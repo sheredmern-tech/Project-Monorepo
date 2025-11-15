@@ -1,0 +1,141 @@
+// ============================================================================
+// FILE: components/forms/dokumen-edit-form.tsx
+// ============================================================================
+"use client";
+
+import { useForm, useWatch } from "react-hook-form";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DokumenEntity, UpdateDokumenDto, KategoriDokumen } from "@/types";
+
+interface DokumenEditFormProps {
+  initialData: DokumenEntity;
+  onSubmit: (data: UpdateDokumenDto) => void;
+  isLoading: boolean;
+  onCancel: () => void;
+}
+
+export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: DokumenEditFormProps) {
+  const { register, handleSubmit, control, setValue } = useForm<UpdateDokumenDto>({
+    defaultValues: {
+      nama_dokumen: initialData.nama_dokumen,
+      kategori: initialData.kategori,
+      nomor_bukti: initialData.nomor_bukti || "",
+      tanggal_dokumen: initialData.tanggal_dokumen 
+        ? new Date(initialData.tanggal_dokumen).toISOString().split('T')[0]
+        : "",
+      adalah_rahasia: initialData.adalah_rahasia,
+      catatan: initialData.catatan || "",
+    },
+  });
+
+  // Use useWatch instead of watch for better React Compiler compatibility
+  const kategori = useWatch({ control, name: "kategori" });
+  const adalahRahasia = useWatch({ control, name: "adalah_rahasia" });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Metadata Dokumen</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="nama_dokumen">Nama Dokumen</Label>
+            <Input
+              id="nama_dokumen"
+              disabled={isLoading}
+              {...register("nama_dokumen")}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Kategori</Label>
+              <Select
+                value={kategori}
+                onValueChange={(value) => setValue("kategori", value as KategoriDokumen)}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(KategoriDokumen).map((kat) => (
+                    <SelectItem key={kat} value={kat} className="capitalize">
+                      {kat.replace(/_/g, " ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nomor_bukti">Nomor Bukti</Label>
+              <Input
+                id="nomor_bukti"
+                placeholder="P-1, T-1, dll"
+                disabled={isLoading}
+                {...register("nomor_bukti")}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tanggal_dokumen">Tanggal Dokumen</Label>
+              <Input
+                id="tanggal_dokumen"
+                type="date"
+                disabled={isLoading}
+                {...register("tanggal_dokumen")}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="adalah_rahasia"
+              checked={adalahRahasia}
+              onCheckedChange={(checked) => setValue("adalah_rahasia", checked)}
+              disabled={isLoading}
+            />
+            <Label htmlFor="adalah_rahasia">Dokumen rahasia (akses terbatas)</Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="catatan">Catatan</Label>
+            <Textarea
+              id="catatan"
+              placeholder="Catatan tambahan..."
+              rows={3}
+              disabled={isLoading}
+              {...register("catatan")}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Actions */}
+      <div className="flex gap-4">
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Simpan Perubahan
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+          Batal
+        </Button>
+      </div>
+    </form>
+  );
+}

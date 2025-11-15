@@ -1,0 +1,40 @@
+// ============================================================================
+// FILE: types/entities/dokumen.ts
+// ============================================================================
+
+import { KategoriDokumen } from "../enums";
+import { KlienBasic } from "./klien";
+import { UserBasic } from "./user";
+
+/**
+ * Dokumen Entity - Complete data
+ */
+export interface DokumenEntity {
+  id: string;
+  perkara_id: string;
+  nama_dokumen: string;
+  kategori: KategoriDokumen;
+  nomor_bukti: string | null;
+  file_path: string;
+  ukuran_file: number | null;
+  tipe_file: string | null;
+  versi: number;
+  adalah_rahasia: boolean;
+  diunggah_oleh: string | null;
+  tanggal_dokumen: string | null;
+  tanggal_upload: string;
+  catatan: string | null;
+}
+
+/**
+ * Dokumen with Relations
+ */
+export interface DokumenWithRelations extends DokumenEntity {
+  perkara: {
+    id: string;
+    nomor_perkara: string;
+    judul: string;
+    klien: KlienBasic | null;
+  };
+  pengunggah: UserBasic | null;
+}

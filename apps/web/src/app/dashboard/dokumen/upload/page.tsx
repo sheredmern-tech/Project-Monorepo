@@ -1,0 +1,37 @@
+// ============================================================================
+// FILE: app/(dashboard)/dokumen/upload/page.tsx
+// ============================================================================
+"use client";
+
+import { useRouter } from "next/navigation";
+import { PageHeader } from "@/components/shared/page-header";
+import { DokumenUploadForm } from "@/components/forms/dokumen-upload-form";
+import { useDokumen } from "@/lib/hooks/use-dokumen";
+
+export default function DokumenUploadPage() {
+  const router = useRouter();
+  const { uploadDokumen, isUploading } = useDokumen();
+
+  const handleUpload = async (formData: FormData) => {
+    try {
+      await uploadDokumen(formData);
+      router.push("/dokumen");
+    } catch {
+      // Error handled by hook
+    }
+  };
+
+  return (
+    <div>
+      <PageHeader title="Upload Dokumen" description="Upload dokumen hukum baru" />
+
+      <div className="max-w-3xl">
+        <DokumenUploadForm
+          onSubmit={handleUpload}
+          isLoading={isUploading}
+          onCancel={() => router.push("/dokumen")}
+        />
+      </div>
+    </div>
+  );
+}
