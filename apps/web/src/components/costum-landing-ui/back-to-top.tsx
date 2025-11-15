@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { ArrowUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { scrollToTop } from '@/app/home/_utils/scroll-utils'
+import { scrollToTop } from '@/lib/utils/scroll-utils'
 
 export function BackToTop() {
   const [isVisible, setIsVisible] = useState(false)

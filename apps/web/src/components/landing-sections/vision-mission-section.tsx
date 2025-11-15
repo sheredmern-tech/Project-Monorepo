@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Target, Compass, Lightbulb, Heart, Users2, Trophy } from 'lucide-react'
-import { SectionHeading } from '@/app/home/_components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
 
 const visiItems = [
   { icon: Lightbulb, text: 'Menjadi firma hukum terdepan yang dikenal karena integritas dan profesionalisme' },
@@ -29,7 +29,7 @@ export function VisionMissionSection() {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px]" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -50,7 +50,7 @@ export function VisionMissionSection() {
               <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 h-full">
                 {/* Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                
+
                 <div className="relative p-8 md:p-10">
                   {/* Icon Header */}
                   <div className="flex items-start gap-4 mb-6">
@@ -91,7 +91,7 @@ export function VisionMissionSection() {
               <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 h-full">
                 {/* Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-blue-500/10 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                
+
                 <div className="relative p-8 md:p-10">
                   {/* Icon Header */}
                   <div className="flex items-start gap-4 mb-6">
@@ -124,7 +124,7 @@ export function VisionMissionSection() {
           </div>
 
           {/* Values Section */}
-          <motion.div 
+          <motion.div
             className="mt-12 grid md:grid-cols-3 gap-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

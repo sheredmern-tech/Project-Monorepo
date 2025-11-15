@@ -10,8 +10,8 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Scale, LogIn, UserPlus, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useNavbarScroll } from '@/lib/hooks/_hooks/use-navbar-scroll'
-import { ThemeToggle } from '@/app/home/_components/costum-landing-ui/theme-toggle'
+import { useNavbarScroll } from '@/lib/hooks/use-navbar-scroll'
+import { ThemeToggle } from '@/components/costum-landing-ui/theme-toggle'
 import { DesktopNav } from './landing-desktop-nav'
 import { MobileNav } from './landing-mobile-nav'
 
@@ -115,8 +115,8 @@ export function HomeHeader() {
       </div>
 
       {/* Mobile Menu */}
-      <MobileNav 
-        isOpen={isMobileMenuOpen} 
+      <MobileNav
+        isOpen={isMobileMenuOpen}
         setIsOpen={setIsMobileMenuOpen}
         isScrolled={isScrolled}
       />

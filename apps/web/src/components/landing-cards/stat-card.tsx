@@ -6,7 +6,7 @@
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { type LucideIcon } from 'lucide-react'
-import { useCounterAnimation } from '@/lib/hooks/_hooks/use-counter-animation'
+import { useCounterAnimation } from '@/lib/hooks/use-counter-animation'
 import { cn } from '@/lib/utils'
 
 interface StatCardProps {
@@ -40,7 +40,7 @@ export function StatCard({
       <Card className="relative overflow-hidden border-2 hover:border-primary/20 transition-all duration-300 hover:shadow-xl">
         {/* Gradient Background */}
         <div className={cn("absolute inset-0 bg-gradient-to-br opacity-5", color)} />
-        
+
         {/* Icon Background Glow */}
         <div className="absolute top-4 right-4 opacity-10">
           <Icon className="w-24 h-24" />
@@ -63,7 +63,7 @@ export function StatCard({
 
           {/* Label */}
           <h3 className="text-lg font-semibold mb-2">{label}</h3>
-          
+
           {/* Description */}
           <p className="text-sm text-muted-foreground leading-relaxed">
             {description}

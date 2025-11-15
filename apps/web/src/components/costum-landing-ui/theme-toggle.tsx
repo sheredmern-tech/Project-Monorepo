@@ -5,7 +5,7 @@
 
 import { Sun, Moon } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useTheme } from '@/lib/hooks/_hooks/use-theme'
+import { useTheme } from '@/lib/hooks/use-theme'
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()

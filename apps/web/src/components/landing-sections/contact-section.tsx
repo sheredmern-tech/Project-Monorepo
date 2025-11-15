@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react'
-import { siteConfig } from '@/app/home/_constants/site-config'
-import { SectionHeading } from '@/app/home/_components/costum-landing-ui/section-heading'
+import { siteConfig } from '@/lib/constant/site-config'
+import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
 
 export function ContactSection() {
   const [formData, setFormData] = useState({
@@ -26,13 +26,13 @@ export function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000))
-    
+
     console.log('Form submitted:', formData)
     alert('Terima kasih! Kami akan segera menghubungi Anda.')
-    
+
     setFormData({ name: '', email: '', phone: '', message: '' })
     setIsSubmitting(false)
   }
@@ -57,7 +57,7 @@ export function ContactSection() {
 
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact Info */}
-            <motion.div 
+            <motion.div
               className="space-y-6"
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -65,7 +65,7 @@ export function ContactSection() {
               transition={{ duration: 0.6 }}
             >
               <h3 className="text-2xl font-semibold mb-6">Informasi Kontak</h3>
-              
+
               <Card className="p-6 hover:shadow-xl transition-all hover:-translate-y-1">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -146,8 +146,8 @@ export function ContactSection() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nama Lengkap *</Label>
-                    <Input 
-                      id="name" 
+                    <Input
+                      id="name"
                       placeholder="Masukkan nama lengkap"
                       value={formData.name}
                       onChange={handleChange}
@@ -157,9 +157,9 @@ export function ContactSection() {
 
                   <div className="space-y-2">
                     <Label htmlFor="email">Email *</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
+                    <Input
+                      id="email"
+                      type="email"
                       placeholder="nama@email.com"
                       value={formData.email}
                       onChange={handleChange}
@@ -169,8 +169,8 @@ export function ContactSection() {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone">Nomor Telepon *</Label>
-                    <Input 
-                      id="phone" 
+                    <Input
+                      id="phone"
                       placeholder="+62 812 3456 7890"
                       value={formData.phone}
                       onChange={handleChange}
@@ -180,9 +180,9 @@ export function ContactSection() {
 
                   <div className="space-y-2">
                     <Label htmlFor="message">Pesan *</Label>
-                    <Textarea 
-                      id="message" 
-                      placeholder="Ceritakan permasalahan hukum Anda..." 
+                    <Textarea
+                      id="message"
+                      placeholder="Ceritakan permasalahan hukum Anda..."
                       rows={5}
                       value={formData.message}
                       onChange={handleChange}
@@ -190,9 +190,9 @@ export function ContactSection() {
                     />
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
+                  <Button
+                    type="submit"
+                    className="w-full"
                     size="lg"
                     disabled={isSubmitting}
                   >

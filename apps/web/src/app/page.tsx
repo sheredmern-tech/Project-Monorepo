@@ -3,9 +3,9 @@
 // ============================================================================
 'use client'
 
-import { HomeHeader } from '../components/landing-layout/landing-home-header'
-import { HomeFooter } from '../components/landing-layout/landing-home-footer'
-import { HomeTOC } from '../components/landing-layout/landing-home-toc'
+import { HomeHeader } from '../components/layouts/landing-home-header'
+import { HomeFooter } from '../components/layouts/landing-home-footer'
+import { HomeTOC } from '../components/layouts/landing-home-toc'
 import { HeroSection } from '../components/landing-sections/hero-section'
 import { StatsSection } from '../components/landing-sections/stats-section'
 import { AboutSection } from '../components/landing-sections/about-section'
@@ -25,7 +25,7 @@ export default function HomePage() {
     <div className="relative min-h-screen">
       <HomeHeader />
       <ScrollProgress />
-      
+
       <main className="relative">
         <HeroSection />
         <StatsSection />
@@ -40,7 +40,7 @@ export default function HomePage() {
       </main>
 
       <HomeFooter />
-      
+
       <HomeTOC />
       <FloatingWhatsApp />
       <BackToTop />

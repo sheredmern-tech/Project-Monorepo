@@ -9,15 +9,15 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowRight } from 'lucide-react'
-import { teamData, teamCategories } from '@/app/home/_constants/team-data'
+import { teamData, teamCategories } from '@/lib/constant/team-data'
 import { TeamCard } from '@/components/landing-cards/team-card'
-import { SectionHeading } from '@/app/home/_components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
 
 export function TeamSection() {
   const [activeCategory, setActiveCategory] = useState('all')
-  
-  const filteredTeam = activeCategory === 'all' 
-    ? teamData 
+
+  const filteredTeam = activeCategory === 'all'
+    ? teamData
     : teamData.filter(t => t.category === activeCategory)
 
   return (
@@ -42,8 +42,8 @@ export function TeamSection() {
             <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
               <TabsList className="grid w-full max-w-xl mx-auto grid-cols-4">
                 {teamCategories.map((cat) => (
-                  <TabsTrigger 
-                    key={cat.value} 
+                  <TabsTrigger
+                    key={cat.value}
                     value={cat.value}
                     className="text-xs sm:text-sm"
                   >

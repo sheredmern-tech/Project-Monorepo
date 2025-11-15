@@ -8,12 +8,12 @@ import { useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { testimonialsData } from '@/app/home/_constants/testimonials-data'
+import { testimonialsData } from '@/lib/constant/testimonials-data'
 import { TestimonialCard } from '@/components/landing-cards/testimonial-card'
-import { SectionHeading } from '@/app/home/_components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
 
 export function TestimonialsSection() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'start',
     skipSnaps: false,
@@ -38,7 +38,7 @@ export function TestimonialsSection() {
     <section id="testimonials" className="py-24 md:py-32 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px]" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -53,8 +53,8 @@ export function TestimonialsSection() {
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-6">
                 {testimonialsData.map((testimonial) => (
-                  <div 
-                    key={testimonial.id} 
+                  <div
+                    key={testimonial.id}
                     className="flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0"
                   >
                     <TestimonialCard {...testimonial} />

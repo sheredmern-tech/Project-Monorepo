@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChevronUp, List, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { navigationItems } from '@/app/home/_constants/navigation-items'
-import { useScrollSpy } from '@/lib/hooks/_hooks/use-scroll-spy'
-import { scrollToSection, scrollToTop } from '@/app/home/_utils/scroll-utils'
+import { navigationItems } from '@/lib/constant/navigation-items'
+import { useScrollSpy } from '@/lib/hooks/use-scroll-spy'
+import { scrollToSection, scrollToTop } from '@/lib/utils/scroll-utils'
 
 export function HomeTOC() {
   const [isOpen, setIsOpen] = useState(false)
@@ -22,7 +22,7 @@ export function HomeTOC() {
     <>
       {/* Desktop TOC - Right Sidebar */}
       <aside className="hidden xl:block fixed right-8 top-32 w-[240px] z-30">
-        <motion.div 
+        <motion.div
           className="sticky top-32"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}

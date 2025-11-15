@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Scale, LogIn, UserPlus, Home, Info, Target, Briefcase, Users, Mail } from 'lucide-react'
-import { scrollToSection } from '@/app/home/_utils/scroll-utils'
+import { scrollToSection } from '@/lib/utils/scroll-utils'
 import { cn } from '@/lib/utils'
 
 interface MobileNavProps {

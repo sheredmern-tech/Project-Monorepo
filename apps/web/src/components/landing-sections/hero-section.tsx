@@ -8,28 +8,28 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Scale, ArrowRight, CheckCircle2 } from 'lucide-react'
-import { heroContent, heroImageSizes } from '@/app/home/_constants/hero-content'
-import { scrollToSection } from '@/app/home/_utils/scroll-utils'
-import { OptimizedImage } from '@/app/home/_components/costum-landing-ui/optimized-image'
+import { heroContent, heroImageSizes } from '@/lib/constant/hero-content'
+import { scrollToSection } from '@/lib/utils/scroll-utils'
+import { OptimizedImage } from '@/components/costum-landing-ui/optimized-image'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 // Lazy load heavy components
 const ParticleBackground = dynamic(
-  () => import('@/app/home/_components/costum-landing-ui/particle-background').then(mod => ({ 
-    default: mod.ParticleBackground 
+  () => import('@/components/costum-landing-ui/particle-background').then(mod => ({
+    default: mod.ParticleBackground
   })),
-  { 
+  {
     ssr: false,
     loading: () => null
   }
 )
 
 const StaggeredText = dynamic(
-  () => import('@/app/home/_components/costum-landing-ui/animated-text').then(mod => ({ 
-    default: mod.StaggeredText 
+  () => import('@/components/costum-landing-ui/animated-text').then(mod => ({
+    default: mod.StaggeredText
   })),
-  { 
+  {
     ssr: false,
     loading: () => (
       <p className="text-xl md:text-2xl lg:text-3xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
@@ -41,8 +41,8 @@ const StaggeredText = dynamic(
 
 export function HeroSection() {
   return (
-    <section 
-      id="hero" 
+    <section
+      id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950"
     >
       {/* Background Image */}
@@ -71,27 +71,27 @@ export function HeroSection() {
 
       {/* Gradient Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
+        <motion.div
           className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl"
-          animate={{ 
+          animate={{
             scale: [1, 1.2, 1],
             opacity: [0.3, 0.5, 0.3]
           }}
-          transition={{ 
-            duration: 8, 
+          transition={{
+            duration: 8,
             repeat: Infinity,
             ease: 'easeInOut'
           }}
         />
-        <motion.div 
+        <motion.div
           className="absolute bottom-20 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
-          animate={{ 
+          animate={{
             scale: [1, 1.3, 1],
             opacity: [0.2, 0.4, 0.2]
           }}
-          transition={{ 
-            duration: 10, 
-            repeat: Infinity, 
+          transition={{
+            duration: 10,
+            repeat: Infinity,
             delay: 1,
             ease: 'easeInOut'
           }}
@@ -101,15 +101,15 @@ export function HeroSection() {
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10 pt-20">
         <div className="max-w-5xl mx-auto text-center space-y-8">
-          
+
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className="text-sm px-4 py-1.5 bg-white/10 text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
             >
               {heroContent.badge}
@@ -117,7 +117,7 @@ export function HeroSection() {
           </motion.div>
 
           {/* Icon */}
-          <motion.div 
+          <motion.div
             className="flex justify-center"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -167,23 +167,23 @@ export function HeroSection() {
           </motion.div>
 
           {/* CTA Buttons */}
-          <motion.div 
+          <motion.div
             className="flex flex-col sm:flex-row gap-4 justify-center pt-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.2 }}
           >
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="text-lg px-8 py-6 group shadow-2xl shadow-primary/20"
               onClick={() => scrollToSection(heroContent.cta.primary.href)}
             >
               {heroContent.cta.primary.text}
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+            <Button
+              size="lg"
+              variant="outline"
               className="text-lg px-8 py-6 bg-white/5 backdrop-blur-sm text-white border-white/20 hover:bg-white hover:text-slate-900"
               onClick={() => scrollToSection(heroContent.cta.secondary.href)}
             >
@@ -192,7 +192,7 @@ export function HeroSection() {
           </motion.div>
 
           {/* Trust Indicators */}
-          <motion.div 
+          <motion.div
             className="flex flex-wrap items-center justify-center gap-8 pt-12 text-slate-400 text-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -209,21 +209,21 @@ export function HeroSection() {
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div 
+      <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2"
         animate={{ y: [0, 10, 0] }}
-        transition={{ 
-          duration: 2, 
+        transition={{
+          duration: 2,
           repeat: Infinity,
           ease: 'easeInOut'
         }}
       >
         <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center p-2">
-          <motion.div 
+          <motion.div
             className="w-1 h-3 bg-white/50 rounded-full"
             animate={{ y: [0, 12, 0] }}
-            transition={{ 
-              duration: 2, 
+            transition={{
+              duration: 2,
               repeat: Infinity,
               ease: 'easeInOut'
             }}

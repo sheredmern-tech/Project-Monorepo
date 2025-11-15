@@ -10,17 +10,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowRight } from 'lucide-react'
-import { servicesData, serviceCategories } from '@/app/home/_constants/services-data'
+import { servicesData, serviceCategories } from '@/lib/constant/services-data'
 import { ServiceCard } from '@/components/landing-cards/service-card'
 import { CTACard } from '@/components/landing-cards/cta-card'
-import { SectionHeading } from '@/app/home/_components/costum-landing-ui/section-heading'
-import { scrollToSection } from '@/app/home/_utils/scroll-utils'
+import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
+import { scrollToSection } from '@/lib/utils/scroll-utils'
 
 export function ServicesSection() {
   const [activeCategory, setActiveCategory] = useState('all')
-  
-  const filteredServices = activeCategory === 'all' 
-    ? servicesData 
+
+  const filteredServices = activeCategory === 'all'
+    ? servicesData
     : servicesData.filter(s => s.category === activeCategory)
 
   return (
@@ -45,14 +45,14 @@ export function ServicesSection() {
             <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
               <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 h-auto p-1.5 bg-slate-100/80 dark:bg-slate-800/80">
                 {serviceCategories.map((cat) => (
-                  <TabsTrigger 
-                    key={cat.value} 
+                  <TabsTrigger
+                    key={cat.value}
                     value={cat.value}
                     className="flex flex-col sm:flex-row items-center justify-center gap-2 py-3 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:shadow-sm"
                   >
                     <span className="text-xs sm:text-sm font-medium">{cat.label}</span>
-                    <Badge 
-                      variant={activeCategory === cat.value ? "default" : "secondary"} 
+                    <Badge
+                      variant={activeCategory === cat.value ? "default" : "secondary"}
                       className="text-xs px-2"
                     >
                       {cat.count}
@@ -71,7 +71,7 @@ export function ServicesSection() {
           </div>
 
           {/* View All Button */}
-          <motion.div 
+          <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -79,8 +79,8 @@ export function ServicesSection() {
             transition={{ duration: 0.6 }}
           >
             <Link href="/layanan">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="text-base px-8 group"
               >

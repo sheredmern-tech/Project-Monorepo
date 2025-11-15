@@ -6,8 +6,8 @@
 import { useState } from 'react'
 import { MessageCircle, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { formatWhatsAppLink } from '@/app/home/_utils/format-helpers'
-import { siteConfig } from '@/app/home/_constants/site-config'
+import { formatWhatsAppLink } from '@/lib/utils/format-helpers'
+import { siteConfig } from '@/lib/constant/site-config'
 
 export function FloatingWhatsApp() {
   const [isOpen, setIsOpen] = useState(false)
@@ -32,10 +32,10 @@ export function FloatingWhatsApp() {
       >
         {/* Pulse Ring */}
         <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
-        
+
         {/* Glow Effect */}
         <span className="absolute inset-0 rounded-full bg-green-500 blur-xl opacity-50 group-hover:opacity-75 transition-opacity" />
-        
+
         {/* Button */}
         <div className="relative w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg flex items-center justify-center">
           <MessageCircle className="w-7 h-7 text-white" />

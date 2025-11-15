@@ -4,16 +4,16 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { achievementsData } from '@/app/home/_constants/achievements-data'
+import { achievementsData } from '@/lib/constant/achievements-data'
 import { AchievementBadge } from '@/components/landing-cards/achievement-badge'
-import { SectionHeading } from '@/app/home/_components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
 
 export function AchievementsSection() {
   return (
     <section id="achievements" className="py-24 md:py-32 bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:60px_60px]" />
-      
+
       {/* Gradient Orbs */}
       <div className="absolute top-20 left-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
@@ -53,7 +53,7 @@ export function AchievementsSection() {
             <p className="text-lg text-muted-foreground mb-8">
               Dipercaya oleh perusahaan dan institusi terkemuka
             </p>
-            
+
             {/* Client Logos Placeholder */}
             <div className="flex flex-wrap justify-center items-center gap-8 opacity-50 grayscale hover:grayscale-0 transition-all">
               {[1, 2, 3, 4, 5, 6].map((i) => (

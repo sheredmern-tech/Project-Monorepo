@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Award, Users, Shield, Target, Sparkles, TrendingUp, Scale } from 'lucide-react'
-import { SectionHeading } from '@/app/home/_components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
 
 const features = [
   {

@@ -8,9 +8,9 @@ import { Scale, Facebook, Instagram, Linkedin, Twitter, Mail, Phone, MapPin } fr
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { WaveDivider } from '@/app/home/_components/costum-landing-ui/wave-divider'
-import { siteConfig } from '@/app/home/_constants/site-config'
-import { scrollToSection } from '@/app/home/_utils/scroll-utils'
+import { WaveDivider } from '@/components/costum-landing-ui/wave-divider'
+import { siteConfig } from '@/lib/constant/site-config'
+import { scrollToSection } from '@/lib/utils/scroll-utils'
 
 const quickLinks = [
   { label: 'Beranda', href: '#hero' },
@@ -44,8 +44,8 @@ export function HomeFooter() {
   return (
     <footer className="relative bg-slate-900 text-white">
       {/* Wave Divider */}
-      <WaveDivider 
-        variant="flipped" 
+      <WaveDivider
+        variant="flipped"
         color="fill-white dark:fill-slate-900"
         className="-mt-1"
       />
@@ -62,7 +62,7 @@ export function HomeFooter() {
               <p className="text-slate-400 mb-6 leading-relaxed">
                 {siteConfig.description}
               </p>
-              
+
               {/* Contact Info */}
               <div className="space-y-3 text-sm text-slate-400">
                 <div className="flex items-start gap-2">
@@ -145,9 +145,9 @@ export function HomeFooter() {
                 Dapatkan update terbaru tentang hukum dan layanan kami
               </p>
               <div className="flex gap-2 max-w-md mx-auto">
-                <Input 
-                  type="email" 
-                  placeholder="Email Anda" 
+                <Input
+                  type="email"
+                  placeholder="Email Anda"
                   className="bg-white/10 border-white/20 text-white placeholder:text-slate-400"
                 />
                 <Button variant="default">
