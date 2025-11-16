@@ -42,7 +42,10 @@ export class GoogleDriveService {
 
       const auth = new google.auth.GoogleAuth({
         credentials,
-        scopes: ['https://www.googleapis.com/auth/drive.file'],
+        scopes: [
+          'https://www.googleapis.com/auth/drive',
+          'https://www.googleapis.com/auth/drive.file',
+        ],
       });
 
       this.drive = google.drive({ version: 'v3', auth });
