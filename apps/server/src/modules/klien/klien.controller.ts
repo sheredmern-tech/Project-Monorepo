@@ -53,9 +53,9 @@ export class KlienController {
     return this.klienService.updateMyProfile(userId, dto);
   }
 
-  // 🔒 EXISTING: Endpoint untuk admin/advokat/paralegal
+  // 🔒 EXISTING: Endpoint untuk admin/advokat/paralegal/staff
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Buat klien baru' })
   @ApiResponse({ status: 201, description: 'Klien berhasil dibuat' })
   create(@Body() dto: CreateKlienDto, @CurrentUser('id') userId: string) {
@@ -87,7 +87,7 @@ export class KlienController {
 
   // 🔒 EXISTING: Update klien (TIDAK untuk client)
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Update klien by ID' })
   @ApiResponse({ status: 200, description: 'Klien berhasil diupdate' })
   update(

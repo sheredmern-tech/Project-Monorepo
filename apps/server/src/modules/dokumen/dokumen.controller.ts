@@ -39,7 +39,7 @@ export class DokumenController {
   constructor(private readonly dokumenService: DokumenService) {}
 
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Upload dokumen baru' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: 'Dokumen berhasil diupload' })
@@ -53,6 +53,7 @@ export class DokumenController {
   }
 
   @Get()
+  @Roles(UserRole.staff)
   @ApiOperation({ summary: 'Get semua dokumen dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data dokumen berhasil diambil' })
   findAll(
@@ -64,6 +65,7 @@ export class DokumenController {
   }
 
   @Get(':id')
+  @Roles(UserRole.staff)
   @ApiOperation({ summary: 'Get detail dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Detail dokumen berhasil diambil' })
   findOne(@Param('id') id: string) {
@@ -71,6 +73,7 @@ export class DokumenController {
   }
 
   @Get(':id/download')
+  @Roles(UserRole.staff)
   @ApiOperation({ summary: 'Download dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Dokumen berhasil didownload' })
   download(@Param('id') id: string) {

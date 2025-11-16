@@ -44,7 +44,7 @@ export class KonfikController {
   }
 
   @Get()
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.staff)
   @ApiOperation({ summary: 'Get semua pemeriksaan konflik dengan pagination' })
   @ApiResponse({
     status: 200,
@@ -55,7 +55,7 @@ export class KonfikController {
   }
 
   @Get(':id')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.staff)
   @ApiOperation({ summary: 'Get detail pemeriksaan konflik by ID' })
   @ApiResponse({
     status: 200,

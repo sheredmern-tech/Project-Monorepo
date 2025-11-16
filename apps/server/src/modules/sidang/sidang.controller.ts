@@ -43,6 +43,7 @@ export class SidangController {
   }
 
   @Get()
+  @Roles(UserRole.staff)
   @ApiOperation({ summary: 'Get semua jadwal sidang dengan pagination' })
   @ApiResponse({
     status: 200,
@@ -57,6 +58,7 @@ export class SidangController {
   }
 
   @Get('upcoming')
+  @Roles(UserRole.staff)
   @ApiOperation({ summary: 'Get jadwal sidang mendatang' })
   @ApiResponse({
     status: 200,
@@ -71,6 +73,7 @@ export class SidangController {
   }
 
   @Get(':id')
+  @Roles(UserRole.staff)
   @ApiOperation({ summary: 'Get detail jadwal sidang by ID' })
   @ApiResponse({
     status: 200,
