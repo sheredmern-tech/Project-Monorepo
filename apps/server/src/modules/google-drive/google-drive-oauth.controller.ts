@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { google } from 'googleapis';
+import { Public } from '../../common/decorators/public.decorator';
 
 @ApiTags('Google Drive OAuth Setup')
 @Controller('google-drive/oauth')
@@ -40,6 +41,7 @@ export class GoogleDriveOAuthController {
     );
   }
 
+  @Public()
   @Get('authorize')
   @ApiOperation({
     summary: 'Step 1: Get OAuth authorization URL (Admin only - one time setup)',
@@ -80,6 +82,7 @@ export class GoogleDriveOAuthController {
     };
   }
 
+  @Public()
   @Get('callback')
   @ApiOperation({
     summary: 'Step 2: OAuth callback handler (DO NOT call manually)',
