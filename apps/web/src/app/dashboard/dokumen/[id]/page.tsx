@@ -90,7 +90,7 @@ export default function DokumenDetailPage() {
   }
 
   // Show error if dokumen not found after loading
-  if (!isLoading && !dokumen) {
+  if (!dokumen) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
@@ -108,6 +108,7 @@ export default function DokumenDetailPage() {
     );
   }
 
+  // ✅ TypeScript now knows dokumen is not null after this point
   const canPreview = isPreviewable(dokumen.tipe_file);
 
   return (
