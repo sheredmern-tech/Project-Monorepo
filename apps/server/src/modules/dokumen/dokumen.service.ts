@@ -65,7 +65,7 @@ export class DokumenService {
         // Metadata
         ukuran_file: file.size,
         tipe_file: file.mimetype,
-        adalah_rahasia: dto.adalah_rahasia || false,
+        adalah_rahasia: dto.adalah_rahasia === true, // ✅ Explicit boolean check
         tanggal_dokumen: dto.tanggal_dokumen,
         catatan: dto.catatan,
         diunggah_oleh: userId,

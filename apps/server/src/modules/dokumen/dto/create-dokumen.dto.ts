@@ -7,6 +7,7 @@ import {
   IsDateString,
   IsUUID,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { KategoriDokumen } from '@prisma/client';
 
@@ -31,6 +32,12 @@ export class CreateDokumenDto {
 
   @ApiPropertyOptional({ example: false, default: false })
   @IsOptional()
+  @Transform(({ value }) => {
+    // Handle FormData string to boolean conversion
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return Boolean(value);
+  })
   @IsBoolean()
   adalah_rahasia?: boolean;
 
