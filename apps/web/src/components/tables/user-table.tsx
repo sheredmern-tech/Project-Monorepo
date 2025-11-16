@@ -230,7 +230,7 @@ export function UserTable({
               const isSendingInvite = sendingInviteId === user.id;
 
               // 🎯 Check if user has ANY action permission
-              const hasAnyAction = permissions.tim.read || permissions.tim.update || permissions.tim.delete;
+              const hasAnyAction = permissions.tim.read || permissions.tim.update || permissions.users.delete;
 
               return (
                 <TableRow
@@ -363,8 +363,8 @@ export function UserTable({
                             </>
                           )}
 
-                          {/* 🔒 Delete - requires tim:delete permission */}
-                          {permissions.tim.delete && (
+                          {/* 🔒 Delete - requires users:delete permission */}
+                          {permissions.users.delete && (
                             <>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
