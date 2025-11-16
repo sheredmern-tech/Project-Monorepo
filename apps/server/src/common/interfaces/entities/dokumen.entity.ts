@@ -50,7 +50,10 @@ export interface CreateDokumenData {
   nama_dokumen: string;
   kategori: KategoriDokumen;
   nomor_bukti?: string | null;
-  file_path: string;
+  file_path?: string | null; // ✅ Optional - legacy local files
+  google_drive_id?: string | null; // ✅ Google Drive file ID
+  google_drive_link?: string | null; // ✅ Google Drive shareable link
+  embed_link?: string | null; // ✅ Google Drive embed preview link
   ukuran_file?: number | null;
   tipe_file?: string | null;
   versi?: number;

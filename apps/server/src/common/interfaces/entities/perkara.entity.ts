@@ -95,7 +95,10 @@ export interface PerkaraWithRelations extends PerkaraEntity {
     id: string;
     nama_dokumen: string;
     kategori: string;
-    file_path: string;
+    file_path: string | null;
+    google_drive_id: string | null;
+    google_drive_link: string | null;
+    embed_link: string | null;
     tanggal_upload: Date;
   }>;
   jadwal_sidang: Array<{
