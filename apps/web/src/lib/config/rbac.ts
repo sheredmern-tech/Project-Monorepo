@@ -99,9 +99,35 @@ const ALL_NAVIGATION: NavItem[] = [
  * This replaces the static ROLE_NAVIGATION mapping
  */
 export function getNavigationForRole(userRole: UserRole): NavItem[] {
-  // KLIEN gets no dashboard navigation
+  // KLIEN gets limited navigation - only what they need
   if (userRole === UserRole.KLIEN) {
-    return [];
+    return [
+      {
+        title: "Dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard
+      },
+      {
+        title: "Profil Saya",
+        href: "/dashboard/klien/profile",
+        icon: Users
+      },
+      {
+        title: "Perkara Saya",
+        href: "/dashboard/perkara",
+        icon: Briefcase
+      },
+      {
+        title: "Dokumen",
+        href: "/dashboard/dokumen",
+        icon: FileText
+      },
+      {
+        title: "Jadwal Sidang",
+        href: "/dashboard/sidang",
+        icon: Calendar
+      },
+    ];
   }
 
   // Filter navigation based on resource access permissions
@@ -125,7 +151,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavItem[]> = {
   [UserRole.ADVOKAT]: getNavigationForRole(UserRole.ADVOKAT),
   [UserRole.PARALEGAL]: getNavigationForRole(UserRole.PARALEGAL),
   [UserRole.STAFF]: getNavigationForRole(UserRole.STAFF),
-  [UserRole.KLIEN]: [], // ❌ KLIEN tidak bisa akses dashboard
+  [UserRole.KLIEN]: getNavigationForRole(UserRole.KLIEN), // ✅ KLIEN gets limited menu
 };
 
 // ============================================================================
@@ -136,12 +162,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavItem[]> = {
  * Get default redirect after login based on role
  */
 export function getDefaultRedirect(userRole: UserRole): string {
-  // KLIEN → Own profile page
-  if (userRole === UserRole.KLIEN) {
-    return '/dashboard/klien/profile';
-  }
-
-  // OTHERS → DASHBOARD
+  // All roles → DASHBOARD (will show filtered view based on role)
   return '/dashboard';
 }
 

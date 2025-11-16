@@ -51,15 +51,15 @@ export function proxy(request: NextRequest) {
       console.log('✅ Already logged in, redirecting from auth page');
       console.log('   Token exists:', !!token);
       console.log('   Role:', userRole);
-      
+
       const url = request.nextUrl.clone();
-      
+
       if (userRole === UserRole.KLIEN) {
-        console.log('🚫 KLIEN → redirect to 404');
-        url.pathname = "/404";
+        console.log('✅ KLIEN → redirect to dashboard (filtered view)');
+        url.pathname = "/dashboard";
         return NextResponse.redirect(url);
       }
-      
+
       console.log('✅ OTHER ROLE → redirect to dashboard');
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
@@ -98,13 +98,37 @@ export function proxy(request: NextRequest) {
     return response;
   }
   
+  // ========================================
+  // 6. KLIEN ROLE - RESTRICTED DASHBOARD ACCESS
+  // ========================================
   if (userRole === UserRole.KLIEN) {
-    console.log('🚫 KLIEN trying to access dashboard → 404');
-    const url = request.nextUrl.clone();
-    url.pathname = "/404";
-    return NextResponse.redirect(url);
+    console.log('🔐 KLIEN user detected, checking allowed paths');
+
+    // KLIEN dapat akses ke routes berikut:
+    const klienAllowedPaths = [
+      '/dashboard/klien/profile',        // Own profile
+      '/dashboard/perkara',              // View own cases
+      '/dashboard/dokumen',              // View own documents
+      '/dashboard/sidang',               // View own hearings
+      '/dashboard/tugas',                // View own tasks
+      '/dashboard',                      // Dashboard home (will show filtered view)
+    ];
+
+    const isAllowedForKlien = klienAllowedPaths.some(path =>
+      pathname.startsWith(path)
+    );
+
+    if (!isAllowedForKlien) {
+      console.log('🚫 KLIEN trying to access forbidden path:', pathname);
+      const url = request.nextUrl.clone();
+      url.pathname = "/403";
+      return NextResponse.redirect(url);
+    }
+
+    console.log('✅ KLIEN access granted to:', pathname);
+    return NextResponse.next();
   }
-  
+
   console.log('✅ Access granted for:', userRole);
   return NextResponse.next();
 }
