@@ -41,7 +41,7 @@ interface PerkaraState {
 export const usePerkaraStore = create<PerkaraState>((set) => ({
   perkara: [],
   selectedPerkara: null,
-  isLoading: false,
+  isLoading: true, // ✅ Start with loading state to show skeleton on mount
   error: null,
   page: 1,
   limit: 10,

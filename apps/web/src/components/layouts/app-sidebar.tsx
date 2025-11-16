@@ -44,6 +44,12 @@ import { APP_NAME } from "@/lib/config/constants";
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth(); // ✅ GANTI useAuthStore JADI useAuth
+  const [mounted, setMounted] = React.useState(false);
+
+  // ✅ Fix hydration mismatch by only rendering after mount
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navigationItems = user ? getNavigationForRole(user.role as UserRole) : [];
 
@@ -169,40 +175,18 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user?.avatar_url || undefined} alt={user?.nama_lengkap || "User"} />
-                    <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {user?.nama_lengkap || "User"}
-                    </span>
-                    <span className="truncate text-xs">
-                      {user?.email}
-                    </span>
-                  </div>
-                  <ChevronRight className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+            {/* ✅ Only render DropdownMenu after mount to prevent hydration mismatch */}
+            {mounted ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    size="lg"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    suppressHydrationWarning
+                  >
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage src={user?.avatar_url || undefined} alt={user?.nama_lengkap || "User"} />
-                      <AvatarFallback className="rounded-lg">
+                      <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
@@ -214,28 +198,74 @@ export function AppSidebar() {
                         {user?.email}
                       </span>
                     </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Profil Saya
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Pengaturan
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {/* ✅ FIX LOGOUT BUTTON */}
-                <DropdownMenuItem 
-                  onClick={handleLogout}
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
+                    <ChevronRight className="ml-auto size-4" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                  side="bottom"
+                  align="end"
+                  sideOffset={4}
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Keluar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuLabel className="p-0 font-normal">
+                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                      <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarImage src={user?.avatar_url || undefined} alt={user?.nama_lengkap || "User"} />
+                        <AvatarFallback className="rounded-lg">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-semibold">
+                          {user?.nama_lengkap || "User"}
+                        </span>
+                        <span className="truncate text-xs">
+                          {user?.email}
+                        </span>
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <User className="mr-2 h-4 w-4" />
+                    Profil Saya
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Pengaturan
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {/* ✅ FIX LOGOUT BUTTON */}
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Keluar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">
+                    {user?.nama_lengkap || "User"}
+                  </span>
+                  <span className="truncate text-xs">
+                    {user?.email}
+                  </span>
+                </div>
+                <ChevronRight className="ml-auto size-4" />
+              </SidebarMenuButton>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

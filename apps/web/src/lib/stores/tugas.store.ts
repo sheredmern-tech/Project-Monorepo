@@ -43,7 +43,7 @@ interface TugasState {
 export const useTugasStore = create<TugasState>((set) => ({
   tugas: [],
   selectedTugas: null,
-  isLoading: false,
+  isLoading: true, // ✅ Start with loading state to show skeleton on mount
   error: null,
   page: 1,
   limit: 10,

@@ -39,7 +39,7 @@ interface DokumenState {
 export const useDokumenStore = create<DokumenState>((set) => ({
   dokumen: [],
   selectedDokumen: null,
-  isLoading: false,
+  isLoading: true, // ✅ Start with loading state to show skeleton on mount
   isUploading: false,
   error: null,
   page: 1,

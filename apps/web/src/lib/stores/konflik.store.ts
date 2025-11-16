@@ -37,7 +37,7 @@ interface KonflikState {
 export const useKonflikStore = create<KonflikState>((set) => ({
   konflik: [],
   selectedKonflik: null,
-  isLoading: false,
+  isLoading: true, // ✅ Start with loading state to show skeleton on mount
   error: null,
   page: 1,
   limit: 10,

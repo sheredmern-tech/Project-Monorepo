@@ -37,7 +37,7 @@ interface KlienState {
 export const useKlienStore = create<KlienState>((set) => ({
   klien: [],
   selectedKlien: null,
-  isLoading: false,
+  isLoading: true, // ✅ Start with loading state to show skeleton on mount
   error: null,
   page: 1,
   limit: 10,

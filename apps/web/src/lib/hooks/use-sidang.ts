@@ -16,7 +16,7 @@ import { handleApiError, getErrorMessage } from "@/lib/utils/error-handler";
 
 export function useSidang() {
   const [sidang, setSidang] = useState<JadwalSidangWithRelations[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // ✅ Start with loading state to show skeleton on mount
   const [error, setError] = useState<string | null>(null);
 
   // Fetch All Sidang
