@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { DetailPageSkeleton } from "@/components/shared/detail-page-skeleton";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { PriorityBadge } from "@/components/shared/priority-badge";
@@ -71,7 +71,7 @@ export default function TugasDetailPage() {
   };
 
   if (isLoading || !tugas) {
-    return <LoadingSpinner />;
+    return <DetailPageSkeleton />;
   }
 
   const isOverdue = tugas.tenggat_waktu && new Date(tugas.tenggat_waktu) < new Date() && tugas.status !== StatusTugas.SELESAI;

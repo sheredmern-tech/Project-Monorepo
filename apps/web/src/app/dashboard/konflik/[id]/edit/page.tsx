@@ -9,7 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { KonflikForm } from "@/components/forms/konflik-form";
 import { konflikApi } from "@/lib/api/konflik.api";
 import { KonflikWithRelations, UpdateKonflikDto } from "@/types";
@@ -80,7 +80,7 @@ export default function KonflikEditPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner />
+        <FormSkeleton />
       </div>
     );
   }

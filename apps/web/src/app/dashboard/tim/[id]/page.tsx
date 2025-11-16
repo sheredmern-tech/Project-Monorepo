@@ -49,7 +49,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { DetailPageSkeleton } from "@/components/shared/detail-page-skeleton";
 import { EditUserDialog } from "@/components/modals/edit-user-dialog";
 import { UserActivityLog } from "@/components/tim/user-activity-log";
 import { timApi } from "@/lib/api/tim.api";
@@ -264,7 +264,7 @@ export default function TimDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner />
+        <DetailPageSkeleton />
       </div>
     );
   }

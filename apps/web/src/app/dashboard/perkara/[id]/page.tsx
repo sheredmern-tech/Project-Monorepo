@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { DetailPageSkeleton } from "@/components/shared/detail-page-skeleton";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { PriorityBadge } from "@/components/shared/priority-badge";
@@ -205,7 +205,7 @@ export default function PerkaraDetailPage() {
   };
 
   if (isLoading || !perkara || !hasPermission) {
-    return <LoadingSpinner />;
+    return <DetailPageSkeleton />;
   }
 
   // ✅ CONDITIONAL PERMISSIONS: Clients have limited actions

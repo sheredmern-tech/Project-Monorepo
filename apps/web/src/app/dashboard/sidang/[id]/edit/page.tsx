@@ -8,7 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { SidangForm } from "@/components/forms/sidang-form";
 import { useSidang } from "@/lib/hooks/use-sidang";
 import { JadwalSidangEntity, UpdateJadwalSidangDto } from "@/types";
@@ -39,7 +39,7 @@ export default function SidangEditPage() {
   };
 
   if (!sidang) {
-    return <LoadingSpinner />;
+    return <FormSkeleton />;
   }
 
   return (

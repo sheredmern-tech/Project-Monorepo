@@ -8,7 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { KlienForm } from "@/components/forms/klien-form";
 import { useKlien } from "@/lib/hooks/use-klien";
 import { KlienEntity, UpdateKlienDto } from "@/types";
@@ -53,7 +53,7 @@ export default function KlienEditPage() {
   };
 
   if (isLoadingKlien) {
-    return <LoadingSpinner />;
+    return <FormSkeleton />;
   }
 
   if (!klien) {

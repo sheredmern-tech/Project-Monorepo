@@ -8,7 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { TugasForm } from "@/components/forms/tugas-form";
 import { useTugas } from "@/lib/hooks/use-tugas";
 import { TugasEntity, UpdateTugasDto } from "@/types";
@@ -39,7 +39,7 @@ export default function TugasEditPage() {
   };
 
   if (!tugas) {
-    return <LoadingSpinner />;
+    return <FormSkeleton />;
   }
 
   return (

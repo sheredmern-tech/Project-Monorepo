@@ -8,7 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { PerkaraForm } from "@/components/forms/perkara-form";
 import { perkaraApi } from "@/lib/api/perkara.api";
 import { usePerkara } from "@/lib/hooks/use-perkara";
@@ -54,7 +54,7 @@ export default function PerkaraEditPage() {
   };
 
   if (isLoading || !perkara) {
-    return <LoadingSpinner />;
+    return <FormSkeleton />;
   }
 
   return (

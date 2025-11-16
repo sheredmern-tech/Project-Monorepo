@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLog } from "@/lib/hooks/use-log";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { ListPageSkeleton } from "@/components/shared/list-page-skeleton";
 import { formatDateTime } from "@/lib/utils/date";
 import { Search, Filter, Calendar } from "lucide-react";
 
@@ -80,7 +80,7 @@ export default function LaporanAktivitasPage() {
   const hasActiveFilters = searchQuery || entityFilter !== "all" || actionFilter !== "all";
 
   if (isLoading && logs.length === 0) {
-    return <LoadingSpinner />;
+    return <ListPageSkeleton showStats={true} statsCount={3} />;
   }
 
   return (

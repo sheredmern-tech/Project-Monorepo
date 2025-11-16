@@ -17,17 +17,7 @@ import { sidangApi } from "@/lib/api/sidang.api";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { StatusPerkara, StatusTugas, PerkaraWithKlien, TugasWithRelations } from "@/types";
 import { formatDate } from "@/lib/utils/format";
-
-// ============================================================================
-// LOADING COMPONENT
-// ============================================================================
-function LoadingSpinner() {
-  return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>
-  );
-}
+import { DashboardSkeleton } from "@/components/shared/dashboard-skeleton";
 
 // ============================================================================
 // STATS CARD COMPONENT
@@ -139,7 +129,7 @@ export default function DashboardHomePage() {
   // LOADING STATE
   // ============================================================================
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <DashboardSkeleton />;
   }
 
   // ============================================================================

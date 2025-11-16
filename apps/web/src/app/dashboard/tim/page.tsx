@@ -44,7 +44,7 @@ import { BulkActionsBar } from "@/components/tim/bulk-actions-bar";
 import { BulkImportUsersDialog } from "@/components/modals/bulk-import-users-dialog";
 import { timApi } from "@/lib/api/tim.api";
 import { UserEntity, UserRole } from "@/types";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { ListPageSkeleton } from "@/components/shared/list-page-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useToast } from "@/lib/hooks/use-toast";
 
@@ -301,7 +301,7 @@ export default function TimPage() {
     filteredUsers.length > 0 &&
     filteredUsers.every((u) => selectedUserIds.has(u.id));
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading) return <ListPageSkeleton showStats={true} statsCount={5} />;
 
   return (
     <div className="space-y-6">

@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { DetailPageSkeleton } from "@/components/shared/detail-page-skeleton";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { useSidang } from "@/lib/hooks/use-sidang";
 import { usePermission } from "@/lib/hooks/use-permission";
@@ -46,7 +46,7 @@ export default function SidangDetailPage() {
   };
 
   if (isLoading || !sidang) {
-    return <LoadingSpinner />;
+    return <DetailPageSkeleton />;
   }
 
   return (

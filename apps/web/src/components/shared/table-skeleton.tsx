@@ -1,8 +1,16 @@
 // ============================================================================
-// FILE 2: components/shared/table-skeleton.tsx - NEW
+// FILE 2: components/shared/table-skeleton.tsx - UPDATED
 // ============================================================================
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface TableSkeletonProps {
   rows?: number;
@@ -12,23 +20,28 @@ interface TableSkeletonProps {
 export function TableSkeleton({ rows = 5, columns = 6 }: TableSkeletonProps) {
   return (
     <Card>
-      <div className="p-6 space-y-4">
-        {/* Header */}
-        <div className="flex gap-4">
-          {Array.from({ length: columns }).map((_, i) => (
-            <Skeleton key={i} className="h-10 flex-1" />
-          ))}
-        </div>
-        
-        {/* Rows */}
-        {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="flex gap-4">
-            {Array.from({ length: columns }).map((_, j) => (
-              <Skeleton key={j} className="h-16 flex-1" />
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {Array.from({ length: columns }).map((_, i) => (
+              <TableHead key={i}>
+                <Skeleton className="h-4 w-full" />
+              </TableHead>
             ))}
-          </div>
-        ))}
-      </div>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: rows }).map((_, i) => (
+            <TableRow key={i}>
+              {Array.from({ length: columns }).map((_, j) => (
+                <TableCell key={j}>
+                  <Skeleton className="h-4 w-full" />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </Card>
   );
 }

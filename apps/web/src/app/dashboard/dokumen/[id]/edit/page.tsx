@@ -8,7 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { FormSkeleton } from "@/components/shared/form-skeleton";
 import { DokumenEditForm } from "@/components/forms/dokumen-edit-form";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
 import { DokumenEntity, UpdateDokumenDto } from "@/types";
@@ -39,7 +39,7 @@ export default function DokumenEditPage() {
   };
 
   if (!dokumen) {
-    return <LoadingSpinner />;
+    return <FormSkeleton />;
   }
 
   return (

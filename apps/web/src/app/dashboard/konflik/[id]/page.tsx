@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { DetailPageSkeleton } from "@/components/shared/detail-page-skeleton";
 import { konflikApi } from "@/lib/api/konflik.api";
 import { usePermission } from "@/lib/hooks/use-permission";
 import { KonflikWithRelations } from "@/types";
@@ -72,7 +72,7 @@ export default function KonflikDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner />
+        <DetailPageSkeleton />
       </div>
     );
   }
