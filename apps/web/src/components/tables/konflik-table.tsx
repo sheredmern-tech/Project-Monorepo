@@ -77,7 +77,7 @@ export function KonflikTable({
         description="Mulai dengan menambahkan pemeriksaan konflik baru"
         action={{
           label: "Tambah Pemeriksaan Konflik",
-          onClick: () => router.push("/konflik/baru"),
+          onClick: () => router.push("/dashboard/konflik/baru"),
         }}
       />
     );
@@ -103,7 +103,7 @@ export function KonflikTable({
               <TableRow
                 key={konflik.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/konflik/${konflik.id}`)}
+                onClick={() => router.push(`/dashboard/konflik/${konflik.id}`)}
               >
                 <TableCell>
                   <div>
@@ -184,7 +184,7 @@ export function KonflikTable({
                       {/* 🔒 View - requires konflik:read permission */}
                       {permissions.konflik.read && (
                         <DropdownMenuItem
-                          onClick={() => router.push(`/konflik/${konflik.id}`)}
+                          onClick={() => router.push(`/dashboard/konflik/${konflik.id}`)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           Lihat Detail

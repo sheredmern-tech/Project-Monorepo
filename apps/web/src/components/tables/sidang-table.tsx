@@ -124,7 +124,7 @@ export function SidangTable({
         description="Mulai dengan menambahkan jadwal sidang baru"
         action={{
           label: "Tambah Jadwal Sidang",
-          onClick: () => router.push("/sidang/baru"),
+          onClick: () => router.push("/dashboard/sidang/baru"),
         }}
       />
     );
@@ -153,7 +153,7 @@ export function SidangTable({
                 <TableRow
                   key={sidang.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/sidang/${sidang.id}`)}
+                  onClick={() => router.push(`/dashboard/sidang/${sidang.id}`)}
                 >
                   <TableCell>
                     <div className="flex items-start gap-2">
@@ -235,7 +235,7 @@ export function SidangTable({
                         {/* 🔒 View - requires sidang:read permission */}
                         {permissions.sidang.read && (
                           <DropdownMenuItem
-                            onClick={() => router.push(`/sidang/${sidang.id}`)}
+                            onClick={() => router.push(`/dashboard/sidang/${sidang.id}`)}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Lihat Detail
@@ -245,7 +245,7 @@ export function SidangTable({
                         {/* 🔒 Edit - requires sidang:update permission */}
                         {permissions.sidang.update && (
                           <DropdownMenuItem
-                            onClick={() => router.push(`/sidang/${sidang.id}/edit`)}
+                            onClick={() => router.push(`/dashboard/sidang/${sidang.id}/edit`)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit

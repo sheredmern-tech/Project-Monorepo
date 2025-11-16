@@ -191,7 +191,7 @@ export function UserTable({
         description="Mulai dengan menambahkan user baru"
         action={{
           label: "Tambah User",
-          onClick: () => router.push("/tim/baru"),
+          onClick: () => router.push("/dashboard/tim/baru"),
         }}
       />
     );
@@ -229,7 +229,7 @@ export function UserTable({
                 <TableRow
                   key={user.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/tim/${user.id}`)}
+                  onClick={() => router.push(`/dashboard/tim/${user.id}`)}
                 >
                   {showCheckboxes && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
@@ -307,11 +307,11 @@ export function UserTable({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push(`/tim/${user.id}`)}>
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tim/${user.id}`)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Lihat Detail
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/tim/${user.id}/edit`)}>
+                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tim/${user.id}/edit`)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>

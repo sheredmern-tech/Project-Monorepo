@@ -76,7 +76,7 @@ export function KlienTable({ data, isLoading, page, limit, total }: KlienTablePr
         description="Mulai dengan menambahkan klien baru"
         action={{
           label: "Tambah Klien",
-          onClick: () => router.push("/klien/baru"),
+          onClick: () => router.push("/dashboard/klien/baru"),
         }}
       />
     );
@@ -102,7 +102,7 @@ export function KlienTable({ data, isLoading, page, limit, total }: KlienTablePr
               <TableRow
                 key={klien.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/klien/${klien.id}`)}
+                onClick={() => router.push(`/dashboard/klien/${klien.id}`)}
               >
                 <TableCell>
                   <div>
@@ -153,7 +153,7 @@ export function KlienTable({ data, isLoading, page, limit, total }: KlienTablePr
                       {/* 🔒 View - requires klien:read permission */}
                       {permissions.klien.read && (
                         <DropdownMenuItem
-                          onClick={() => router.push(`/klien/${klien.id}`)}
+                          onClick={() => router.push(`/dashboard/klien/${klien.id}`)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           Lihat Detail
@@ -163,7 +163,7 @@ export function KlienTable({ data, isLoading, page, limit, total }: KlienTablePr
                       {/* 🔒 Edit - requires klien:update permission */}
                       {permissions.klien.update && (
                         <DropdownMenuItem
-                          onClick={() => router.push(`/klien/${klien.id}/edit`)}
+                          onClick={() => router.push(`/dashboard/klien/${klien.id}/edit`)}
                         >
                           <Edit className="mr-2 h-4 w-4" />
                           Edit

@@ -121,7 +121,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
         description="Mulai dengan upload dokumen baru"
         action={{
           label: "Upload Dokumen",
-          onClick: () => router.push("/dokumen/upload"),
+          onClick: () => router.push("/dashboard/dokumen/upload"),
         }}
       />
     );
@@ -151,7 +151,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                 <TableRow
                   key={dokumen.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/dokumen/${dokumen.id}`)}
+                  onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}`)}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -216,7 +216,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                         {/* 🔒 View - requires dokumen:read permission */}
                         {permissions.dokumen.read && (
                           <DropdownMenuItem
-                            onClick={() => router.push(`/dokumen/${dokumen.id}`)}
+                            onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}`)}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Lihat Detail
@@ -237,7 +237,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                         {/* 🔒 Edit - requires dokumen:update permission */}
                         {permissions.dokumen.update && (
                           <DropdownMenuItem
-                            onClick={() => router.push(`/dokumen/${dokumen.id}/edit`)}
+                            onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}/edit`)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit

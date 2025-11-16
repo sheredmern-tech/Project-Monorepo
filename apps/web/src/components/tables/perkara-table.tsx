@@ -110,7 +110,7 @@ export function PerkaraTable({ data, isLoading, error, page, limit, total }: Per
         description="Mulai dengan menambahkan perkara baru"
         action={{
           label: "Tambah Perkara",
-          onClick: () => router.push("/perkara/baru"),
+          onClick: () => router.push("/dashboard/perkara/baru"),
         }}
       />
     );
@@ -138,7 +138,7 @@ export function PerkaraTable({ data, isLoading, error, page, limit, total }: Per
               <TableRow
                 key={perkara.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/perkara/${perkara.id}`)}
+                onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
               >
                 <TableCell>
                   <div>
@@ -202,7 +202,7 @@ export function PerkaraTable({ data, isLoading, error, page, limit, total }: Per
                       {/* 🔒 View - requires perkara:read permission */}
                       {permissions.perkara.read && (
                         <DropdownMenuItem
-                          onClick={() => router.push(`/perkara/${perkara.id}`)}
+                          onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
                         >
                           <Eye className="mr-2 h-4 w-4" />
                           Lihat Detail
@@ -212,7 +212,7 @@ export function PerkaraTable({ data, isLoading, error, page, limit, total }: Per
                       {/* 🔒 Edit - requires perkara:update permission */}
                       {permissions.perkara.update && (
                         <DropdownMenuItem
-                          onClick={() => router.push(`/perkara/${perkara.id}/edit`)}
+                          onClick={() => router.push(`/dashboard/perkara/${perkara.id}/edit`)}
                         >
                           <Edit className="mr-2 h-4 w-4" />
                           Edit

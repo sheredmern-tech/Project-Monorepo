@@ -129,7 +129,7 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
         description="Mulai dengan menambahkan tugas baru"
         action={{
           label: "Tambah Tugas",
-          onClick: () => router.push("/tugas/baru"),
+          onClick: () => router.push("/dashboard/tugas/baru"),
         }}
       />
     );
@@ -161,7 +161,7 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
                 <TableRow
                   key={tugas.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/tugas/${tugas.id}`)}
+                  onClick={() => router.push(`/dashboard/tugas/${tugas.id}`)}
                 >
                   <TableCell>
                     <div className="flex items-start gap-2">
@@ -245,7 +245,7 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
                         {/* 🔒 View - requires tugas:read permission */}
                         {permissions.tugas.read && (
                           <DropdownMenuItem
-                            onClick={() => router.push(`/tugas/${tugas.id}`)}
+                            onClick={() => router.push(`/dashboard/tugas/${tugas.id}`)}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Lihat Detail
@@ -255,7 +255,7 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
                         {/* 🔒 Edit - requires tugas:update permission */}
                         {permissions.tugas.update && (
                           <DropdownMenuItem
-                            onClick={() => router.push(`/tugas/${tugas.id}/edit`)}
+                            onClick={() => router.push(`/dashboard/tugas/${tugas.id}/edit`)}
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
