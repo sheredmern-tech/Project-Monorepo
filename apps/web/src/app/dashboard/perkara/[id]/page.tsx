@@ -32,6 +32,7 @@ import { perkaraApi } from "@/lib/api/perkara.api";
 import { timApi } from "@/lib/api/tim.api";
 import { klienApi } from "@/lib/api/klien.api";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
 import { PerkaraWithRelations, PerkaraStatistics, CreateTimPerkaraDto, UserBasic } from "@/types";
 import { formatDate, formatCurrency } from "@/lib/utils/format";
@@ -46,6 +47,7 @@ export default function PerkaraDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
+  const permissions = usePermission();
   const [perkara, setPerkara] = useState<PerkaraWithRelations | null>(null);
   const [stats, setStats] = useState<PerkaraStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -208,9 +210,6 @@ export default function PerkaraDetailPage() {
 
   // ✅ CONDITIONAL PERMISSIONS: Clients have limited actions
   const isClient = user?.role === UserRole.KLIEN;
-  const canEdit = !isClient;
-  const canDelete = !isClient;
-  const canManageTeam = !isClient;
 
   return (
     <div>
@@ -224,22 +223,20 @@ export default function PerkaraDetailPage() {
           title={perkara.nomor_perkara}
           description={perkara.judul}
           action={
-            !isClient && (
-              <div className="flex gap-2">
-                {canEdit && (
-                  <Button variant="outline" onClick={() => router.push(`/dashboard/perkara/${params.id}/edit`)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </Button>
-                )}
-                {canDelete && (
-                  <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Hapus
-                  </Button>
-                )}
-              </div>
-            )
+            <div className="flex gap-2">
+              {permissions.perkara.update && (
+                <Button variant="outline" onClick={() => router.push(`/dashboard/perkara/${params.id}/edit`)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+              {permissions.perkara.delete && (
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus
+                </Button>
+              )}
+            </div>
           }
         />
 
@@ -500,9 +497,9 @@ export default function PerkaraDetailPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Tim Perkara</CardTitle>
-                  {canManageTeam && (
-                    <Button 
-                      variant="outline" 
+                  {permissions.perkara.update && (
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setShowAddMemberDialog(true)}
                     >
@@ -538,7 +535,7 @@ export default function PerkaraDetailPage() {
                               </div>
                             </div>
                           </div>
-                          {canManageTeam && (
+                          {permissions.perkara.update && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -559,7 +556,7 @@ export default function PerkaraDetailPage() {
                     icon={Users}
                     title="Belum ada tim"
                     description="Tambahkan anggota tim untuk perkara ini"
-                    action={canManageTeam ? {
+                    action={permissions.perkara.update ? {
                       label: "Tambah Anggota",
                       onClick: () => setShowAddMemberDialog(true),
                     } : undefined}
@@ -571,43 +568,37 @@ export default function PerkaraDetailPage() {
         )}
       </Tabs>
 
-      {/* Delete Perkara Dialog - Only for non-clients */}
-      {canDelete && (
-        <ConfirmDialog
-          open={showDeleteDialog}
-          onOpenChange={setShowDeleteDialog}
-          title="Hapus Perkara"
-          description={`Apakah Anda yakin ingin menghapus perkara "${perkara.nomor_perkara}"? Semua data terkait (tugas, dokumen, sidang) akan ikut terhapus.`}
-          onConfirm={handleDelete}
-          confirmText="Hapus"
-          variant="destructive"
-        />
-      )}
+      {/* Delete Perkara Dialog */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Hapus Perkara"
+        description={`Apakah Anda yakin ingin menghapus perkara "${perkara.nomor_perkara}"? Semua data terkait (tugas, dokumen, sidang) akan ikut terhapus.`}
+        onConfirm={handleDelete}
+        confirmText="Hapus"
+        variant="destructive"
+      />
 
-      {/* Delete Team Member Dialog - Only for non-clients */}
-      {canManageTeam && (
-        <ConfirmDialog
-          open={!!memberToDelete}
-          onOpenChange={(open) => !open && setMemberToDelete(null)}
-          title="Hapus Anggota Tim"
-          description={`Apakah Anda yakin ingin menghapus ${memberToDelete?.name} dari tim perkara ini?`}
-          onConfirm={handleRemoveMember}
-          confirmText="Hapus"
-          variant="destructive"
-        />
-      )}
+      {/* Delete Team Member Dialog */}
+      <ConfirmDialog
+        open={!!memberToDelete}
+        onOpenChange={(open) => !open && setMemberToDelete(null)}
+        title="Hapus Anggota Tim"
+        description={`Apakah Anda yakin ingin menghapus ${memberToDelete?.name} dari tim perkara ini?`}
+        onConfirm={handleRemoveMember}
+        confirmText="Hapus"
+        variant="destructive"
+      />
 
-      {/* Add Team Member Dialog - Only for non-clients */}
-      {canManageTeam && (
-        <AddTeamMemberDialog
-          open={showAddMemberDialog}
-          onOpenChange={setShowAddMemberDialog}
-          perkaraId={params.id as string}
-          perkaraNomor={perkara.nomor_perkara}
-          existingMemberIds={perkara.tim_perkara.map(t => t.user.id)}
-          onAdd={handleAddMember}
-        />
-      )}
+      {/* Add Team Member Dialog */}
+      <AddTeamMemberDialog
+        open={showAddMemberDialog}
+        onOpenChange={setShowAddMemberDialog}
+        perkaraId={params.id as string}
+        perkaraNomor={perkara.nomor_perkara}
+        existingMemberIds={perkara.tim_perkara.map(t => t.user.id)}
+        onAdd={handleAddMember}
+      />
     </div>
   );
 }

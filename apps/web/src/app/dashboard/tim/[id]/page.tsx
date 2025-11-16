@@ -53,6 +53,7 @@ import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { EditUserDialog } from "@/components/modals/edit-user-dialog";
 import { UserActivityLog } from "@/components/tim/user-activity-log";
 import { timApi } from "@/lib/api/tim.api";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { UserWithStats, UserEntity } from "@/types";
 import { formatDate } from "@/lib/utils/date";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -62,7 +63,8 @@ export default function TimDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  
+  const permissions = usePermission();
+
   const [user, setUser] = useState<UserWithStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -318,11 +320,13 @@ export default function TimDetailPage() {
           Kembali
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Profil
-          </Button>
-          
+          {permissions.tim.update && (
+            <Button variant="outline" onClick={() => setEditDialogOpen(true)}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Profil
+            </Button>
+          )}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
@@ -332,69 +336,83 @@ export default function TimDetailPage() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Aksi</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              
-              <DropdownMenuItem
-                onClick={handleToggleStatus}
-                disabled={isTogglingStatus}
-              >
-                <Power className="mr-2 h-4 w-4" />
-                {user.is_active ? 'Nonaktifkan' : 'Aktifkan'} User
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem
-                onClick={() => setResetPasswordDialogOpen(true)}
-              >
-                <Key className="mr-2 h-4 w-4" />
-                Reset Password
-              </DropdownMenuItem>
-              
-              <DropdownMenuItem
-                onClick={handleSendInvitation}
-                disabled={isSendingInvitation}
-              >
-                <Send className="mr-2 h-4 w-4" />
-                {isSendingInvitation ? 'Mengirim...' : 'Kirim Undangan'}
-              </DropdownMenuItem>
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem
-                onClick={() => document.getElementById('avatar-upload')?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Ganti Foto
-              </DropdownMenuItem>
-              
-              {user.avatar_url && (
+
+              {permissions.tim.update && (
                 <DropdownMenuItem
-                  onClick={() => setDeleteAvatarDialogOpen(true)}
-                  className="text-orange-600"
+                  onClick={handleToggleStatus}
+                  disabled={isTogglingStatus}
                 >
-                  <ImageIcon className="mr-2 h-4 w-4" />
-                  Hapus Foto
+                  <Power className="mr-2 h-4 w-4" />
+                  {user.is_active ? 'Nonaktifkan' : 'Aktifkan'} User
                 </DropdownMenuItem>
               )}
-              
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleAvatarUpload(file);
-                }}
-              />
-              
-              <DropdownMenuSeparator />
-              
-              <DropdownMenuItem
-                onClick={() => setDeleteDialogOpen(true)}
-                className="text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Hapus User
-              </DropdownMenuItem>
+
+              {permissions.tim.update && (
+                <DropdownMenuItem
+                  onClick={() => setResetPasswordDialogOpen(true)}
+                >
+                  <Key className="mr-2 h-4 w-4" />
+                  Reset Password
+                </DropdownMenuItem>
+              )}
+
+              {permissions.tim.update && (
+                <DropdownMenuItem
+                  onClick={handleSendInvitation}
+                  disabled={isSendingInvitation}
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  {isSendingInvitation ? 'Mengirim...' : 'Kirim Undangan'}
+                </DropdownMenuItem>
+              )}
+
+              {permissions.tim.update && (
+                <>
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={() => document.getElementById('avatar-upload')?.click()}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Ganti Foto
+                  </DropdownMenuItem>
+
+                  {user.avatar_url && (
+                    <DropdownMenuItem
+                      onClick={() => setDeleteAvatarDialogOpen(true)}
+                      className="text-orange-600"
+                    >
+                      <ImageIcon className="mr-2 h-4 w-4" />
+                      Hapus Foto
+                    </DropdownMenuItem>
+                  )}
+
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleAvatarUpload(file);
+                    }}
+                  />
+                </>
+              )}
+
+              {permissions.users.delete && (
+                <>
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Hapus User
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

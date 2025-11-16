@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { useSidang } from "@/lib/hooks/use-sidang";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { JadwalSidangWithRelations } from "@/types";
 import { formatDate, formatTime } from "@/lib/utils/date";
 
@@ -21,6 +22,7 @@ export default function SidangDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { fetchSidangById, deleteSidang, isLoading } = useSidang();
+  const permissions = usePermission();
   const [sidang, setSidang] = useState<JadwalSidangWithRelations | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -60,17 +62,21 @@ export default function SidangDetailPage() {
           description={`${sidang.nama_pengadilan} - ${formatDate(sidang.tanggal_sidang)}`}
           action={
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/dashboard/sidang/${params.id}/edit`)}
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Hapus
-              </Button>
+              {permissions.sidang.update && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`/dashboard/sidang/${params.id}/edit`)}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+              {permissions.sidang.delete && (
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus
+                </Button>
+              )}
             </div>
           }
         />

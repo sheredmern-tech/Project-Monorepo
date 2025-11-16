@@ -26,6 +26,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { PriorityBadge } from "@/components/shared/priority-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { useTugas } from "@/lib/hooks/use-tugas";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { TugasWithRelations, StatusTugas } from "@/types";
 import { formatDate, formatCurrency, formatRelativeTime } from "@/lib/utils/format";
 
@@ -33,6 +34,7 @@ export default function TugasDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { fetchTugasById, updateTugas, deleteTugas, isLoading } = useTugas();
+  const permissions = usePermission();
   const [tugas, setTugas] = useState<TugasWithRelations | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -87,20 +89,24 @@ export default function TugasDetailPage() {
           description={`Tugas untuk perkara: ${tugas.perkara.nomor_perkara}`}
           action={
             <div className="flex gap-2">
-              {tugas.status !== StatusTugas.SELESAI && (
+              {tugas.status !== StatusTugas.SELESAI && permissions.tugas.update && (
                 <Button variant="outline" onClick={() => handleStatusChange(StatusTugas.SELESAI)}>
                   <CheckCircle2 className="mr-2 h-4 w-4" />
                   Tandai Selesai
                 </Button>
               )}
-              <Button variant="outline" onClick={() => router.push(`/dashboard/tugas/${params.id}/edit`)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Hapus
-              </Button>
+              {permissions.tugas.update && (
+                <Button variant="outline" onClick={() => router.push(`/dashboard/tugas/${params.id}/edit`)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+              {permissions.tugas.delete && (
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus
+                </Button>
+              )}
             </div>
           }
         />

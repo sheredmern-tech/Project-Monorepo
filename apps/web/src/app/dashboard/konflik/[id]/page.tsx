@@ -13,12 +13,14 @@ import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { konflikApi } from "@/lib/api/konflik.api";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { KonflikWithRelations } from "@/types";
 import { formatDate } from "@/lib/utils/date";
 
 export default function KonflikDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const permissions = usePermission();
   const [konflik, setKonflik] = useState<KonflikWithRelations | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -245,13 +247,15 @@ export default function KonflikDetailPage() {
             <Separator />
 
             <div className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => router.push(`/dashboard/konflik/${konflik.id}/edit`)}
-              >
-                Edit Pemeriksaan
-              </Button>
+              {permissions.konflik.update && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => router.push(`/dashboard/konflik/${konflik.id}/edit`)}
+                >
+                  Edit Pemeriksaan
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className="w-full"

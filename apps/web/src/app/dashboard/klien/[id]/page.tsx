@@ -15,6 +15,7 @@ import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { klienApi } from "@/lib/api/klien.api";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
 import { KlienWithPerkara } from "@/types";
 import { formatDate } from "@/lib/utils/format";
@@ -24,6 +25,7 @@ export default function KlienDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuthStore();
+  const permissions = usePermission();
   const [klien, setKlien] = useState<KlienWithPerkara | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -138,21 +140,25 @@ export default function KlienDetailPage() {
           description={`Detail informasi klien - ${klien.jenis_klien}`}
           action={
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/dashboard/klien/${params.id}/edit`)}
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isDeleting}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Hapus
-              </Button>
+              {permissions.klien.update && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push(`/dashboard/klien/${params.id}/edit`)}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+              {permissions.klien.delete && (
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus
+                </Button>
+              )}
             </div>
           }
         />

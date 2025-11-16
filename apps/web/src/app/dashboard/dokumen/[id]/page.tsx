@@ -24,6 +24,7 @@ import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { DokumenPreview } from "@/components/shared/dokumen-preview";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { DokumenWithRelations } from "@/types";
 import { formatDate, formatFileSize } from "@/lib/utils/format";
 import { getFileIcon, getFileExtension, isPreviewable } from "@/lib/utils/file";
@@ -43,6 +44,7 @@ export default function DokumenDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { fetchDokumenById, deleteDokumen, downloadDokumen, isLoading } = useDokumen();
+  const permissions = usePermission();
   const [dokumen, setDokumen] = useState<DokumenWithRelations | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -101,14 +103,18 @@ export default function DokumenDetailPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
-              <Button variant="outline" onClick={() => router.push(`/dashboard/dokumen/${params.id}/edit`)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-                <Trash2 className="mr-2 h-4 w-4" />
-                Hapus
-              </Button>
+              {permissions.dokumen.update && (
+                <Button variant="outline" onClick={() => router.push(`/dashboard/dokumen/${params.id}/edit`)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+              {permissions.dokumen.delete && (
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Hapus
+                </Button>
+              )}
             </div>
           }
         />
