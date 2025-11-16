@@ -166,22 +166,25 @@ model Tugas {
 }
 
 model DokumenHukum {
-  id              String          @id @default(uuid())
-  perkara_id      String
-  nama_dokumen    String
-  kategori        KategoriDokumen
-  nomor_bukti     String?
-  file_path       String
-  ukuran_file     Int?
-  tipe_file       String?
-  versi           Int             @default(1)
-  adalah_rahasia  Boolean         @default(false)
-  diunggah_oleh   String?
-  tanggal_dokumen DateTime?
-  tanggal_upload  DateTime        @default(now())
-  catatan         String?
-  pengunggah      User?           @relation("DokumenDiunggah", fields: [diunggah_oleh], references: [id])
-  perkara         Perkara         @relation(fields: [perkara_id], references: [id], onDelete: Cascade)
+  id                String          @id @default(uuid())
+  perkara_id        String
+  nama_dokumen      String
+  kategori          KategoriDokumen
+  nomor_bukti       String?
+  file_path         String?         // ✅ Made nullable - legacy local files
+  google_drive_id   String?         // ✅ Google Drive file ID
+  google_drive_link String?         // ✅ Google Drive shareable link
+  embed_link        String?         // ✅ Google Drive embed preview link
+  ukuran_file       Int?
+  tipe_file         String?
+  versi             Int             @default(1)
+  adalah_rahasia    Boolean         @default(false)
+  diunggah_oleh     String?
+  tanggal_dokumen   DateTime?
+  tanggal_upload    DateTime        @default(now())
+  catatan           String?
+  pengunggah        User?           @relation("DokumenDiunggah", fields: [diunggah_oleh], references: [id])
+  perkara           Perkara         @relation(fields: [perkara_id], references: [id], onDelete: Cascade)
 
   @@map("dokumen_hukum")
 }

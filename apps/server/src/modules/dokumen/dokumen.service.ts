@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: server/src/modules/dokumen/dokumen.service.ts - WITH RBAC FILTERING
+// FILE: server/src/modules/dokumen/dokumen.service.ts - WITH GOOGLE DRIVE API
 // ============================================================================
 import {
   Injectable,
@@ -17,18 +17,14 @@ import {
   DokumenDownloadResponse,
   CreateLogAktivitasData,
 } from '../../common/interfaces';
-import * as fs from 'fs';
-import * as path from 'path';
+import { GoogleDriveService } from '../google-drive/google-drive.service';
 
 @Injectable()
 export class DokumenService {
-  private uploadPath = './uploads/dokumen';
-
-  constructor(private prisma: PrismaService) {
-    if (!fs.existsSync(this.uploadPath)) {
-      fs.mkdirSync(this.uploadPath, { recursive: true });
-    }
-  }
+  constructor(
+    private prisma: PrismaService,
+    private googleDriveService: GoogleDriveService,
+  ) {}
 
   async create(
     dto: CreateDokumenDto,
@@ -41,29 +37,40 @@ export class DokumenService {
 
     const perkara = await this.prisma.perkara.findUnique({
       where: { id: dto.perkara_id },
+      select: { id: true, nomor_perkara: true },
     });
 
     if (!perkara) {
       throw new BadRequestException('Perkara tidak ditemukan');
     }
 
-    const fileName = `${Date.now()}-${file.originalname}`;
-    const filePath = path.join(this.uploadPath, fileName);
-    fs.writeFileSync(filePath, file.buffer);
+    // ✅ UPLOAD TO GOOGLE DRIVE (instead of local storage)
+    const driveFile = await this.googleDriveService.uploadFile({
+      fileName: dto.nama_dokumen || file.originalname,
+      mimeType: file.mimetype,
+      buffer: file.buffer,
+    });
 
+    // ✅ SAVE METADATA + GOOGLE DRIVE LINKS (not local file path)
     const dokumen = await this.prisma.dokumenHukum.create({
       data: {
         perkara_id: dto.perkara_id,
         nama_dokumen: dto.nama_dokumen || file.originalname,
         kategori: dto.kategori,
         nomor_bukti: dto.nomor_bukti,
-        file_path: filePath,
+        // Google Drive fields
+        google_drive_id: driveFile.id,
+        google_drive_link: driveFile.webViewLink,
+        embed_link: driveFile.embedLink,
+        // Metadata
         ukuran_file: file.size,
         tipe_file: file.mimetype,
         adalah_rahasia: dto.adalah_rahasia || false,
         tanggal_dokumen: dto.tanggal_dokumen,
         catatan: dto.catatan,
         diunggah_oleh: userId,
+        // Legacy field (null for Google Drive files)
+        file_path: null,
       },
       include: {
         perkara: {
@@ -102,6 +109,7 @@ export class DokumenService {
       detail: {
         nama_dokumen: dokumen.nama_dokumen,
         perkara_id: dto.perkara_id,
+        google_drive_id: driveFile.id,
       },
     };
 
@@ -279,12 +287,15 @@ export class DokumenService {
   async download(id: string): Promise<DokumenDownloadResponse> {
     const dokumen = await this.findOne(id);
 
-    if (!fs.existsSync(dokumen.file_path)) {
-      throw new NotFoundException('File tidak ditemukan di server');
+    // ✅ Return Google Drive download link (not local file)
+    if (!dokumen.google_drive_link) {
+      throw new NotFoundException(
+        'File tidak tersedia. Google Drive link tidak ditemukan.',
+      );
     }
 
     return {
-      file_path: dokumen.file_path,
+      file_path: dokumen.google_drive_link, // Google Drive download URL
       nama_dokumen: dokumen.nama_dokumen,
     };
   }
@@ -348,8 +359,17 @@ export class DokumenService {
   async remove(id: string, userId: string): Promise<{ message: string }> {
     const dokumen = await this.findOne(id);
 
-    if (fs.existsSync(dokumen.file_path)) {
-      fs.unlinkSync(dokumen.file_path);
+    // ✅ Delete from Google Drive if exists
+    if (dokumen.google_drive_id) {
+      try {
+        await this.googleDriveService.deleteFile(dokumen.google_drive_id);
+      } catch (error) {
+        // Log error but continue with DB deletion
+        console.error(
+          `Failed to delete file from Google Drive: ${dokumen.google_drive_id}`,
+          error,
+        );
+      }
     }
 
     await this.prisma.dokumenHukum.delete({
@@ -361,7 +381,10 @@ export class DokumenService {
       aksi: 'DELETE_DOKUMEN',
       jenis_entitas: 'dokumen',
       id_entitas: id,
-      detail: { nama_dokumen: dokumen.nama_dokumen },
+      detail: {
+        nama_dokumen: dokumen.nama_dokumen,
+        google_drive_id: dokumen.google_drive_id,
+      },
     };
 
     await this.prisma.logAktivitas.create({
