@@ -16,6 +16,11 @@ export class CreatePerkaraDto {
   @IsString()
   nomor_perkara: string;
 
+  @ApiPropertyOptional({ example: '123/Pdt.G/2024/PN.Jkt.Sel' })
+  @IsOptional()
+  @IsString()
+  nomor_perkara_pengadilan?: string;
+
   @ApiProperty({ example: 'Gugatan Wanprestasi PT ABC vs PT XYZ' })
   @IsString()
   judul: string;
@@ -64,6 +69,21 @@ export class CreatePerkaraDto {
   @IsString()
   nama_hakim_ketua?: string;
 
+  @ApiPropertyOptional({ example: 'Dr. Budi Santoso, S.H., M.H.' })
+  @IsOptional()
+  @IsString()
+  nama_hakim_anggota_1?: string;
+
+  @ApiPropertyOptional({ example: 'Dr. Citra Dewi, S.H., M.H.' })
+  @IsOptional()
+  @IsString()
+  nama_hakim_anggota_2?: string;
+
+  @ApiPropertyOptional({ example: 'Agus Priyanto, S.H.' })
+  @IsOptional()
+  @IsString()
+  nama_panitera?: string;
+
   @ApiPropertyOptional({ example: 'Penggugat' })
   @IsOptional()
   @IsString()
@@ -94,6 +114,21 @@ export class CreatePerkaraDto {
   @IsOptional()
   @IsDateString()
   tanggal_sidang_pertama?: string;
+
+  @ApiPropertyOptional({ example: '2024-03-01T09:00:00Z' })
+  @IsOptional()
+  @IsDateString()
+  tanggal_sidang_berikutnya?: string;
+
+  @ApiPropertyOptional({ example: '2024-04-01T00:00:00Z' })
+  @IsOptional()
+  @IsDateString()
+  batas_waktu_banding?: string;
+
+  @ApiPropertyOptional({ example: '2024-05-01T00:00:00Z' })
+  @IsOptional()
+  @IsDateString()
+  batas_waktu_kasasi?: string;
 
   @ApiPropertyOptional({ example: 1500000000 })
   @IsOptional()
