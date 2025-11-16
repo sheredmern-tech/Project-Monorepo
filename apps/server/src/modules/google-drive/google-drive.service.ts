@@ -1,9 +1,11 @@
 // ============================================================================
 // FILE: src/modules/google-drive/google-drive.service.ts
 // Google Drive API Service - Handle upload, download, delete
+// Supports both OAuth (admin's Drive) and Service Account modes
 // ============================================================================
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../prisma/prisma.service';
 import { google } from 'googleapis';
 import { Readable } from 'stream';
 
@@ -29,29 +31,30 @@ export class GoogleDriveService {
   private readonly logger = new Logger(GoogleDriveService.name);
   private drive;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private prisma: PrismaService,
+  ) {
     this.initializeDrive();
   }
 
   /**
-   * Initialize Google Drive API with service account credentials
+   * Initialize Google Drive API - Try OAuth first, fallback to Service Account
    */
   private initializeDrive() {
     try {
-      const credentials = this.getCredentials();
+      // Priority 1: OAuth (admin's Google Drive - RECOMMENDED)
+      const oauthRefreshToken = this.configService.get<string>(
+        'GOOGLE_OAUTH_REFRESH_TOKEN',
+      );
 
-      const auth = new google.auth.GoogleAuth({
-        credentials,
-        scopes: [
-          'https://www.googleapis.com/auth/drive',
-          'https://www.googleapis.com/auth/drive.file',
-        ],
-      });
+      if (oauthRefreshToken) {
+        this.initializeOAuth();
+        return;
+      }
 
-      this.drive = google.drive({ version: 'v3', auth });
-      this.logger.log('✅ Google Drive API initialized successfully');
-      this.logger.log(`Service Account: ${credentials.client_email}`);
-      this.logger.log(`Project ID: ${credentials.project_id}`);
+      // Priority 2: Service Account (fallback - won't work for free Drive)
+      this.initializeServiceAccount();
     } catch (error) {
       this.logger.error('❌ Failed to initialize Google Drive API');
       this.logger.error('Error details:', error.message);
@@ -59,6 +62,71 @@ export class GoogleDriveService {
         'Failed to initialize Google Drive. Check credentials.',
       );
     }
+  }
+
+  /**
+   * Initialize with OAuth - Uses admin's personal Google Drive (15GB free)
+   */
+  private initializeOAuth() {
+    const clientId = this.configService.get<string>('GOOGLE_OAUTH_CLIENT_ID');
+    const clientSecret = this.configService.get<string>(
+      'GOOGLE_OAUTH_CLIENT_SECRET',
+    );
+    const refreshToken = this.configService.get<string>(
+      'GOOGLE_OAUTH_REFRESH_TOKEN',
+    );
+
+    if (!clientId || !clientSecret || !refreshToken) {
+      throw new BadRequestException(
+        'OAuth credentials incomplete. Need CLIENT_ID, CLIENT_SECRET, and REFRESH_TOKEN',
+      );
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      clientId,
+      clientSecret,
+      this.configService.get<string>('GOOGLE_OAUTH_REDIRECT_URI') ||
+        'http://localhost:3000/api/v1/google-drive/oauth/callback',
+    );
+
+    oauth2Client.setCredentials({
+      refresh_token: refreshToken,
+    });
+
+    this.drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+    this.logger.log('✅ Google Drive API initialized with OAuth');
+    this.logger.log('📦 Using admin\'s Google Drive for centralized storage');
+    this.logger.log('💾 15GB free quota available');
+
+    const rootFolderId = this.configService.get<string>(
+      'GOOGLE_DRIVE_ROOT_FOLDER_ID',
+    );
+    if (rootFolderId) {
+      this.logger.log(`📁 Root Folder ID: ${rootFolderId}`);
+    }
+  }
+
+  /**
+   * Initialize with Service Account - Legacy mode (won't work for free Drive)
+   */
+  private initializeServiceAccount() {
+    const credentials = this.getCredentials();
+
+    const auth = new google.auth.GoogleAuth({
+      credentials,
+      scopes: [
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/drive.file',
+      ],
+    });
+
+    this.drive = google.drive({ version: 'v3', auth });
+    this.logger.log('✅ Google Drive API initialized with Service Account');
+    this.logger.log(`Service Account: ${credentials.client_email}`);
+    this.logger.warn(
+      '⚠️  Service Account mode: Requires Google Workspace or shared folder',
+    );
   }
 
   /**

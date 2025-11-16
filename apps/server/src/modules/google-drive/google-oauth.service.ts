@@ -147,7 +147,16 @@ export class GoogleOAuthService {
     if (!expiresAt || now >= expiresAt) {
       // Token expired, refresh it
       this.logger.log(`Token expired for user ${userId}, refreshing...`);
+
+      if (!user.google_drive_refresh_token) {
+        throw new Error('No refresh token available. Please reconnect Google Drive.');
+      }
+
       return await this.refreshAccessToken(userId, user.google_drive_refresh_token);
+    }
+
+    if (!user.google_drive_access_token) {
+      throw new Error('No access token available. Please reconnect Google Drive.');
     }
 
     return user.google_drive_access_token;
