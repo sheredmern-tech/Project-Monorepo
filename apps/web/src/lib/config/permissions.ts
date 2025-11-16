@@ -278,6 +278,29 @@ export function canAccessResource(
 }
 
 /**
+ * Check if role can PERFORM ACTIONS on a resource (not just read)
+ * Used for navigation filtering - only show menu if user can do something
+ */
+export function canPerformActionsOnResource(
+  role: UserRole | undefined,
+  resource: Resource
+): boolean {
+  if (!role) return false;
+
+  // Get all permissions for this resource
+  const rolePermissions = ROLE_PERMISSIONS[role] || [];
+  const resourcePermissions = rolePermissions.filter((perm) =>
+    perm.startsWith(`${resource}:`)
+  );
+
+  // Check if user has ANY action permission BESIDES read
+  return resourcePermissions.some((perm) => {
+    const action = perm.split(':')[1];
+    return action !== 'read'; // Must have create, update, delete, upload, assign, etc
+  });
+}
+
+/**
  * Check multiple permissions (AND logic - must have ALL)
  */
 export function hasAllPermissions(

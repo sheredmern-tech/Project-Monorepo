@@ -14,7 +14,7 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
-import { Resource, canAccessResource } from "./permissions";
+import { Resource, canAccessResource, canPerformActionsOnResource } from "./permissions";
 
 export interface NavItem {
   title: string;
@@ -96,21 +96,22 @@ const ALL_NAVIGATION: NavItem[] = [
 
 /**
  * Get navigation items filtered by user's permissions
- * This replaces the static ROLE_NAVIGATION mapping
+ * Philosophy: Only show menu if user can PERFORM ACTIONS (not just read)
  */
 export function getNavigationForRole(userRole: UserRole): NavItem[] {
   // NOTE: KLIEN role removed - this is an INTERNAL admin system only
   // KLIEN users cannot access the web admin dashboard
 
-  // Filter navigation based on resource access permissions
+  // Filter navigation based on actionable permissions
   return ALL_NAVIGATION.filter((item) => {
     // Always show dashboard
     if (!item.requiredResource) {
       return true;
     }
 
-    // Check if user has permission to access this resource
-    return canAccessResource(userRole, item.requiredResource);
+    // Only show menu if user can DO SOMETHING (create, update, delete, upload, etc)
+    // Hide read-only menus
+    return canPerformActionsOnResource(userRole, item.requiredResource);
   });
 }
 
