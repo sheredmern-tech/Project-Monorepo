@@ -43,9 +43,10 @@ const FileIconDisplay = ({ tipeFile, className }: FileIconDisplayProps) => {
 export default function DokumenDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { fetchDokumenById, deleteDokumen, downloadDokumen, isLoading } = useDokumen();
+  const { fetchDokumenById, deleteDokumen, downloadDokumen } = useDokumen();
   const permissions = usePermission();
   const [dokumen, setDokumen] = useState<DokumenWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // ✅ Local loading state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -53,12 +54,15 @@ export default function DokumenDetailPage() {
     const loadDokumen = async () => {
       if (params.id) {
         try {
+          setIsLoading(true); // ✅ Set loading true
           const data = await fetchDokumenById(params.id as string);
           setDokumen(data);
         } catch (error) {
           // Error already handled by hook (toast shown)
           // Just prevent infinite loading
           console.error('Failed to load dokumen:', error);
+        } finally {
+          setIsLoading(false); // ✅ Set loading false after everything
         }
       }
     };
