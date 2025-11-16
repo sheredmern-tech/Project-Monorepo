@@ -52,8 +52,14 @@ export default function DokumenDetailPage() {
   useEffect(() => {
     const loadDokumen = async () => {
       if (params.id) {
-        const data = await fetchDokumenById(params.id as string);
-        setDokumen(data);
+        try {
+          const data = await fetchDokumenById(params.id as string);
+          setDokumen(data);
+        } catch (error) {
+          // Error already handled by hook (toast shown)
+          // Just prevent infinite loading
+          console.error('Failed to load dokumen:', error);
+        }
       }
     };
     loadDokumen();
@@ -74,8 +80,28 @@ export default function DokumenDetailPage() {
     }
   };
 
-  if (isLoading || !dokumen) {
+  // Show skeleton while loading
+  if (isLoading) {
     return <DetailPageSkeleton />;
+  }
+
+  // Show error if dokumen not found after loading
+  if (!isLoading && !dokumen) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <div className="text-6xl">📄</div>
+          <h2 className="text-2xl font-semibold">Dokumen Tidak Ditemukan</h2>
+          <p className="text-muted-foreground max-w-md">
+            Dokumen yang Anda cari tidak ditemukan atau Anda tidak memiliki akses untuk melihatnya.
+          </p>
+          <Button onClick={() => router.push("/dashboard/dokumen")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Kembali ke Daftar Dokumen
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   const canPreview = isPreviewable(dokumen.tipe_file);
