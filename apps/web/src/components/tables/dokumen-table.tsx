@@ -147,6 +147,9 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
               const extension = getFileExtension(dokumen.nama_dokumen);
               const isDownloading = downloadingId === dokumen.id;
 
+              // 🎯 Check if user has ANY action permission
+              const hasAnyAction = permissions.dokumen.read || permissions.dokumen.update || permissions.dokumen.delete || permissions.dokumen.download;
+
               return (
                 <TableRow
                   key={dokumen.id}
@@ -203,62 +206,65 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                     </div>
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" disabled={isDownloading}>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                    {/* 🎯 Only show dropdown if user has any action permission */}
+                    {hasAnyAction && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" disabled={isDownloading}>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
 
-                        {/* 🔒 View - requires dokumen:read permission */}
-                        {permissions.dokumen.read && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}`)}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Detail
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* 🔒 Download - requires dokumen:download permission */}
-                        {permissions.dokumen.download && (
-                          <DropdownMenuItem
-                            onClick={(e) => handleDownload(dokumen.id, dokumen.nama_dokumen, e)}
-                            disabled={isDownloading}
-                          >
-                            <Download className="mr-2 h-4 w-4" />
-                            {isDownloading ? "Downloading..." : "Download"}
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* 🔒 Edit - requires dokumen:update permission */}
-                        {permissions.dokumen.update && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}/edit`)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* 🔒 Delete - requires dokumen:delete permission */}
-                        {permissions.dokumen.delete && (
-                          <>
-                            <DropdownMenuSeparator />
+                          {/* 🔒 View - requires dokumen:read permission */}
+                          {permissions.dokumen.read && (
                             <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => setDeleteId(dokumen.id)}
+                              onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}`)}
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
                             </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          )}
+
+                          {/* 🔒 Download - requires dokumen:download permission */}
+                          {permissions.dokumen.download && (
+                            <DropdownMenuItem
+                              onClick={(e) => handleDownload(dokumen.id, dokumen.nama_dokumen, e)}
+                              disabled={isDownloading}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              {isDownloading ? "Downloading..." : "Download"}
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Edit - requires dokumen:update permission */}
+                          {permissions.dokumen.update && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}/edit`)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Delete - requires dokumen:delete permission */}
+                          {permissions.dokumen.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setDeleteId(dokumen.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               );

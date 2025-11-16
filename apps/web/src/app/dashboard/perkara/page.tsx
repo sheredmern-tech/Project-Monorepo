@@ -12,6 +12,7 @@ import { PerkaraTable } from "@/components/tables/perkara-table";
 import { SearchInput } from "@/components/shared/search-input";
 import { usePerkara } from "@/lib/hooks/use-perkara";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
 import {
   Select,
@@ -25,6 +26,7 @@ import { JenisPerkara, StatusPerkara } from "@/types";
 export default function PerkaraPage() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const permissions = usePermission();
   const {
     perkara,
     isLoading,
@@ -73,12 +75,9 @@ export default function PerkaraPage() {
     if (user?.role === UserRole.KLIEN && !clientFilterSet) {
       return;
     }
-    
+
     fetchPerkara();
   }, [fetchPerkara, user, clientFilterSet]);
-
-  // ✅ CONDITIONAL UI: Hide "Add" button for clients
-  const canAddPerkara = user?.role !== UserRole.KLIEN;
 
   return (
     <div>
@@ -90,12 +89,13 @@ export default function PerkaraPage() {
             : "Kelola semua perkara hukum"
         }
         action={
-          canAddPerkara && (
+          /* 🔒 Only show button if user can create */
+          permissions.perkara.create ? (
             <Button onClick={() => router.push("/dashboard/perkara/baru")}>
               <Plus className="mr-2 h-4 w-4" />
               Tambah Perkara
             </Button>
-          )
+          ) : undefined
         }
       />
 

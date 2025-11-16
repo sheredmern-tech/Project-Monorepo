@@ -45,6 +45,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { TablePagination } from "@/components/tables/table-pagination";
 import { UserEntity } from "@/types";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { formatDate } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { toast } from "sonner";
@@ -89,6 +90,9 @@ export function UserTable({
   const [isDeleting, setIsDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [sendingInviteId, setSendingInviteId] = useState<string | null>(null);
+
+  // 🔒 RBAC: Get user permissions
+  const permissions = usePermission();
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Record<string, string> = {
@@ -225,6 +229,9 @@ export function UserTable({
               const isToggling = togglingId === user.id;
               const isSendingInvite = sendingInviteId === user.id;
 
+              // 🎯 Check if user has ANY action permission
+              const hasAnyAction = permissions.tim.read || permissions.tim.update || permissions.tim.delete;
+
               return (
                 <TableRow
                   key={user.id}
@@ -298,57 +305,80 @@ export function UserTable({
                   </TableCell>
 
                   <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" disabled={isToggling || isSendingInvite}>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tim/${user.id}`)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/dashboard/tim/${user.id}/edit`)}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={(e) => handleToggleStatus(user.id, user.is_active, e)}
-                          disabled={isToggling}
-                        >
-                          {user.is_active ? (
+                    {/* 🎯 Only show dropdown if user has any action permission */}
+                    {hasAnyAction && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" disabled={isToggling || isSendingInvite}>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+
+                          {/* 🔒 View - requires tim:read permission */}
+                          {permissions.tim.read && (
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/tim/${user.id}`)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Edit - requires tim:update permission */}
+                          {permissions.tim.update && (
+                            <DropdownMenuItem onClick={() => router.push(`/dashboard/tim/${user.id}/edit`)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Toggle Status & Send Invitation - requires tim:update permission */}
+                          {permissions.tim.update && (
                             <>
-                              <PowerOff className="mr-2 h-4 w-4" />
-                              {isToggling ? "Processing..." : "Nonaktifkan"}
-                            </>
-                          ) : (
-                            <>
-                              <Power className="mr-2 h-4 w-4" />
-                              {isToggling ? "Processing..." : "Aktifkan"}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={(e) => handleToggleStatus(user.id, user.is_active, e)}
+                                disabled={isToggling}
+                              >
+                                {user.is_active ? (
+                                  <>
+                                    <PowerOff className="mr-2 h-4 w-4" />
+                                    {isToggling ? "Processing..." : "Nonaktifkan"}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Power className="mr-2 h-4 w-4" />
+                                    {isToggling ? "Processing..." : "Aktifkan"}
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => handleSendInvitation(user.id, e)}
+                                disabled={isSendingInvite}
+                              >
+                                <Send className="mr-2 h-4 w-4" />
+                                {isSendingInvite ? "Mengirim..." : "Kirim Undangan"}
+                              </DropdownMenuItem>
                             </>
                           )}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => handleSendInvitation(user.id, e)}
-                          disabled={isSendingInvite}
-                        >
-                          <Send className="mr-2 h-4 w-4" />
-                          {isSendingInvite ? "Mengirim..." : "Kirim Undangan"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => setDeleteId(user.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Hapus
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+
+                          {/* 🔒 Delete - requires tim:delete permission */}
+                          {permissions.tim.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setDeleteId(user.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               );

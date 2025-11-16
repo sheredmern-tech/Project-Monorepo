@@ -13,6 +13,7 @@ import { SearchInput } from "@/components/shared/search-input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useTugas } from "@/lib/hooks/use-tugas";
+import { usePermission } from "@/lib/hooks/use-permission";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ import { StatusTugas, PrioritasTugas } from "@/types";
 
 export default function TugasPage() {
   const router = useRouter();
+  const permissions = usePermission();
   const {
     tugas,
     isLoading,
@@ -51,10 +53,13 @@ export default function TugasPage() {
         title="Tugas"
         description="Kelola semua tugas perkara"
         action={
-          <Button onClick={() => router.push("/dashboard/tugas/baru")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Tambah Tugas
-          </Button>
+          /* 🔒 Only show button if user can create */
+          permissions.tugas.create ? (
+            <Button onClick={() => router.push("/dashboard/tugas/baru")}>
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Tugas
+            </Button>
+          ) : undefined
         }
       />
 

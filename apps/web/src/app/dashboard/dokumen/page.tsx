@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { DokumenTable } from "@/components/tables/dokumen-table";
 import { SearchInput } from "@/components/shared/search-input";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
+import { usePermission } from "@/lib/hooks/use-permission";
 import {
   Select,
   SelectContent,
@@ -22,6 +23,7 @@ import { KategoriDokumen } from "@/types";
 
 export default function DokumenPage() {
   const router = useRouter();
+  const permissions = usePermission();
   const {
     dokumen,
     isLoading,
@@ -45,10 +47,13 @@ export default function DokumenPage() {
         title="Dokumen"
         description="Kelola semua dokumen hukum"
         action={
-          <Button onClick={() => router.push("/dashboard/dokumen/upload")}>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Dokumen
-          </Button>
+          /* 🔒 Only show button if user can upload */
+          permissions.dokumen.upload ? (
+            <Button onClick={() => router.push("/dashboard/dokumen/upload")}>
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Dokumen
+            </Button>
+          ) : undefined
         }
       />
 

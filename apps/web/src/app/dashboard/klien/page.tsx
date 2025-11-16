@@ -14,6 +14,7 @@ import { SearchInput } from "@/components/shared/search-input";
 import { ViewToggle } from "@/components/shared/view-toggle";
 import { useKlien } from "@/lib/hooks/use-klien";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
 import { LoadingSpinner } from "@/components/shared/loading-spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,16 +22,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function KlienPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { 
-    klien, 
-    isLoading, 
-    page, 
-    limit, 
+  const permissions = usePermission();
+  const {
+    klien,
+    isLoading,
+    page,
+    limit,
     total,
     jenisKlien,
     setSearch,
     setJenisKlien,
-    fetchKlien 
+    fetchKlien
   } = useKlien();
 
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
@@ -61,10 +63,13 @@ export default function KlienPage() {
         title="Klien"
         description="Kelola data klien firma hukum"
         action={
-          <Button onClick={() => router.push("/dashboard/klien/baru")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Tambah Klien
-          </Button>
+          /* 🔒 Only show "Tambah Klien" button if user can create klien */
+          permissions.klien.create ? (
+            <Button onClick={() => router.push("/dashboard/klien/baru")}>
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Klien
+            </Button>
+          ) : undefined
         }
       />
 

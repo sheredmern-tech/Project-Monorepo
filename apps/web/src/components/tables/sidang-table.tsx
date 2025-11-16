@@ -149,6 +149,9 @@ export function SidangTable({
             {data.map((sidang) => {
               const statusInfo = getSidangStatus(sidang.tanggal_sidang);
 
+              // 🎯 Check if user has ANY action permission
+              const hasAnyAction = permissions.sidang.read || permissions.sidang.update || permissions.sidang.delete;
+
               return (
                 <TableRow
                   key={sidang.id}
@@ -222,51 +225,54 @@ export function SidangTable({
                   </TableCell>
 
                   <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                    {/* 🎯 Only show dropdown if user has any action permission */}
+                    {hasAnyAction && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
 
-                        {/* 🔒 View - requires sidang:read permission */}
-                        {permissions.sidang.read && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/dashboard/sidang/${sidang.id}`)}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Detail
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* 🔒 Edit - requires sidang:update permission */}
-                        {permissions.sidang.update && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/dashboard/sidang/${sidang.id}/edit`)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* 🔒 Delete - requires sidang:delete permission */}
-                        {permissions.sidang.delete && (
-                          <>
-                            <DropdownMenuSeparator />
+                          {/* 🔒 View - requires sidang:read permission */}
+                          {permissions.sidang.read && (
                             <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => setDeleteId(sidang.id)}
+                              onClick={() => router.push(`/dashboard/sidang/${sidang.id}`)}
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
                             </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          )}
+
+                          {/* 🔒 Edit - requires sidang:update permission */}
+                          {permissions.sidang.update && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/sidang/${sidang.id}/edit`)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Delete - requires sidang:delete permission */}
+                          {permissions.sidang.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setDeleteId(sidang.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               );

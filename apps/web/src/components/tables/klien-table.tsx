@@ -98,96 +98,104 @@ export function KlienTable({ data, isLoading, page, limit, total }: KlienTablePr
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((klien) => (
-              <TableRow
-                key={klien.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/dashboard/klien/${klien.id}`)}
-              >
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{klien.nama}</p>
-                    {klien.email && (
-                      <p className="text-sm text-muted-foreground">{klien.email}</p>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="capitalize">
-                    {klien.jenis_klien}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    {klien.telepon && <p>{klien.telepon}</p>}
-                    {klien.telepon_alternatif && (
-                      <p className="text-muted-foreground">{klien.telepon_alternatif}</p>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    {klien.kota && <p>{klien.kota}</p>}
-                    {klien.provinsi && (
-                      <p className="text-muted-foreground">{klien.provinsi}</p>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{klien._count.perkara}</Badge>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {formatDate(klien.created_at)}
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
+            {data.map((klien) => {
+              // 🎯 Check if user has ANY action permission
+              const hasAnyAction = permissions.klien.read || permissions.klien.update || permissions.klien.delete;
 
-                      {/* 🔒 View - requires klien:read permission */}
-                      {permissions.klien.read && (
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dashboard/klien/${klien.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
+              return (
+                <TableRow
+                  key={klien.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => router.push(`/dashboard/klien/${klien.id}`)}
+                >
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{klien.nama}</p>
+                      {klien.email && (
+                        <p className="text-sm text-muted-foreground">{klien.email}</p>
                       )}
-
-                      {/* 🔒 Edit - requires klien:update permission */}
-                      {permissions.klien.update && (
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dashboard/klien/${klien.id}/edit`)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="capitalize">
+                      {klien.jenis_klien}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {klien.telepon && <p>{klien.telepon}</p>}
+                      {klien.telepon_alternatif && (
+                        <p className="text-muted-foreground">{klien.telepon_alternatif}</p>
                       )}
-
-                      {/* 🔒 Delete - requires klien:delete permission (ADMIN only) */}
-                      {permissions.klien.delete && (
-                        <>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {klien.kota && <p>{klien.kota}</p>}
+                      {klien.provinsi && (
+                        <p className="text-muted-foreground">{klien.provinsi}</p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{klien._count.perkara}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(klien.created_at)}
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {/* 🎯 Only show dropdown if user has any action permission */}
+                    {hasAnyAction && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => setDeleteId(klien.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Hapus
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+
+                          {/* 🔒 View - requires klien:read permission */}
+                          {permissions.klien.read && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/klien/${klien.id}`)}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Edit - requires klien:update permission */}
+                          {permissions.klien.update && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/klien/${klien.id}/edit`)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Delete - requires klien:delete permission (ADMIN only) */}
+                          {permissions.klien.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setDeleteId(klien.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Card>

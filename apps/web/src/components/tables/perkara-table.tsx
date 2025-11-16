@@ -134,109 +134,117 @@ export function PerkaraTable({ data, isLoading, error, page, limit, total }: Per
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((perkara) => (
-              <TableRow
-                key={perkara.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
-              >
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{perkara.nomor_perkara}</p>
-                    {perkara.nama_pengadilan && (
-                      <p className="text-sm text-muted-foreground">{perkara.nama_pengadilan}</p>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <p className="max-w-xs truncate">{perkara.judul}</p>
-                </TableCell>
-                <TableCell>
-                  {perkara.klien ? (
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{perkara.klien.nama}</span>
+            {data.map((perkara) => {
+              // 🎯 Check if user has ANY action permission
+              const hasAnyAction = permissions.perkara.read || permissions.perkara.update || permissions.perkara.delete;
+
+              return (
+                <TableRow
+                  key={perkara.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
+                >
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{perkara.nomor_perkara}</p>
+                      {perkara.nama_pengadilan && (
+                        <p className="text-sm text-muted-foreground">{perkara.nama_pengadilan}</p>
+                      )}
                     </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="capitalize">
-                    {perkara.jenis_perkara.replace(/_/g, " ")}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={perkara.status} />
-                </TableCell>
-                <TableCell>
-                  <PriorityBadge priority={perkara.prioritas} />
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Badge variant="secondary" title="Tugas">
-                      {perkara._count.tugas}
+                  </TableCell>
+                  <TableCell>
+                    <p className="max-w-xs truncate">{perkara.judul}</p>
+                  </TableCell>
+                  <TableCell>
+                    {perkara.klien ? (
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{perkara.klien.nama}</span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {perkara.jenis_perkara.replace(/_/g, " ")}
                     </Badge>
-                    <Badge variant="secondary" title="Dokumen">
-                      {perkara._count.dokumen}
-                    </Badge>
-                    <Badge variant="secondary" title="Sidang">
-                      {perkara._count.jadwal_sidang}
-                    </Badge>
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {formatDate(perkara.created_at)}
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-
-                      {/* 🔒 View - requires perkara:read permission */}
-                      {permissions.perkara.read && (
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-                      )}
-
-                      {/* 🔒 Edit - requires perkara:update permission */}
-                      {permissions.perkara.update && (
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dashboard/perkara/${perkara.id}/edit`)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                      )}
-
-                      {/* 🔒 Delete - requires perkara:delete permission */}
-                      {permissions.perkara.delete && (
-                        <>
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={perkara.status} />
+                  </TableCell>
+                  <TableCell>
+                    <PriorityBadge priority={perkara.prioritas} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Badge variant="secondary" title="Tugas">
+                        {perkara._count.tugas}
+                      </Badge>
+                      <Badge variant="secondary" title="Dokumen">
+                        {perkara._count.dokumen}
+                      </Badge>
+                      <Badge variant="secondary" title="Sidang">
+                        {perkara._count.jadwal_sidang}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(perkara.created_at)}
+                  </TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {/* 🎯 Only show dropdown if user has any action permission */}
+                    {hasAnyAction && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => setDeleteId(perkara.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Hapus
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+
+                          {/* 🔒 View - requires perkara:read permission */}
+                          {permissions.perkara.read && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Edit - requires perkara:update permission */}
+                          {permissions.perkara.update && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/perkara/${perkara.id}/edit`)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Delete - requires perkara:delete permission */}
+                          {permissions.perkara.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setDeleteId(perkara.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Card>

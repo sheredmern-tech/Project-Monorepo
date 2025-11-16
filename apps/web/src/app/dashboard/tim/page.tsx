@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { usePermission } from "@/lib/hooks/use-permission";
 import {
   Select,
   SelectContent,
@@ -52,7 +53,8 @@ type TabValue = "all" | "internal" | "client";
 export default function TimPage() {
   const router = useRouter();
   const { toast } = useToast();
-  
+  const permissions = usePermission();
+
   const [users, setUsers] = useState<UserEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -359,11 +361,14 @@ export default function TimPage() {
               <CheckSquare className="mr-2 h-4 w-4" />
               {bulkSelectMode ? "Batal Pilih" : "Pilih Multiple"}
             </Button>
-            
-            <Button onClick={() => router.push("/dashboard/tim/tambah")}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Tambah Anggota
-            </Button>
+
+            {/* 🔒 Only show button if user can create */}
+            {permissions.users.create && (
+              <Button onClick={() => router.push("/dashboard/tim/tambah")}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Tambah Anggota
+              </Button>
+            )}
           </div>
         }
       />

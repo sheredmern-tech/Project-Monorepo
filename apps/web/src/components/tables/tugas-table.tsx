@@ -152,10 +152,13 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
           </TableHeader>
           <TableBody>
             {data.map((tugas) => {
-              const isOverdue = tugas.tenggat_waktu && 
-                new Date(tugas.tenggat_waktu) < new Date() && 
+              const isOverdue = tugas.tenggat_waktu &&
+                new Date(tugas.tenggat_waktu) < new Date() &&
                 tugas.status !== StatusTugas.SELESAI;
               const isCompleting = completingId === tugas.id;
+
+              // 🎯 Check if user has ANY action permission
+              const hasAnyAction = permissions.tugas.read || permissions.tugas.update || permissions.tugas.delete;
 
               return (
                 <TableRow
@@ -218,65 +221,68 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
                     )}
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" disabled={isCompleting}>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                    {/* 🎯 Only show dropdown if user has any action permission */}
+                    {hasAnyAction && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" disabled={isCompleting}>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
 
-                        {/* 🔒 Mark Complete - requires tugas:update permission */}
-                        {permissions.tugas.update && tugas.status !== StatusTugas.SELESAI && (
-                          <>
+                          {/* 🔒 Mark Complete - requires tugas:update permission */}
+                          {permissions.tugas.update && tugas.status !== StatusTugas.SELESAI && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={(e) => handleMarkComplete(tugas.id, e)}
+                                disabled={isCompleting}
+                              >
+                                <CheckCircle2 className="mr-2 h-4 w-4" />
+                                {isCompleting ? "Menyimpan..." : "Tandai Selesai"}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                            </>
+                          )}
+
+                          {/* 🔒 View - requires tugas:read permission */}
+                          {permissions.tugas.read && (
                             <DropdownMenuItem
-                              onClick={(e) => handleMarkComplete(tugas.id, e)}
-                              disabled={isCompleting}
+                              onClick={() => router.push(`/dashboard/tugas/${tugas.id}`)}
                             >
-                              <CheckCircle2 className="mr-2 h-4 w-4" />
-                              {isCompleting ? "Menyimpan..." : "Tandai Selesai"}
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                          </>
-                        )}
+                          )}
 
-                        {/* 🔒 View - requires tugas:read permission */}
-                        {permissions.tugas.read && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/dashboard/tugas/${tugas.id}`)}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Lihat Detail
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* 🔒 Edit - requires tugas:update permission */}
-                        {permissions.tugas.update && (
-                          <DropdownMenuItem
-                            onClick={() => router.push(`/dashboard/tugas/${tugas.id}/edit`)}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                        )}
-
-                        {/* 🔒 Delete - requires tugas:delete permission */}
-                        {permissions.tugas.delete && (
-                          <>
-                            <DropdownMenuSeparator />
+                          {/* 🔒 Edit - requires tugas:update permission */}
+                          {permissions.tugas.update && (
                             <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => setDeleteId(tugas.id)}
+                              onClick={() => router.push(`/dashboard/tugas/${tugas.id}/edit`)}
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Hapus
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
                             </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          )}
+
+                          {/* 🔒 Delete - requires tugas:delete permission */}
+                          {permissions.tugas.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setDeleteId(tugas.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               );

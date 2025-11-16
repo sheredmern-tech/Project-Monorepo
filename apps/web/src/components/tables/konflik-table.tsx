@@ -99,116 +99,124 @@ export function KonflikTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((konflik) => (
-              <TableRow
-                key={konflik.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => router.push(`/dashboard/konflik/${konflik.id}`)}
-              >
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{konflik.nama_klien}</p>
-                    {konflik.perkara && (
-                      <p className="text-xs text-muted-foreground">
-                        {konflik.perkara.nomor_perkara}
-                      </p>
-                    )}
-                  </div>
-                </TableCell>
+            {data.map((konflik) => {
+              // 🎯 Check if user has ANY action permission
+              const hasAnyAction = permissions.konflik.read || permissions.konflik.delete;
 
-                <TableCell>
-                  <p className="text-sm">{konflik.pihak_lawan}</p>
-                </TableCell>
-
-                <TableCell>
-                  {konflik.perkara ? (
+              return (
+                <TableRow
+                  key={konflik.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => router.push(`/dashboard/konflik/${konflik.id}`)}
+                >
+                  <TableCell>
                     <div>
-                      <p className="font-medium text-sm">{konflik.perkara.nomor_perkara}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {konflik.perkara.judul}
-                      </p>
+                      <p className="font-medium">{konflik.nama_klien}</p>
+                      {konflik.perkara && (
+                        <p className="text-xs text-muted-foreground">
+                          {konflik.perkara.nomor_perkara}
+                        </p>
+                      )}
                     </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      Belum terkait perkara
-                    </span>
-                  )}
-                </TableCell>
+                  </TableCell>
 
-                <TableCell>
-                  {konflik.ada_konflik ? (
-                    <Badge variant="destructive" className="gap-1">
-                      <XCircle className="h-3 w-3" />
-                      Ada Konflik
-                    </Badge>
-                  ) : (
-                    <Badge variant="default" className="gap-1 bg-green-500">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Tidak Ada Konflik
-                    </Badge>
-                  )}
-                </TableCell>
+                  <TableCell>
+                    <p className="text-sm">{konflik.pihak_lawan}</p>
+                  </TableCell>
 
-                <TableCell>
-                  {konflik.pemeriksa ? (
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-xs font-medium">
-                          {konflik.pemeriksa.nama_lengkap?.[0] || konflik.pemeriksa.email[0]}
+                  <TableCell>
+                    {konflik.perkara ? (
+                      <div>
+                        <p className="font-medium text-sm">{konflik.perkara.nomor_perkara}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          {konflik.perkara.judul}
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        Belum terkait perkara
+                      </span>
+                    )}
+                  </TableCell>
+
+                  <TableCell>
+                    {konflik.ada_konflik ? (
+                      <Badge variant="destructive" className="gap-1">
+                        <XCircle className="h-3 w-3" />
+                        Ada Konflik
+                      </Badge>
+                    ) : (
+                      <Badge variant="default" className="gap-1 bg-green-500">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Tidak Ada Konflik
+                      </Badge>
+                    )}
+                  </TableCell>
+
+                  <TableCell>
+                    {konflik.pemeriksa ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-xs font-medium">
+                            {konflik.pemeriksa.nama_lengkap?.[0] || konflik.pemeriksa.email[0]}
+                          </span>
+                        </div>
+                        <span className="text-sm">
+                          {konflik.pemeriksa.nama_lengkap || konflik.pemeriksa.email}
                         </span>
                       </div>
-                      <span className="text-sm">
-                        {konflik.pemeriksa.nama_lengkap || konflik.pemeriksa.email}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">-</span>
-                  )}
-                </TableCell>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
 
-                <TableCell className="text-sm text-muted-foreground">
-                  {formatDate(konflik.tanggal_periksa)}
-                </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(konflik.tanggal_periksa)}
+                  </TableCell>
 
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-
-                      {/* 🔒 View - requires konflik:read permission */}
-                      {permissions.konflik.read && (
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dashboard/konflik/${konflik.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-                      )}
-
-                      {/* 🔒 Delete - requires konflik:delete permission */}
-                      {permissions.konflik.delete && (
-                        <>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    {/* 🎯 Only show dropdown if user has any action permission */}
+                    {hasAnyAction && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => setDeleteId(konflik.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Hapus
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+
+                          {/* 🔒 View - requires konflik:read permission */}
+                          {permissions.konflik.read && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/konflik/${konflik.id}`)}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              Lihat Detail
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Delete - requires konflik:delete permission */}
+                          {permissions.konflik.delete && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600"
+                                onClick={() => setDeleteId(konflik.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Card>

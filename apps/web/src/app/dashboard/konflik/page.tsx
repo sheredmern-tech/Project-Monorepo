@@ -12,9 +12,11 @@ import { KonflikTable } from "@/components/tables/konflik-table";
 import { konflikApi } from "@/lib/api/konflik.api";
 import { KonflikWithRelations } from "@/types";
 import { toast } from "sonner";
+import { usePermission } from "@/lib/hooks/use-permission";
 
 export default function KonflikPage() {
   const router = useRouter();
+  const permissions = usePermission();
   const [konflik, setKonflik] = useState<KonflikWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -24,11 +26,11 @@ export default function KonflikPage() {
   const fetchKonflik = async () => {
     try {
       setIsLoading(true);
-      const response = await konflikApi.getAll({ 
-        page, 
+      const response = await konflikApi.getAll({
+        page,
         limit,
-        sortBy: "tanggal_periksa", 
-        sortOrder: "desc" 
+        sortBy: "tanggal_periksa",
+        sortOrder: "desc"
       });
       setKonflik(response.data);
       setTotal(response.meta.total);
@@ -62,10 +64,13 @@ export default function KonflikPage() {
         title="Pemeriksaan Konflik"
         description="Kelola pemeriksaan konflik kepentingan"
         action={
-          <Button onClick={() => router.push("/dashboard/konflik/baru")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Periksa Konflik
-          </Button>
+          /* 🔒 Only show button if user can create */
+          permissions.konflik.create ? (
+            <Button onClick={() => router.push("/dashboard/konflik/baru")}>
+              <Plus className="mr-2 h-4 w-4" />
+              Periksa Konflik
+            </Button>
+          ) : undefined
         }
       />
 
