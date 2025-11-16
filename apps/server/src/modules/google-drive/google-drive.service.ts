@@ -165,22 +165,20 @@ export class GoogleDriveService {
       );
       const targetFolderId = folderId || rootFolderId;
 
-      this.logger.log(`📁 Using folder ID: ${targetFolderId}`);
-
-      if (!targetFolderId) {
-        throw new BadRequestException(
-          'No folder ID specified. Please set GOOGLE_DRIVE_ROOT_FOLDER_ID in .env file. ' +
-            'Create a folder in your Google Drive, share it with the service account, and add the folder ID.',
-        );
-      }
-
+      // Build file metadata - folder is optional (will use root if not specified)
       const fileMetadata: any = {
         name: fileName,
-        parents: [targetFolderId],
       };
 
+      if (targetFolderId) {
+        fileMetadata.parents = [targetFolderId];
+        this.logger.log(`📁 Uploading to folder ID: ${targetFolderId}`);
+      } else {
+        this.logger.log(`📁 Uploading to root folder (My Drive)`);
+      }
+
       this.logger.log(
-        `📋 File metadata: ${JSON.stringify({ name: fileName, parents: [targetFolderId], mimeType })}`,
+        `📋 File metadata: ${JSON.stringify({ name: fileName, parents: fileMetadata.parents, mimeType })}`,
       );
 
       const media = {
