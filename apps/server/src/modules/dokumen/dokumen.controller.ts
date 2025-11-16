@@ -53,6 +53,11 @@ export class DokumenController {
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser('id') userId: string,
   ) {
+    // 🔍 DEBUG: Log adalah_rahasia value and type
+    console.log('📋 adalah_rahasia received:', {
+      value: dto.adalah_rahasia,
+      type: typeof dto.adalah_rahasia,
+    });
     return this.dokumenService.create(dto, file, userId);
   }
 
