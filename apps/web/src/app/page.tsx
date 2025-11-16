@@ -16,9 +16,9 @@ import { TestimonialsSection } from '../components/landing-sections/testimonials
 import { AchievementsSection } from '../components/landing-sections/achievements-section'
 import { CTASection } from '../components/landing-sections/cta-section'
 import { ContactSection } from '../components/landing-sections/contact-section'
-import { FloatingWhatsApp } from '../components/costum-landing-ui/floating-whatsapp'
-import { ScrollProgress } from '../components/costum-landing-ui/scroll-progress'
-import { BackToTop } from '../components/costum-landing-ui/back-to-top'
+import { FloatingWhatsApp } from '../components/custom-landing-ui/floating-whatsapp'
+import { ScrollProgress } from '../components/custom-landing-ui/scroll-progress'
+import { BackToTop } from '../components/custom-landing-ui/back-to-top'
 
 export default function HomePage() {
   return (

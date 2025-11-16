@@ -223,8 +223,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "pengaturan:read",
   ],
 
-  // NOTE: KLIEN role removed - this is an INTERNAL admin system
-  // KLIEN users should not have access to the web admin dashboard
+  // KLIEN: No access to web admin (internal system only)
+  // KLIEN users are blocked at middleware level
+  [UserRole.KLIEN]: [],
 };
 
 // ============================================================================
