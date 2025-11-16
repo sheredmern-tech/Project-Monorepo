@@ -1,6 +1,6 @@
 
 // ============================================================================
-// FILE 1: components/tables/perkara-table.tsx - REFACTORED ✅
+// FILE 1: components/tables/perkara-table.tsx - WITH RBAC PROTECTION
 // ============================================================================
 "use client";
 
@@ -35,6 +35,7 @@ import { PriorityBadge } from "@/components/shared/priority-badge";
 import { TablePagination } from "@/components/tables/table-pagination";
 import { PerkaraWithKlien } from "@/types";
 import { usePerkara } from "@/lib/hooks/use-perkara";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { formatDate } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { toast } from "sonner";
@@ -53,6 +54,9 @@ export function PerkaraTable({ data, isLoading, error, page, limit, total }: Per
   const { deletePerkara, setPage, fetchPerkara } = usePerkara();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // 🔒 RBAC: Get user permissions
+  const permissions = usePermission();
 
   // ✅ Enhanced delete with error handling
   const handleDelete = async () => {
@@ -194,26 +198,40 @@ export function PerkaraTable({ data, isLoading, error, page, limit, total }: Per
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => router.push(`/perkara/${perkara.id}`)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Lihat Detail
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => router.push(`/perkara/${perkara.id}/edit`)}
-                      >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => setDeleteId(perkara.id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Hapus
-                      </DropdownMenuItem>
+
+                      {/* 🔒 View - requires perkara:read permission */}
+                      {permissions.perkara.read && (
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/perkara/${perkara.id}`)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Lihat Detail
+                        </DropdownMenuItem>
+                      )}
+
+                      {/* 🔒 Edit - requires perkara:update permission */}
+                      {permissions.perkara.update && (
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/perkara/${perkara.id}/edit`)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+
+                      {/* 🔒 Delete - requires perkara:delete permission */}
+                      {permissions.perkara.delete && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => setDeleteId(perkara.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Hapus
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

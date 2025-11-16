@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE: components/tables/konflik-table.tsx
+// FILE: components/tables/konflik-table.tsx - WITH RBAC PROTECTION
 // ============================================================================
 "use client";
 
@@ -30,6 +30,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { TablePagination } from "@/components/tables/table-pagination";
 import { KonflikWithRelations } from "@/types";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { formatDate } from "@/lib/utils/format";
 
 interface KonflikTableProps {
@@ -53,6 +54,9 @@ export function KonflikTable({
 }: KonflikTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // 🔒 RBAC: Get user permissions
+  const permissions = usePermission();
 
   const handleDelete = async () => {
     if (deleteId) {
@@ -176,19 +180,27 @@ export function KonflikTable({
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => router.push(`/konflik/${konflik.id}`)}
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Lihat Detail
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => setDeleteId(konflik.id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Hapus
+
+                      {/* 🔒 View - requires konflik:read permission */}
+                      {permissions.konflik.read && (
+                        <DropdownMenuItem
+                          onClick={() => router.push(`/konflik/${konflik.id}`)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Lihat Detail
+                        </DropdownMenuItem>
+                      )}
+
+                      {/* 🔒 Delete - requires konflik:delete permission */}
+                      {permissions.konflik.delete && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => setDeleteId(konflik.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Hapus
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

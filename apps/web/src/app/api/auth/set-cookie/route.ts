@@ -24,11 +24,11 @@ export async function POST(request: NextRequest) {
       message: 'Cookies set successfully' 
     });
 
-    // ✅ Set access_token cookie
+    // ✅ Set access_token cookie (httpOnly=true for XSS protection)
     response.cookies.set({
       name: 'access_token',
       value: token,
-      httpOnly: false,
+      httpOnly: true, // 🔒 SECURITY: Prevent JavaScript access (XSS protection)
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       response.cookies.set({
         name: 'user_role',
         value: role,
-        httpOnly: false,
+        httpOnly: true, // 🔒 SECURITY: Prevent JavaScript access (XSS protection)
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7, // 7 days

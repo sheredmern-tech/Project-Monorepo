@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE 1: components/tables/dokumen-table.tsx
+// FILE 1: components/tables/dokumen-table.tsx - WITH RBAC PROTECTION
 // ============================================================================
 "use client";
 
@@ -32,6 +32,7 @@ import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { TablePagination } from "@/components/tables/table-pagination";
 import { DokumenWithRelations } from "@/types";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { formatDate, formatFileSize } from "@/lib/utils/format";
 import { getFileIcon, getFileExtension } from "@/lib/utils/file";
 import { handleApiError } from "@/lib/utils/error-handler";
@@ -52,6 +53,9 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  // 🔒 RBAC: Get user permissions
+  const permissions = usePermission();
 
   // ✅ Enhanced delete with error handling
   const handleDelete = async () => {
@@ -208,33 +212,51 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dokumen/${dokumen.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => handleDownload(dokumen.id, dokumen.nama_dokumen, e)}
-                          disabled={isDownloading}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          {isDownloading ? "Downloading..." : "Download"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/dokumen/${dokumen.id}/edit`)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => setDeleteId(dokumen.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Hapus
-                        </DropdownMenuItem>
+
+                        {/* 🔒 View - requires dokumen:read permission */}
+                        {permissions.dokumen.read && (
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/dokumen/${dokumen.id}`)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 🔒 Download - requires dokumen:download permission */}
+                        {permissions.dokumen.download && (
+                          <DropdownMenuItem
+                            onClick={(e) => handleDownload(dokumen.id, dokumen.nama_dokumen, e)}
+                            disabled={isDownloading}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            {isDownloading ? "Downloading..." : "Download"}
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 🔒 Edit - requires dokumen:update permission */}
+                        {permissions.dokumen.update && (
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/dokumen/${dokumen.id}/edit`)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 🔒 Delete - requires dokumen:delete permission */}
+                        {permissions.dokumen.delete && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => setDeleteId(dokumen.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Hapus
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

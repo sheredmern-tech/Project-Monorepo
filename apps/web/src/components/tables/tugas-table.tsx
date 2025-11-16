@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE 2: components/tables/tugas-table.tsx - REFACTORED ✅
+// FILE 2: components/tables/tugas-table.tsx - WITH RBAC PROTECTION
 // ============================================================================
 "use client";
 
@@ -35,6 +35,7 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { TablePagination } from "@/components/tables/table-pagination";
 import { TugasWithRelations, StatusTugas } from "@/types";
 import { useTugas } from "@/lib/hooks/use-tugas";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { formatDate, formatRelativeTime } from "@/lib/utils/format";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { toast } from "sonner";
@@ -54,6 +55,9 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [completingId, setCompletingId] = useState<string | null>(null);
+
+  // 🔒 RBAC: Get user permissions
+  const permissions = usePermission();
 
   // ✅ Enhanced mark complete with optimistic update
   const handleMarkComplete = async (id: string, e: React.MouseEvent) => {
@@ -223,9 +227,11 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {tugas.status !== StatusTugas.SELESAI && (
+
+                        {/* 🔒 Mark Complete - requires tugas:update permission */}
+                        {permissions.tugas.update && tugas.status !== StatusTugas.SELESAI && (
                           <>
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={(e) => handleMarkComplete(tugas.id, e)}
                               disabled={isCompleting}
                             >
@@ -235,26 +241,40 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
                             <DropdownMenuSeparator />
                           </>
                         )}
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/tugas/${tugas.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/tugas/${tugas.id}/edit`)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => setDeleteId(tugas.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Hapus
-                        </DropdownMenuItem>
+
+                        {/* 🔒 View - requires tugas:read permission */}
+                        {permissions.tugas.read && (
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/tugas/${tugas.id}`)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 🔒 Edit - requires tugas:update permission */}
+                        {permissions.tugas.update && (
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/tugas/${tugas.id}/edit`)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 🔒 Delete - requires tugas:delete permission */}
+                        {permissions.tugas.delete && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => setDeleteId(tugas.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Hapus
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

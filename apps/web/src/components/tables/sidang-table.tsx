@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE 2: components/tables/sidang-table.tsx - REFACTORED ✅ COMPLETE
+// FILE 2: components/tables/sidang-table.tsx - WITH RBAC PROTECTION
 // ============================================================================
 "use client";
 
@@ -32,6 +32,7 @@ import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { TablePagination } from "@/components/tables/table-pagination";
 import { JadwalSidangWithRelations } from "@/types";
 import { useSidang } from "@/lib/hooks/use-sidang";
+import { usePermission } from "@/lib/hooks/use-permission";
 import { formatDate, formatTime, isToday, isFuture } from "@/lib/utils/date";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { toast } from "sonner";
@@ -57,6 +58,9 @@ export function SidangTable({
 }: SidangTableProps) {
   const router = useRouter();
   const { deleteSidang, fetchSidang } = useSidang();
+
+  // 🔒 RBAC: Get user permissions
+  const permissions = usePermission();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -227,26 +231,40 @@ export function SidangTable({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/sidang/${sidang.id}`)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Lihat Detail
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => router.push(`/sidang/${sidang.id}/edit`)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => setDeleteId(sidang.id)}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Hapus
-                        </DropdownMenuItem>
+
+                        {/* 🔒 View - requires sidang:read permission */}
+                        {permissions.sidang.read && (
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/sidang/${sidang.id}`)}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 🔒 Edit - requires sidang:update permission */}
+                        {permissions.sidang.update && (
+                          <DropdownMenuItem
+                            onClick={() => router.push(`/sidang/${sidang.id}/edit`)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 🔒 Delete - requires sidang:delete permission */}
+                        {permissions.sidang.delete && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => setDeleteId(sidang.id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Hapus
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
