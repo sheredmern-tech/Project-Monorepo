@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChevronUp, List, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { navigationItems } from '@/lib/constant/navigation-items'
+import { navigationItems } from '@/lib/data/navigation-items'
 import { useScrollSpy } from '@/lib/hooks/use-scroll-spy'
 import { scrollToSection, scrollToTop } from '@/lib/utils/scroll-utils'
 

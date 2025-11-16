@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowRight } from 'lucide-react'
-import { teamData, teamCategories } from '@/lib/constant/team-data'
+import { teamData, teamCategories } from '@/lib/data/team-data'
 import { TeamCard } from '@/components/landing-cards/team-card'
-import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/custom-landing-ui/section-heading'
 
 export function TeamSection() {
   const [activeCategory, setActiveCategory] = useState('all')

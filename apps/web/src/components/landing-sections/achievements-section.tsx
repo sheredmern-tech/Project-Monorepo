@@ -4,9 +4,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { achievementsData } from '@/lib/constant/achievements-data'
+import { achievementsData } from '@/lib/data/achievements-data'
 import { AchievementBadge } from '@/components/landing-cards/achievement-badge'
-import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/custom-landing-ui/section-heading'
 
 export function AchievementsSection() {
   return (

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Phone, Mail, MessageCircle } from 'lucide-react'
 import { scrollToSection } from '@/lib/utils/scroll-utils'
-import { siteConfig } from '@/lib/constant/site-config'
+import { siteConfig } from '@/lib/data/site-config'
 
 export function CTASection() {
   return (

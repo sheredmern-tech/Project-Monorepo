@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react'
-import { siteConfig } from '@/lib/constant/site-config'
-import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
+import { siteConfig } from '@/lib/data/site-config'
+import { SectionHeading } from '@/components/custom-landing-ui/section-heading'
 
 export function ContactSection() {
   const [formData, setFormData] = useState({

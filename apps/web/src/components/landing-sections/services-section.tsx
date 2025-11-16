@@ -10,10 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArrowRight } from 'lucide-react'
-import { servicesData, serviceCategories } from '@/lib/constant/services-data'
+import { servicesData, serviceCategories } from '@/lib/data/services-data'
 import { ServiceCard } from '@/components/landing-cards/service-card'
 import { CTACard } from '@/components/landing-cards/cta-card'
-import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/custom-landing-ui/section-heading'
 import { scrollToSection } from '@/lib/utils/scroll-utils'
 
 export function ServicesSection() {

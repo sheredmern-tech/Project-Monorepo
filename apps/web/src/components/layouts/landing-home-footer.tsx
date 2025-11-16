@@ -8,8 +8,8 @@ import { Scale, Facebook, Instagram, Linkedin, Twitter, Mail, Phone, MapPin } fr
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { WaveDivider } from '@/components/costum-landing-ui/wave-divider'
-import { siteConfig } from '@/lib/constant/site-config'
+import { WaveDivider } from '@/components/custom-landing-ui/wave-divider'
+import { siteConfig } from '@/lib/data/site-config'
 import { scrollToSection } from '@/lib/utils/scroll-utils'
 
 const quickLinks = [

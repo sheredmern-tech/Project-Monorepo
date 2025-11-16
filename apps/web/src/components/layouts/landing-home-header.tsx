@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Scale, LogIn, UserPlus, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNavbarScroll } from '@/lib/hooks/use-navbar-scroll'
-import { ThemeToggle } from '@/components/costum-landing-ui/theme-toggle'
+import { ThemeToggle } from '@/components/custom-landing-ui/theme-toggle'
 import { DesktopNav } from './landing-desktop-nav'
 import { MobileNav } from './landing-mobile-nav'
 

@@ -99,34 +99,14 @@ export function proxy(request: NextRequest) {
   }
   
   // ========================================
-  // 6. KLIEN ROLE - RESTRICTED DASHBOARD ACCESS
+  // 6. KLIEN ROLE - BLOCKED FROM WEB ADMIN
   // ========================================
+  // This is an INTERNAL admin dashboard - KLIEN should not have access
   if (userRole === UserRole.KLIEN) {
-    console.log('🔐 KLIEN user detected, checking allowed paths');
-
-    // KLIEN dapat akses ke routes berikut:
-    const klienAllowedPaths = [
-      '/dashboard/klien/profile',        // Own profile
-      '/dashboard/perkara',              // View own cases
-      '/dashboard/dokumen',              // View own documents
-      '/dashboard/sidang',               // View own hearings
-      '/dashboard/tugas',                // View own tasks
-      '/dashboard',                      // Dashboard home (will show filtered view)
-    ];
-
-    const isAllowedForKlien = klienAllowedPaths.some(path =>
-      pathname.startsWith(path)
-    );
-
-    if (!isAllowedForKlien) {
-      console.log('🚫 KLIEN trying to access forbidden path:', pathname);
-      const url = request.nextUrl.clone();
-      url.pathname = "/403";
-      return NextResponse.redirect(url);
-    }
-
-    console.log('✅ KLIEN access granted to:', pathname);
-    return NextResponse.next();
+    console.log('🚫 KLIEN cannot access admin dashboard - this is for internal staff only');
+    const url = request.nextUrl.clone();
+    url.pathname = "/403";
+    return NextResponse.redirect(url);
   }
 
   console.log('✅ Access granted for:', userRole);

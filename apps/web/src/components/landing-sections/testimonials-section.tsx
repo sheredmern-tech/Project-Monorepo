@@ -8,9 +8,9 @@ import { useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { testimonialsData } from '@/lib/constant/testimonials-data'
+import { testimonialsData } from '@/lib/data/testimonials-data'
 import { TestimonialCard } from '@/components/landing-cards/testimonial-card'
-import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/custom-landing-ui/section-heading'
 
 export function TestimonialsSection() {
   const [emblaRef, emblaApi] = useEmblaCarousel({

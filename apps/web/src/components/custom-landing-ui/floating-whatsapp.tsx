@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { MessageCircle, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatWhatsAppLink } from '@/lib/utils/format-helpers'
-import { siteConfig } from '@/lib/constant/site-config'
+import { siteConfig } from '@/lib/data/site-config'
 
 export function FloatingWhatsApp() {
   const [isOpen, setIsOpen] = useState(false)

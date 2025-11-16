@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Target, Compass, Lightbulb, Heart, Users2, Trophy } from 'lucide-react'
-import { SectionHeading } from '@/components/costum-landing-ui/section-heading'
+import { SectionHeading } from '@/components/custom-landing-ui/section-heading'
 
 const visiItems = [
   { icon: Lightbulb, text: 'Menjadi firma hukum terdepan yang dikenal karena integritas dan profesionalisme' },

@@ -223,21 +223,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "pengaturan:read",
   ],
 
-  // KLIEN (Client): Own profile and cases only (read-only)
-  [UserRole.KLIEN]: [
-    // Can only see own profile
-    "klien:read",
-    "klien:update", // Own profile only
-    // Can see own cases
-    "perkara:read",
-    // Can see documents in their cases
-    "dokumen:read",
-    "dokumen:download",
-    // Can see hearings for their cases
-    "sidang:read",
-    // Can see tasks related to their cases
-    "tugas:read",
-  ],
+  // NOTE: KLIEN role removed - this is an INTERNAL admin system
+  // KLIEN users should not have access to the web admin dashboard
 };
 
 // ============================================================================

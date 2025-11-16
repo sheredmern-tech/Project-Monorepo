@@ -15,7 +15,7 @@ import {
 import { Scale, Home, Target, Users, Briefcase, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { scrollToSection } from '@/lib/utils/scroll-utils'
-import { servicesData } from '@/lib/constant/services-data'
+import { servicesData } from '@/lib/data/services-data'
 
 interface DesktopNavProps {
   isScrolled: boolean

@@ -99,36 +99,8 @@ const ALL_NAVIGATION: NavItem[] = [
  * This replaces the static ROLE_NAVIGATION mapping
  */
 export function getNavigationForRole(userRole: UserRole): NavItem[] {
-  // KLIEN gets limited navigation - only what they need
-  if (userRole === UserRole.KLIEN) {
-    return [
-      {
-        title: "Dashboard",
-        href: "/dashboard",
-        icon: LayoutDashboard
-      },
-      {
-        title: "Profil Saya",
-        href: "/dashboard/klien/profile",
-        icon: Users
-      },
-      {
-        title: "Perkara Saya",
-        href: "/dashboard/perkara",
-        icon: Briefcase
-      },
-      {
-        title: "Dokumen",
-        href: "/dashboard/dokumen",
-        icon: FileText
-      },
-      {
-        title: "Jadwal Sidang",
-        href: "/dashboard/sidang",
-        icon: Calendar
-      },
-    ];
-  }
+  // NOTE: KLIEN role removed - this is an INTERNAL admin system only
+  // KLIEN users cannot access the web admin dashboard
 
   // Filter navigation based on resource access permissions
   return ALL_NAVIGATION.filter((item) => {
@@ -151,7 +123,7 @@ export const ROLE_NAVIGATION: Record<UserRole, NavItem[]> = {
   [UserRole.ADVOKAT]: getNavigationForRole(UserRole.ADVOKAT),
   [UserRole.PARALEGAL]: getNavigationForRole(UserRole.PARALEGAL),
   [UserRole.STAFF]: getNavigationForRole(UserRole.STAFF),
-  [UserRole.KLIEN]: getNavigationForRole(UserRole.KLIEN), // ✅ KLIEN gets limited menu
+  [UserRole.KLIEN]: [], // KLIEN cannot access admin dashboard
 };
 
 // ============================================================================
@@ -175,10 +147,9 @@ export function getDefaultRedirect(userRole: UserRole): string {
  * This is a simplified version - detailed checks should use permission system
  */
 export function canAccessRoute(userRole: UserRole, pathname: string): boolean {
-  // KLIEN can only access their profile
+  // KLIEN cannot access any admin routes
   if (userRole === UserRole.KLIEN) {
-    return pathname.startsWith('/dashboard/klien/profile') ||
-           pathname.startsWith('/dashboard/perkara'); // Can see own cases
+    return false;
   }
 
   // For other roles, check navigation items

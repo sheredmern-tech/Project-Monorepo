@@ -4,7 +4,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { statsData } from '@/lib/constant/stats-data'
+import { statsData } from '@/lib/data/stats-data'
 import { StatCard } from '@/components/landing-cards/stat-card'
 import * as LucideIcons from 'lucide-react'
 

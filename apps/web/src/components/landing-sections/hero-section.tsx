@@ -8,15 +8,15 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Scale, ArrowRight, CheckCircle2 } from 'lucide-react'
-import { heroContent, heroImageSizes } from '@/lib/constant/hero-content'
+import { heroContent, heroImageSizes } from '@/lib/data/hero-content'
 import { scrollToSection } from '@/lib/utils/scroll-utils'
-import { OptimizedImage } from '@/components/costum-landing-ui/optimized-image'
+import { OptimizedImage } from '@/components/custom-landing-ui/optimized-image'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 // Lazy load heavy components
 const ParticleBackground = dynamic(
-  () => import('@/components/costum-landing-ui/particle-background').then(mod => ({
+  () => import('@/components/custom-landing-ui/particle-background').then(mod => ({
     default: mod.ParticleBackground
   })),
   {
@@ -26,7 +26,7 @@ const ParticleBackground = dynamic(
 )
 
 const StaggeredText = dynamic(
-  () => import('@/components/costum-landing-ui/animated-text').then(mod => ({
+  () => import('@/components/custom-landing-ui/animated-text').then(mod => ({
     default: mod.StaggeredText
   })),
   {
