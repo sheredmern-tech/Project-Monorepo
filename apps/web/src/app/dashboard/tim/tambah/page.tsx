@@ -139,7 +139,7 @@ export default function TambahUserPage() {
       }
 
       toast.success("User berhasil ditambahkan");
-      router.push("/tim");
+      router.push("/dashboard/tim");
     } catch (error) {
       console.error("Failed to add user:", error);
       toast.error(

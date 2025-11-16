@@ -131,7 +131,7 @@ export default function TimDetailPage() {
         title: "Berhasil",
         description: "User berhasil dihapus",
       });
-      router.push("/tim");
+      router.push("/dashboard/tim");
     } catch (err) {
       toast({
         title: "Gagal",

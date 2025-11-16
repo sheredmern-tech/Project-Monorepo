@@ -72,7 +72,7 @@ export default function PerkaraDetailPage() {
           if (perkaraData.klien_id !== profile.id) {
             console.log('🚫 Client trying to access unauthorized perkara');
             toast.error('Anda tidak memiliki akses ke perkara ini');
-            router.push('/perkara');
+            router.push('/dashboard/perkara');
             return;
           }
           
@@ -100,7 +100,7 @@ export default function PerkaraDetailPage() {
       } catch (err) {
         console.error("Failed to load perkara:", err);
         toast.error("Gagal memuat data perkara");
-        router.push("/perkara");
+        router.push("/dashboard/perkara");
       } finally {
         setIsLoading(false);
       }
@@ -113,7 +113,7 @@ export default function PerkaraDetailPage() {
     try {
       await perkaraApi.delete(params.id as string);
       toast.success("Perkara berhasil dihapus");
-      router.push("/perkara");
+      router.push("/dashboard/perkara");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Gagal menghapus perkara";
       toast.error(errorMessage);
@@ -227,7 +227,7 @@ export default function PerkaraDetailPage() {
             !isClient && (
               <div className="flex gap-2">
                 {canEdit && (
-                  <Button variant="outline" onClick={() => router.push(`/perkara/${params.id}/edit`)}>
+                  <Button variant="outline" onClick={() => router.push(`/dashboard/perkara/${params.id}/edit`)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
@@ -378,7 +378,7 @@ export default function PerkaraDetailPage() {
                     <div
                       key={tugas.id}
                       className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-accent"
-                      onClick={() => router.push(`/tugas/${tugas.id}`)}
+                      onClick={() => router.push(`/dashboard/tugas/${tugas.id}`)}
                     >
                       <div className="flex-1">
                         <p className="font-medium">{tugas.judul}</p>
@@ -424,7 +424,7 @@ export default function PerkaraDetailPage() {
                     <div
                       key={doc.id}
                       className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent"
-                      onClick={() => router.push(`/dokumen/${doc.id}`)}
+                      onClick={() => router.push(`/dashboard/dokumen/${doc.id}`)}
                     >
                       <FileText className="h-8 w-8 text-muted-foreground" />
                       <div className="flex-1">
@@ -465,7 +465,7 @@ export default function PerkaraDetailPage() {
                     <div
                       key={sidang.id}
                       className="p-4 border rounded-lg cursor-pointer hover:bg-accent"
-                      onClick={() => router.push(`/sidang/${sidang.id}`)}
+                      onClick={() => router.push(`/dashboard/sidang/${sidang.id}`)}
                     >
                       <div className="flex items-start justify-between">
                         <div>

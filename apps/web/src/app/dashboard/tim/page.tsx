@@ -360,7 +360,7 @@ export default function TimPage() {
               {bulkSelectMode ? "Batal Pilih" : "Pilih Multiple"}
             </Button>
             
-            <Button onClick={() => router.push("/tim/tambah")}>
+            <Button onClick={() => router.push("/dashboard/tim/tambah")}>
               <UserPlus className="mr-2 h-4 w-4" />
               Tambah Anggota
             </Button>
@@ -551,7 +551,7 @@ export default function TimPage() {
                     user={user}
                     onClick={() => {
                       if (!bulkSelectMode) {
-                        router.push(`/tim/${user.id}`);
+                        router.push(`/dashboard/tim/${user.id}`);
                       }
                     }}
                     onSelect={(checked) => handleToggleUser(user.id, checked)}

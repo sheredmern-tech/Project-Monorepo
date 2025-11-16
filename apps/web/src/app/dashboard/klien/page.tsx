@@ -61,7 +61,7 @@ export default function KlienPage() {
         title="Klien"
         description="Kelola data klien firma hukum"
         action={
-          <Button onClick={() => router.push("/klien/baru")}>
+          <Button onClick={() => router.push("/dashboard/klien/baru")}>
             <Plus className="mr-2 h-4 w-4" />
             Tambah Klien
           </Button>

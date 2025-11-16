@@ -63,7 +63,7 @@ export function TaskList() {
               <div
                 key={task.id}
                 className="p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                onClick={() => router.push(`/tugas/${task.id}`)}
+                onClick={() => router.push(`/dashboard/tugas/${task.id}`)}
               >
                 <p className="font-medium text-sm">{task.judul}</p>
                 <div className="flex items-center gap-2 mt-1">

@@ -55,7 +55,7 @@ export default function KlienDetailPage() {
             setKlien(data);
           } else {
             toast.error("Data klien tidak valid");
-            setTimeout(() => router.push("/klien"), 1500);
+            setTimeout(() => router.push("/dashboard/klien"), 1500);
           }
         }
       } catch (error) {
@@ -63,7 +63,7 @@ export default function KlienDetailPage() {
         
         if (isMounted) {
           toast.error("Gagal memuat detail klien");
-          setTimeout(() => router.push("/klien"), 2000);
+          setTimeout(() => router.push("/dashboard/klien"), 2000);
         }
       } finally {
         if (isMounted) {
@@ -86,7 +86,7 @@ export default function KlienDetailPage() {
       setIsDeleting(true);
       await klienApi.delete(params.id as string);
       toast.success("Klien berhasil dihapus");
-      router.push("/klien");
+      router.push("/dashboard/klien");
     } catch (error) {
       console.error("Error deleting klien:", error);
       toast.error("Gagal menghapus klien");
@@ -113,7 +113,7 @@ export default function KlienDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <p className="text-muted-foreground">Data klien tidak ditemukan</p>
-        <Button onClick={() => router.push("/klien")}>
+        <Button onClick={() => router.push("/dashboard/klien")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali ke Daftar Klien
         </Button>
@@ -140,7 +140,7 @@ export default function KlienDetailPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => router.push(`/klien/${params.id}/edit`)}
+                onClick={() => router.push(`/dashboard/klien/${params.id}/edit`)}
               >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
@@ -286,7 +286,7 @@ export default function KlienDetailPage() {
                     <div
                       key={perkara.id}
                       className="cursor-pointer rounded-lg border p-3 hover:bg-accent"
-                      onClick={() => router.push(`/perkara/${perkara.id}`)}
+                      onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
                     >
                       <p className="font-medium text-sm">{perkara.nomor_perkara}</p>
                       <p className="text-sm text-muted-foreground line-clamp-1">

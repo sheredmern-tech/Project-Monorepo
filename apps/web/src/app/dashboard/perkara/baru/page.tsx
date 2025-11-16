@@ -16,7 +16,7 @@ export default function PerkaraBaruPage() {
   const handleSubmit = async (data: CreatePerkaraDto) => {
     try {
       await createPerkara(data);
-      router.push("/perkara");
+      router.push("/dashboard/perkara");
     } catch {
       // Error handled by hook
     }
@@ -27,7 +27,7 @@ export default function PerkaraBaruPage() {
       <PageHeader title="Tambah Perkara Baru" description="Lengkapi form untuk menambahkan perkara baru" />
 
       <div className="max-w-4xl">
-        <PerkaraForm onSubmit={handleSubmit} isLoading={isLoading} onCancel={() => router.push("/perkara")} />
+        <PerkaraForm onSubmit={handleSubmit} isLoading={isLoading} onCancel={() => router.push("/dashboard/perkara")} />
       </div>
     </div>
   );

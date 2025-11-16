@@ -32,7 +32,7 @@ export default function TugasEditPage() {
   const handleSubmit = async (data: UpdateTugasDto) => {
     try {
       await updateTugas(params.id as string, data);
-      router.push(`/tugas/${params.id}`);
+      router.push(`/dashboard/tugas/${params.id}`);
     } catch {
       // Error handled by hook
     }
@@ -59,7 +59,7 @@ export default function TugasEditPage() {
           initialData={tugas}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push(`/tugas/${params.id}`)}
+          onCancel={() => router.push(`/dashboard/tugas/${params.id}`)}
           mode="edit"
         />
       </div>

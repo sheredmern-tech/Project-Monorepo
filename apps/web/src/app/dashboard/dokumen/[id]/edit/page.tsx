@@ -32,7 +32,7 @@ export default function DokumenEditPage() {
   const handleSubmit = async (data: UpdateDokumenDto) => {
     try {
       await updateDokumen(params.id as string, data);
-      router.push(`/dokumen/${params.id}`);
+      router.push(`/dashboard/dokumen/${params.id}`);
     } catch {
       // Error handled by hook
     }
@@ -59,7 +59,7 @@ export default function DokumenEditPage() {
           initialData={dokumen}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push(`/dokumen/${params.id}`)}
+          onCancel={() => router.push(`/dashboard/dokumen/${params.id}`)}
         />
       </div>
     </div>

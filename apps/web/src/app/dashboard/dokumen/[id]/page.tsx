@@ -60,7 +60,7 @@ export default function DokumenDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteDokumen(params.id as string);
-      router.push("/dokumen");
+      router.push("/dashboard/dokumen");
     } catch {
       // Error handled by hook
     }
@@ -101,7 +101,7 @@ export default function DokumenDetailPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
-              <Button variant="outline" onClick={() => router.push(`/dokumen/${params.id}/edit`)}>
+              <Button variant="outline" onClick={() => router.push(`/dashboard/dokumen/${params.id}/edit`)}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Button>
@@ -147,7 +147,7 @@ export default function DokumenDetailPage() {
               <p className="text-sm text-muted-foreground mb-2">Perkara</p>
               <div
                 className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent"
-                onClick={() => router.push(`/perkara/${dokumen.perkara.id}`)}
+                onClick={() => router.push(`/dashboard/perkara/${dokumen.perkara.id}`)}
               >
                 <div className="flex-1">
                   <p className="font-medium">{dokumen.perkara.nomor_perkara}</p>

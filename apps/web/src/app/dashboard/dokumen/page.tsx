@@ -45,7 +45,7 @@ export default function DokumenPage() {
         title="Dokumen"
         description="Kelola semua dokumen hukum"
         action={
-          <Button onClick={() => router.push("/dokumen/upload")}>
+          <Button onClick={() => router.push("/dashboard/dokumen/upload")}>
             <Upload className="mr-2 h-4 w-4" />
             Upload Dokumen
           </Button>

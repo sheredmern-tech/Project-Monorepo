@@ -45,7 +45,7 @@ export default function KlienEditPage() {
 
     try {
       await updateKlien(params.id as string, data);
-      router.push(`/klien/${params.id}`);
+      router.push(`/dashboard/klien/${params.id}`);
     } catch (error) {
       // Error handled by hook
       console.error("Failed to update klien:", error);
@@ -62,7 +62,7 @@ export default function KlienEditPage() {
         <p className="text-muted-foreground">Data klien tidak ditemukan</p>
         <Button
           variant="outline"
-          onClick={() => router.push("/klien")}
+          onClick={() => router.push("/dashboard/klien")}
           className="mt-4"
         >
           Kembali ke Daftar Klien
@@ -92,7 +92,7 @@ export default function KlienEditPage() {
           initialData={klien}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push(`/klien/${params.id}`)}
+          onCancel={() => router.push(`/dashboard/klien/${params.id}`)}
           mode="edit"
         />
       </div>

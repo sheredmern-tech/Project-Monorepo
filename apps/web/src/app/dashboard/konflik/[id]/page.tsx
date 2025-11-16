@@ -169,7 +169,7 @@ export default function KonflikDetailPage() {
                     <Button
                       variant="link"
                       className="h-auto p-0 font-medium"
-                      onClick={() => router.push(`/perkara/${konflik.perkara_id}`)}
+                      onClick={() => router.push(`/dashboard/perkara/${konflik.perkara_id}`)}
                     >
                       {konflik.perkara.nomor_perkara}
                     </Button>
@@ -248,14 +248,14 @@ export default function KonflikDetailPage() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => router.push(`/konflik/${konflik.id}/edit`)}
+                onClick={() => router.push(`/dashboard/konflik/${konflik.id}/edit`)}
               >
                 Edit Pemeriksaan
               </Button>
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => router.push("/konflik")}
+                onClick={() => router.push("/dashboard/konflik")}
               >
                 Lihat Semua Konflik
               </Button>

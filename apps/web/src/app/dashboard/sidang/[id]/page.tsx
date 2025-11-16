@@ -37,7 +37,7 @@ export default function SidangDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteSidang(params.id as string);
-      router.push("/sidang");
+      router.push("/dashboard/sidang");
     } catch {
       // Error handled by hook
     }
@@ -62,7 +62,7 @@ export default function SidangDetailPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => router.push(`/sidang/${params.id}/edit`)}
+                onClick={() => router.push(`/dashboard/sidang/${params.id}/edit`)}
               >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
@@ -94,7 +94,7 @@ export default function SidangDetailPage() {
               <p className="text-sm text-muted-foreground mb-2">Perkara</p>
               <div
                 className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent"
-                onClick={() => router.push(`/perkara/${sidang.perkara.id}`)}
+                onClick={() => router.push(`/dashboard/perkara/${sidang.perkara.id}`)}
               >
                 <div className="flex-1">
                   <p className="font-medium">{sidang.perkara.nomor_perkara}</p>

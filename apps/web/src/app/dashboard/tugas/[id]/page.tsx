@@ -49,7 +49,7 @@ export default function TugasDetailPage() {
   const handleDelete = async () => {
     try {
       await deleteTugas(params.id as string);
-      router.push("/tugas");
+      router.push("/dashboard/tugas");
     } catch {
       // Error handled by hook
     }
@@ -93,7 +93,7 @@ export default function TugasDetailPage() {
                   Tandai Selesai
                 </Button>
               )}
-              <Button variant="outline" onClick={() => router.push(`/tugas/${params.id}/edit`)}>
+              <Button variant="outline" onClick={() => router.push(`/dashboard/tugas/${params.id}/edit`)}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Button>
@@ -130,7 +130,7 @@ export default function TugasDetailPage() {
               <p className="text-sm text-muted-foreground mb-2">Perkara</p>
               <div
                 className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent"
-                onClick={() => router.push(`/perkara/${tugas.perkara.id}`)}
+                onClick={() => router.push(`/dashboard/perkara/${tugas.perkara.id}`)}
               >
                 <div className="flex-1">
                   <p className="font-medium">{tugas.perkara.nomor_perkara}</p>

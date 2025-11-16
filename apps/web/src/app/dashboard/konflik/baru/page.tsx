@@ -16,7 +16,7 @@ export default function KonflikBaruPage() {
   const handleSubmit = async (data: CreateKonflikDto) => {
     try {
       await createKonflik(data);
-      router.push("/konflik");
+      router.push("/dashboard/konflik");
     } catch (error) {
       // Error sudah di-handle di hook
       console.error('Submit error:', error);
@@ -34,7 +34,7 @@ export default function KonflikBaruPage() {
         <KonflikForm
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push("/konflik")}
+          onCancel={() => router.push("/dashboard/konflik")}
         />
       </div>
     </div>

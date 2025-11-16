@@ -21,7 +21,7 @@ export function PerkaraCard({ perkara }: PerkaraCardProps) {
   const router = useRouter();
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => router.push(`/perkara/${perkara.id}`)}>
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -30,7 +30,7 @@ export function PerkaraCard({ perkara }: PerkaraCardProps) {
           </div>
           <Button variant="ghost" size="icon" onClick={(e) => {
             e.stopPropagation();
-            router.push(`/perkara/${perkara.id}`);
+            router.push(`/dashboard/perkara/${perkara.id}`);
           }}>
             <Eye className="h-4 w-4" />
           </Button>

@@ -69,7 +69,7 @@ export function UpcomingSidangCard() {
                 <div
                   key={item.id}
                   className="p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors"
-                  onClick={() => router.push(`/sidang/${item.id}`)}
+                  onClick={() => router.push(`/dashboard/sidang/${item.id}`)}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">

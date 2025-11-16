@@ -62,7 +62,7 @@ export default function KonflikEditPage() {
       
       toast.success("Pemeriksaan konflik berhasil diperbarui");
       
-      router.push(`/konflik/${params.id}`);
+      router.push(`/dashboard/konflik/${params.id}`);
     } catch (err) {
       console.error("Failed to update konflik", err);
       const error = err as { response?: { data?: { message?: string } } };

@@ -16,7 +16,7 @@ export default function SidangBaruPage() {
   const handleSubmit = async (data: CreateJadwalSidangDto) => {
     try {
       await createSidang(data);
-      router.push("/sidang");
+      router.push("/dashboard/sidang");
     } catch {
       // Error handled by hook
     }
@@ -33,7 +33,7 @@ export default function SidangBaruPage() {
         <SidangForm
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push("/sidang")}
+          onCancel={() => router.push("/dashboard/sidang")}
         />
       </div>
     </div>

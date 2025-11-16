@@ -67,7 +67,7 @@ export default function ClientProfilePage() {
         title="Profil Saya"
         description="Informasi profil dan perkara Anda"
         action={
-          <Button variant="outline" onClick={() => router.push("/klien/profile/edit")}>
+          <Button variant="outline" onClick={() => router.push("/dashboard/klien/profile/edit")}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Profil
           </Button>
@@ -269,7 +269,7 @@ export default function ClientProfilePage() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => router.push("/perkara")}
+                  onClick={() => router.push("/dashboard/perkara")}
                 >
                   Lihat Semua
                 </Button>
@@ -282,7 +282,7 @@ export default function ClientProfilePage() {
                     <div
                       key={perkara.id}
                       className="cursor-pointer rounded-lg border p-3 hover:bg-accent transition-colors"
-                      onClick={() => router.push(`/perkara/${perkara.id}`)}
+                      onClick={() => router.push(`/dashboard/perkara/${perkara.id}`)}
                     >
                       <p className="font-medium text-sm">{perkara.nomor_perkara}</p>
                       <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
@@ -306,7 +306,7 @@ export default function ClientProfilePage() {
                       variant="outline" 
                       className="w-full" 
                       size="sm"
-                      onClick={() => router.push("/perkara")}
+                      onClick={() => router.push("/dashboard/perkara")}
                     >
                       Lihat {profile.perkara.length - 5} Perkara Lainnya
                     </Button>
@@ -334,21 +334,21 @@ export default function ClientProfilePage() {
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => router.push("/perkara")}
+                onClick={() => router.push("/dashboard/perkara")}
               >
                 Lihat Perkara Saya
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => router.push("/dokumen")}
+                onClick={() => router.push("/dashboard/dokumen")}
               >
                 Dokumen Saya
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full justify-start"
-                onClick={() => router.push("/sidang")}
+                onClick={() => router.push("/dashboard/sidang")}
               >
                 Jadwal Sidang
               </Button>

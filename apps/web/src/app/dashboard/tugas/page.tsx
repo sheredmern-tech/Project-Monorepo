@@ -51,7 +51,7 @@ export default function TugasPage() {
         title="Tugas"
         description="Kelola semua tugas perkara"
         action={
-          <Button onClick={() => router.push("/tugas/baru")}>
+          <Button onClick={() => router.push("/dashboard/tugas/baru")}>
             <Plus className="mr-2 h-4 w-4" />
             Tambah Tugas
           </Button>

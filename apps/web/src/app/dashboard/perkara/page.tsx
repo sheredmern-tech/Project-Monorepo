@@ -91,7 +91,7 @@ export default function PerkaraPage() {
         }
         action={
           canAddPerkara && (
-            <Button onClick={() => router.push("/perkara/baru")}>
+            <Button onClick={() => router.push("/dashboard/perkara/baru")}>
               <Plus className="mr-2 h-4 w-4" />
               Tambah Perkara
             </Button>

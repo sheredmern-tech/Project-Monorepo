@@ -16,7 +16,7 @@ export default function TugasBaruPage() {
   const handleSubmit = async (data: CreateTugasDto) => {
     try {
       await createTugas(data);
-      router.push("/tugas");
+      router.push("/dashboard/tugas");
     } catch {
       // Error handled by hook
     }
@@ -27,7 +27,7 @@ export default function TugasBaruPage() {
       <PageHeader title="Tambah Tugas Baru" description="Lengkapi form untuk menambahkan tugas baru" />
 
       <div className="max-w-3xl">
-        <TugasForm onSubmit={handleSubmit} isLoading={isLoading} onCancel={() => router.push("/tugas")} />
+        <TugasForm onSubmit={handleSubmit} isLoading={isLoading} onCancel={() => router.push("/dashboard/tugas")} />
       </div>
     </div>
   );

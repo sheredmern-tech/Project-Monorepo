@@ -40,7 +40,7 @@ export default function SidangPage() {
         title="Jadwal Sidang"
         description="Kelola jadwal sidang dan persidangan"
         action={
-          <Button onClick={() => router.push("/sidang/baru")}>
+          <Button onClick={() => router.push("/dashboard/sidang/baru")}>
             <Plus className="mr-2 h-4 w-4" />
             Tambah Jadwal
           </Button>

@@ -15,7 +15,7 @@ export default function DokumenUploadPage() {
   const handleUpload = async (formData: FormData) => {
     try {
       await uploadDokumen(formData);
-      router.push("/dokumen");
+      router.push("/dashboard/dokumen");
     } catch {
       // Error handled by hook
     }
@@ -29,7 +29,7 @@ export default function DokumenUploadPage() {
         <DokumenUploadForm
           onSubmit={handleUpload}
           isLoading={isUploading}
-          onCancel={() => router.push("/dokumen")}
+          onCancel={() => router.push("/dashboard/dokumen")}
         />
       </div>
     </div>

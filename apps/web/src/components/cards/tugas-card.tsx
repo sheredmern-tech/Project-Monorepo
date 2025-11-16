@@ -27,7 +27,7 @@ export function TugasCard({ tugas }: TugasCardProps) {
     tugas.status !== StatusTugas.SELESAI;
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => router.push(`/tugas/${tugas.id}`)}>
+    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => router.push(`/dashboard/tugas/${tugas.id}`)}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -38,7 +38,7 @@ export function TugasCard({ tugas }: TugasCardProps) {
           </div>
           <Button variant="ghost" size="icon" onClick={(e) => {
             e.stopPropagation();
-            router.push(`/tugas/${tugas.id}`);
+            router.push(`/dashboard/tugas/${tugas.id}`);
           }}>
             <Eye className="h-4 w-4" />
           </Button>

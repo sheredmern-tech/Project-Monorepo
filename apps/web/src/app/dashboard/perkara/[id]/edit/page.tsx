@@ -34,7 +34,7 @@ export default function PerkaraEditPage() {
       } catch (err) {
         console.error("Failed to load perkara:", err);
         toast.error("Gagal memuat data perkara");
-        router.push("/perkara");
+        router.push("/dashboard/perkara");
       } finally {
         setIsLoading(false);
       }
@@ -46,7 +46,7 @@ export default function PerkaraEditPage() {
   const handleSubmit = async (data: UpdatePerkaraDto) => {
     try {
       await updatePerkara(params.id as string, data);
-      router.push(`/perkara/${params.id}`);
+      router.push(`/dashboard/perkara/${params.id}`);
     } catch (err) {
       // Error handled by hook
       console.error("Update failed:", err);
@@ -74,7 +74,7 @@ export default function PerkaraEditPage() {
           initialData={perkara}
           onSubmit={handleSubmit}
           isLoading={isUpdating}
-          onCancel={() => router.push(`/perkara/${params.id}`)}
+          onCancel={() => router.push(`/dashboard/perkara/${params.id}`)}
           mode="edit"
         />
       </div>

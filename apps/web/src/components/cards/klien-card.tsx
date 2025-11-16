@@ -53,7 +53,7 @@ export function KlienCard({ klien }: KlienCardProps) {
   return (
     <Card 
       className="hover:shadow-md transition-all cursor-pointer group" 
-      onClick={() => router.push(`/klien/${klien.id}`)}
+      onClick={() => router.push(`/dashboard/klien/${klien.id}`)}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
@@ -90,7 +90,7 @@ export function KlienCard({ klien }: KlienCardProps) {
             size="icon"
             onClick={(e) => {
               e.stopPropagation();
-              router.push(`/klien/${klien.id}`);
+              router.push(`/dashboard/klien/${klien.id}`);
             }}
           >
             <Eye className="h-4 w-4" />
@@ -150,7 +150,7 @@ export function KlienCard({ klien }: KlienCardProps) {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/klien/${klien.id}/edit`);
+                router.push(`/dashboard/klien/${klien.id}/edit`);
               }}
             >
               Edit
@@ -160,7 +160,7 @@ export function KlienCard({ klien }: KlienCardProps) {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/klien/${klien.id}`);
+                router.push(`/dashboard/klien/${klien.id}`);
               }}
             >
               Detail

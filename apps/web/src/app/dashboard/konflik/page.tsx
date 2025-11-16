@@ -62,7 +62,7 @@ export default function KonflikPage() {
         title="Pemeriksaan Konflik"
         description="Kelola pemeriksaan konflik kepentingan"
         action={
-          <Button onClick={() => router.push("/konflik/baru")}>
+          <Button onClick={() => router.push("/dashboard/konflik/baru")}>
             <Plus className="mr-2 h-4 w-4" />
             Periksa Konflik
           </Button>

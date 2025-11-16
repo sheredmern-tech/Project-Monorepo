@@ -32,7 +32,7 @@ export default function SidangEditPage() {
   const handleSubmit = async (data: UpdateJadwalSidangDto) => {
     try {
       await updateSidang(params.id as string, data);
-      router.push(`/sidang/${params.id}`);
+      router.push(`/dashboard/sidang/${params.id}`);
     } catch {
       // Error handled by hook
     }
@@ -59,7 +59,7 @@ export default function SidangEditPage() {
           initialData={sidang}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push(`/sidang/${params.id}`)}
+          onCancel={() => router.push(`/dashboard/sidang/${params.id}`)}
           mode="edit"
         />
       </div>

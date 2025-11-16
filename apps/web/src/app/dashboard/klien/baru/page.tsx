@@ -16,7 +16,7 @@ export default function KlienBaruPage() {
   const handleSubmit = async (data: CreateKlienDto) => {
     try {
       await createKlien(data);
-      router.push("/klien");
+      router.push("/dashboard/klien");
     } catch {
       // Error handled by hook
     }
@@ -33,7 +33,7 @@ export default function KlienBaruPage() {
         <KlienForm
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push("/klien")}
+          onCancel={() => router.push("/dashboard/klien")}
         />
       </div>
     </div>

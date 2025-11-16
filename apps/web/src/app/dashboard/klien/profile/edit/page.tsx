@@ -43,7 +43,7 @@ export default function ClientProfileEditPage() {
       } catch (error) {
         console.error("Failed to load profile:", error);
         toast.error("Gagal memuat profil");
-        router.push("/klien/profile");
+        router.push("/dashboard/klien/profile");
       }
     };
 
@@ -53,7 +53,7 @@ export default function ClientProfileEditPage() {
   const handleSubmit = async (data: UpdateKlienDto) => {
     try {
       await updateMyProfile(data);
-      router.push("/klien/profile");
+      router.push("/dashboard/klien/profile");
     } catch (error) {
       // Error handled by hook
       console.error("Update failed:", error);
@@ -86,7 +86,7 @@ export default function ClientProfileEditPage() {
           initialData={profile}
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          onCancel={() => router.push("/klien/profile")}
+          onCancel={() => router.push("/dashboard/klien/profile")}
           mode="edit"
         />
       </div>
