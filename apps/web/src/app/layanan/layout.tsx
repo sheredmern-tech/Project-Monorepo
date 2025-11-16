@@ -1,8 +1,8 @@
 // ============================================
 // FILE: app/layanan/layout.tsx
 // ============================================
-import { HomeHeader } from '@/components/landing-layout/landing-home-header'
-import { HomeTOC } from '@/components/landing-layout/landing-home-toc'
+import { HomeHeader } from '@/components/layouts/landing-home-header'
+import { HomeTOC } from '@/components/layouts/landing-home-toc'
 
 export default function LayananLayout({
   children,

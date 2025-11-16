@@ -201,7 +201,9 @@ export function KonflikTable({
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Hapus
-                      </DropdownMenuItem>
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
