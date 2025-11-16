@@ -114,4 +114,17 @@ export class DokumenController {
   testGoogleDriveConnection() {
     return this.googleDriveService.testConnection();
   }
+
+  @Get('test/google-drive-folder')
+  @Roles(UserRole.admin)
+  @ApiOperation({
+    summary: 'Test Google Drive folder access and permissions (Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Folder access test results',
+  })
+  testGoogleDriveFolder() {
+    return this.googleDriveService.testFolderAccess();
+  }
 }

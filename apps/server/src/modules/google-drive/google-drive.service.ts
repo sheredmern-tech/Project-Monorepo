@@ -89,13 +89,15 @@ export class GoogleDriveService {
     const { fileName, mimeType, buffer, folderId } = options;
 
     try {
-      this.logger.log(`Uploading file to Google Drive: ${fileName}`);
+      this.logger.log(`📤 Uploading file to Google Drive: ${fileName}`);
 
       // Get root folder ID from environment if no folderId provided
       const rootFolderId = this.configService.get<string>(
         'GOOGLE_DRIVE_ROOT_FOLDER_ID',
       );
       const targetFolderId = folderId || rootFolderId;
+
+      this.logger.log(`📁 Using folder ID: ${targetFolderId}`);
 
       if (!targetFolderId) {
         throw new BadRequestException(
@@ -108,6 +110,10 @@ export class GoogleDriveService {
         name: fileName,
         parents: [targetFolderId],
       };
+
+      this.logger.log(
+        `📋 File metadata: ${JSON.stringify({ name: fileName, parents: [targetFolderId], mimeType })}`,
+      );
 
       const media = {
         mimeType,
@@ -377,5 +383,84 @@ export class GoogleDriveService {
     }
 
     return 'Check credentials and API settings';
+  }
+
+  /**
+   * Test folder access and permissions
+   */
+  async testFolderAccess(folderId?: string): Promise<{
+    success: boolean;
+    message: string;
+    details: any;
+  }> {
+    const targetFolderId =
+      folderId || this.configService.get<string>('GOOGLE_DRIVE_ROOT_FOLDER_ID');
+
+    if (!targetFolderId) {
+      return {
+        success: false,
+        message: 'No folder ID provided',
+        details: {
+          error: 'GOOGLE_DRIVE_ROOT_FOLDER_ID not set in .env',
+        },
+      };
+    }
+
+    try {
+      this.logger.log(`Testing folder access: ${targetFolderId}`);
+
+      // Try to get folder metadata
+      const folder = await this.drive.files.get({
+        fileId: targetFolderId,
+        fields: 'id, name, mimeType, permissions, capabilities',
+      });
+
+      // Try to list files in folder
+      const files = await this.drive.files.list({
+        q: `'${targetFolderId}' in parents`,
+        pageSize: 5,
+        fields: 'files(id, name)',
+      });
+
+      this.logger.log('✅ Folder access test successful');
+
+      return {
+        success: true,
+        message: 'Folder access verified',
+        details: {
+          folderId: folder.data.id,
+          folderName: folder.data.name,
+          mimeType: folder.data.mimeType,
+          capabilities: folder.data.capabilities,
+          filesInFolder: files.data.files?.length || 0,
+        },
+      };
+    } catch (error) {
+      this.logger.error('❌ Folder access test failed');
+      this.logger.error('Error details:', {
+        message: error.message,
+        code: error.code,
+      });
+
+      let hint = 'Unknown error';
+      if (error.code === 404) {
+        hint =
+          'Folder not found. Check folder ID is correct: ' + targetFolderId;
+      } else if (error.code === 403) {
+        hint =
+          'Permission denied. Make sure folder is shared with service account with Editor permission';
+      }
+
+      return {
+        success: false,
+        message: 'Folder access test failed',
+        details: {
+          error: error.message,
+          code: error.code,
+          folderId: targetFolderId,
+          hint: hint,
+        },
+      };
+    }
   }
 }
