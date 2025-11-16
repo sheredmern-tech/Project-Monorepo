@@ -91,9 +91,22 @@ export class GoogleDriveService {
     try {
       this.logger.log(`Uploading file to Google Drive: ${fileName}`);
 
+      // Get root folder ID from environment if no folderId provided
+      const rootFolderId = this.configService.get<string>(
+        'GOOGLE_DRIVE_ROOT_FOLDER_ID',
+      );
+      const targetFolderId = folderId || rootFolderId;
+
+      if (!targetFolderId) {
+        throw new BadRequestException(
+          'No folder ID specified. Please set GOOGLE_DRIVE_ROOT_FOLDER_ID in .env file. ' +
+            'Create a folder in your Google Drive, share it with the service account, and add the folder ID.',
+        );
+      }
+
       const fileMetadata: any = {
         name: fileName,
-        parents: folderId ? [folderId] : undefined,
+        parents: [targetFolderId],
       };
 
       const media = {
@@ -142,8 +155,36 @@ export class GoogleDriveService {
 
       // Provide more specific error messages
       if (error.code === 403) {
+        // Check if it's storage quota issue
+        if (error.message?.includes('storage quota')) {
+          const credentials = this.configService.get<string>(
+            'GOOGLE_DRIVE_CREDENTIALS',
+          );
+          let serviceAccountEmail =
+            'your-service-account@project.iam.gserviceaccount.com';
+
+          if (credentials) {
+            try {
+              const parsed = JSON.parse(credentials);
+              serviceAccountEmail = parsed.client_email || serviceAccountEmail;
+            } catch (e) {
+              // Ignore parse error
+            }
+          }
+
+          throw new BadRequestException(
+            'Service Account has no storage quota. Please: ' +
+              '1) Create a folder in YOUR Google Drive, ' +
+              '2) Share it with: ' +
+              serviceAccountEmail +
+              ', ' +
+              '3) Add folder ID to GOOGLE_DRIVE_ROOT_FOLDER_ID in .env. ' +
+              'See GOOGLE_DRIVE_SHARED_FOLDER_SETUP.md for instructions.',
+          );
+        }
+
         throw new BadRequestException(
-          'Google Drive API access denied. Please check: 1) API is enabled in Google Cloud Console, 2) Service account has correct permissions',
+          'Google Drive API access denied. Please check: 1) API is enabled in Google Cloud Console, 2) Service account has correct permissions, 3) Folder is shared with service account',
         );
       }
 
