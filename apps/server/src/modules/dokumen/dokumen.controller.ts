@@ -30,13 +30,17 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserRole } from '@prisma/client';
+import { GoogleDriveService } from '../google-drive/google-drive.service';
 
 @ApiTags('Dokumen Hukum')
 @ApiBearerAuth()
 @Controller('dokumen')
 @UseGuards(RolesGuard)
 export class DokumenController {
-  constructor(private readonly dokumenService: DokumenService) {}
+  constructor(
+    private readonly dokumenService: DokumenService,
+    private readonly googleDriveService: GoogleDriveService,
+  ) {}
 
   @Post()
   @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
@@ -98,5 +102,16 @@ export class DokumenController {
   @ApiResponse({ status: 200, description: 'Dokumen berhasil dihapus' })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.dokumenService.remove(id, userId);
+  }
+
+  @Get('test/google-drive-connection')
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Test Google Drive API connection (Admin only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Google Drive connection test results',
+  })
+  testGoogleDriveConnection() {
+    return this.googleDriveService.testConnection();
   }
 }

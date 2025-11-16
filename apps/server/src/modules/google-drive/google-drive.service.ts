@@ -46,9 +46,12 @@ export class GoogleDriveService {
       });
 
       this.drive = google.drive({ version: 'v3', auth });
-      this.logger.log('Google Drive API initialized successfully');
+      this.logger.log('✅ Google Drive API initialized successfully');
+      this.logger.log(`Service Account: ${credentials.client_email}`);
+      this.logger.log(`Project ID: ${credentials.project_id}`);
     } catch (error) {
-      this.logger.error('Failed to initialize Google Drive API', error);
+      this.logger.error('❌ Failed to initialize Google Drive API');
+      this.logger.error('Error details:', error.message);
       throw new BadRequestException(
         'Failed to initialize Google Drive. Check credentials.',
       );
@@ -125,8 +128,37 @@ export class GoogleDriveService {
         size: file.size,
       };
     } catch (error) {
-      this.logger.error(`Failed to upload file: ${fileName}`, error);
-      throw new BadRequestException('Failed to upload file to Google Drive');
+      // Enhanced error logging
+      this.logger.error(`Failed to upload file: ${fileName}`);
+      this.logger.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        errors: error.errors,
+        response: error.response?.data,
+      });
+
+      // Provide more specific error messages
+      if (error.code === 403) {
+        throw new BadRequestException(
+          'Google Drive API access denied. Please check: 1) API is enabled in Google Cloud Console, 2) Service account has correct permissions',
+        );
+      }
+
+      if (error.code === 401) {
+        throw new BadRequestException(
+          'Invalid Google Drive credentials. Please verify GOOGLE_DRIVE_CREDENTIALS in .env file',
+        );
+      }
+
+      if (error.message?.includes('API has not been used')) {
+        throw new BadRequestException(
+          'Google Drive API is not enabled. Enable it at: https://console.cloud.google.com/apis/library/drive.googleapis.com',
+        );
+      }
+
+      throw new BadRequestException(
+        `Failed to upload file to Google Drive: ${error.message || 'Unknown error'}`,
+      );
     }
   }
 
@@ -235,5 +267,71 @@ export class GoogleDriveService {
       );
       throw new BadRequestException('Failed to manage perkara folder');
     }
+  }
+
+  /**
+   * Test Google Drive connection and permissions
+   * Returns diagnostic information about the setup
+   */
+  async testConnection(): Promise<{
+    success: boolean;
+    message: string;
+    details: any;
+  }> {
+    try {
+      this.logger.log('Testing Google Drive API connection...');
+
+      // Try to get info about the Drive
+      const response = await this.drive.about.get({
+        fields: 'user, storageQuota',
+      });
+
+      this.logger.log('✅ Google Drive connection successful');
+
+      return {
+        success: true,
+        message: 'Google Drive API connection successful',
+        details: {
+          user: response.data.user,
+          storageQuota: response.data.storageQuota,
+        },
+      };
+    } catch (error) {
+      this.logger.error('❌ Google Drive connection test failed');
+      this.logger.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        errors: error.errors,
+      });
+
+      return {
+        success: false,
+        message: 'Google Drive API connection failed',
+        details: {
+          error: error.message,
+          code: error.code,
+          hint: this.getErrorHint(error),
+        },
+      };
+    }
+  }
+
+  /**
+   * Get helpful hint based on error
+   */
+  private getErrorHint(error: any): string {
+    if (error.code === 403) {
+      return 'API not enabled. Enable Google Drive API at: https://console.cloud.google.com/apis/library/drive.googleapis.com';
+    }
+
+    if (error.code === 401) {
+      return 'Invalid credentials. Check GOOGLE_DRIVE_CREDENTIALS in .env file';
+    }
+
+    if (error.message?.includes('API has not been used')) {
+      return 'Enable Google Drive API in Google Cloud Console';
+    }
+
+    return 'Check credentials and API settings';
   }
 }
