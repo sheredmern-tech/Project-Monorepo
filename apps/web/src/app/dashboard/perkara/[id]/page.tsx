@@ -497,7 +497,8 @@ export default function PerkaraDetailPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Tim Perkara</CardTitle>
-                  {permissions.perkara.update && (
+                  {/* 🔒 Require perkara:assign permission to add team members */}
+                  {permissions.perkara.assign && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -535,7 +536,8 @@ export default function PerkaraDetailPage() {
                               </div>
                             </div>
                           </div>
-                          {permissions.perkara.update && (
+                          {/* 🔒 Require perkara:assign permission to remove team members */}
+                          {permissions.perkara.assign && (
                             <Button
                               variant="ghost"
                               size="sm"
@@ -556,7 +558,7 @@ export default function PerkaraDetailPage() {
                     icon={Users}
                     title="Belum ada tim"
                     description="Tambahkan anggota tim untuk perkara ini"
-                    action={permissions.perkara.update ? {
+                    action={permissions.perkara.assign ? {
                       label: "Tambah Anggota",
                       onClick: () => setShowAddMemberDialog(true),
                     } : undefined}
