@@ -93,10 +93,10 @@ export default function DokumenDetailPage() {
           description={`Dokumen untuk perkara: ${dokumen.perkara.nomor_perkara}`}
           action={
             <div className="flex gap-2">
-              {canPreview && (
+              {canPreview && dokumen.embed_link && (
                 <Button variant="outline" onClick={() => setShowPreview(true)}>
                   <Eye className="mr-2 h-4 w-4" />
-                  Preview
+                  Fullscreen
                 </Button>
               )}
               <Button variant="outline" onClick={handleDownload}>
@@ -233,12 +233,32 @@ export default function DokumenDetailPage() {
 
             <Separator />
 
-            {/* File Path */}
+            {/* Google Drive Info */}
             <div>
-              <p className="text-sm text-muted-foreground">Lokasi File</p>
-              <p className="text-sm font-mono bg-muted p-2 rounded mt-1 break-all">
-                {dokumen.file_path}
-              </p>
+              <p className="text-sm text-muted-foreground">Storage</p>
+              <div className="space-y-2 mt-1">
+                {dokumen.google_drive_link && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Google Drive Link</p>
+                    <a
+                      href={dokumen.google_drive_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline break-all"
+                    >
+                      Open in Google Drive
+                    </a>
+                  </div>
+                )}
+                {dokumen.file_path && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Local Path (Legacy)</p>
+                    <p className="text-sm font-mono bg-muted p-2 rounded break-all">
+                      {dokumen.file_path}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -251,24 +271,53 @@ export default function DokumenDetailPage() {
               <CardTitle>Preview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="aspect-[3/4] bg-muted rounded-lg flex items-center justify-center">
-                <FileIconDisplay 
-                  tipeFile={dokumen.tipe_file || "application/octet-stream"} 
-                  className="h-20 w-20 text-muted-foreground" 
-                />
-              </div>
-              <div className="mt-4 space-y-2">
-                {canPreview && (
-                  <Button className="w-full" onClick={() => setShowPreview(true)}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    Lihat Preview
-                  </Button>
-                )}
-                <Button variant="outline" className="w-full" onClick={handleDownload}>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download
-                </Button>
-              </div>
+              {/* ✅ LANGSUNG SHOW PDF/IMAGE EMBED - TIDAK PERLU KLIK BUTTON */}
+              {canPreview && dokumen.embed_link ? (
+                <div className="space-y-4">
+                  {/* Embedded Preview - Langsung tampil */}
+                  <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden border">
+                    <iframe
+                      src={dokumen.embed_link}
+                      className="w-full h-full"
+                      title={dokumen.nama_dokumen}
+                      allow="autoplay"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setShowPreview(true)}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Fullscreen Preview
+                    </Button>
+                    <Button variant="outline" className="w-full" onClick={handleDownload}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                /* Fallback - show icon if no embed link */
+                <div>
+                  <div className="aspect-[3/4] bg-muted rounded-lg flex items-center justify-center">
+                    <FileIconDisplay
+                      tipeFile={dokumen.tipe_file || "application/octet-stream"}
+                      className="h-20 w-20 text-muted-foreground"
+                    />
+                  </div>
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm text-muted-foreground text-center mb-2">
+                      Preview tidak tersedia
+                    </p>
+                    <Button variant="outline" className="w-full" onClick={handleDownload}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
