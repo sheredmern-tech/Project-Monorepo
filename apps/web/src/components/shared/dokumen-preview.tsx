@@ -52,13 +52,13 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] p-0 gap-0">
+      <DialogContent className="max-w-[90vw] lg:max-w-5xl max-h-[90vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
-        <DialogHeader className="px-6 py-4 border-b bg-muted/50">
+        <DialogHeader className="px-6 py-4 border-b bg-muted/50 flex-shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-primary" />
+                <FileText className="h-5 w-5 text-primary flex-shrink-0" />
                 <DialogTitle className="text-lg font-semibold truncate">
                   {dokumen.nama_dokumen}
                 </DialogTitle>
@@ -82,7 +82,7 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="hidden lg:flex gap-2 flex-shrink-0">
               <Button variant="outline" size="sm" onClick={handleOpenInDrive}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open in Drive
@@ -95,11 +95,11 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
           </div>
         </DialogHeader>
 
-        <div className="flex flex-col lg:flex-row h-[calc(95vh-120px)]">
+        <div className="flex flex-col lg:flex-row overflow-hidden" style={{ height: 'calc(90vh - 120px)' }}>
           {/* Main Preview Area */}
-          <div className="flex-1 p-6 overflow-auto">
+          <div className="flex-1 p-4 lg:p-6 overflow-auto">
             {embedLink ? (
-              <div className="relative w-full h-full min-h-[500px] bg-muted/30 rounded-lg overflow-hidden border">
+              <div className="relative w-full h-full bg-muted/30 rounded-lg overflow-hidden border">
                 {/* Loading Overlay */}
                 {iframeLoading && !iframeError && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
@@ -124,9 +124,10 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
                           Silakan buka di tab baru atau download file.
                         </p>
                       </div>
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex gap-2 justify-center flex-wrap">
                         <Button
                           variant="outline"
+                          size="sm"
                           onClick={handleOpenInDrive}
                         >
                           <ExternalLink className="mr-2 h-4 w-4" />
@@ -134,6 +135,7 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
                         </Button>
                         <Button
                           variant="outline"
+                          size="sm"
                           onClick={() => {
                             setIframeError(false);
                             setIframeLoading(true);
@@ -185,19 +187,31 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
           </div>
 
           {/* Sidebar Info */}
-          <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l bg-muted/30 p-6 overflow-auto">
-            <h3 className="font-semibold mb-4 flex items-center">
-              <FileText className="h-4 w-4 mr-2" />
-              Informasi Dokumen
-            </h3>
+          <div className="w-full lg:w-96 lg:max-w-sm border-t lg:border-t-0 lg:border-l bg-muted/30 overflow-y-auto flex-shrink-0">
+            <div className="p-4 lg:p-6 space-y-4">
+              <h3 className="font-semibold flex items-center sticky top-0 bg-muted/30 py-2 -mt-2 backdrop-blur-sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Informasi Dokumen
+              </h3>
 
-            <div className="space-y-4">
+              {/* Mobile Action Buttons */}
+              <div className="lg:hidden flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1" onClick={handleOpenInDrive}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open in Drive
+                </Button>
+                <Button variant="default" size="sm" className="flex-1" onClick={handleDownload}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+
               {/* Perkara */}
               <div>
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-1.5">
                   Perkara
                 </label>
-                <div className="mt-1.5 p-3 bg-background rounded-lg border">
+                <div className="p-3 bg-background rounded-lg border">
                   <p className="font-medium text-sm">{dokumen.perkara.nomor_perkara}</p>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                     {dokumen.perkara.judul}
@@ -213,36 +227,36 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
               <Separator />
 
               {/* File Details */}
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <div className="flex items-center gap-2 text-sm">
-                  <HardDrive className="h-4 w-4 text-muted-foreground" />
+                  <HardDrive className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground">Ukuran:</span>
-                  <span className="font-medium ml-auto">
+                  <span className="font-medium ml-auto text-right">
                     {formatFileSize(dokumen.ukuran_file)}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                  <Tag className="h-4 w-4 text-muted-foreground" />
+                  <Tag className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground">Tipe:</span>
-                  <span className="font-medium ml-auto">
+                  <span className="font-medium ml-auto text-right truncate max-w-[150px]">
                     {dokumen.tipe_file || '-'}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-muted-foreground">Upload:</span>
-                  <span className="font-medium ml-auto">
+                  <span className="font-medium ml-auto text-right">
                     {formatDate(dokumen.tanggal_upload)}
                   </span>
                 </div>
 
                 {dokumen.tanggal_dokumen && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Tanggal Dokumen:</span>
-                    <span className="font-medium ml-auto">
+                    <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-muted-foreground text-xs">Tgl Dokumen:</span>
+                    <span className="font-medium ml-auto text-right">
                       {formatDate(dokumen.tanggal_dokumen)}
                     </span>
                   </div>
@@ -250,9 +264,9 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
                 {dokumen.pengunggah && (
                   <div className="flex items-center gap-2 text-sm">
-                    <User className="h-4 w-4 text-muted-foreground" />
+                    <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <span className="text-muted-foreground">Diunggah:</span>
-                    <span className="font-medium ml-auto">
+                    <span className="font-medium ml-auto text-right">
                       {dokumen.pengunggah.nama_lengkap}
                     </span>
                   </div>
@@ -264,11 +278,11 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
                 <>
                   <Separator />
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-1.5">
                       Catatan
                     </label>
-                    <div className="mt-1.5 p-3 bg-background rounded-lg border">
-                      <p className="text-sm whitespace-pre-wrap">{dokumen.catatan}</p>
+                    <div className="p-3 bg-background rounded-lg border max-h-32 overflow-y-auto">
+                      <p className="text-sm whitespace-pre-wrap break-words">{dokumen.catatan}</p>
                     </div>
                   </div>
                 </>
@@ -276,8 +290,8 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
               <Separator />
 
-              {/* Action Buttons */}
-              <div className="space-y-2">
+              {/* Desktop Action Buttons */}
+              <div className="hidden lg:block space-y-2">
                 <Button
                   variant="outline"
                   className="w-full justify-start"
