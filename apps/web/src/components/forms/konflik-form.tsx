@@ -145,7 +145,7 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                   type="button"
                   variant="outline"
                   className="flex-1 justify-between"
-                  disabled={isLoading || loadingPerkara}
+                  disabled={loadingPerkara}
                   onClick={() => setOpenPerkaraModal(true)}
                 >
                   {loadingPerkara ? (
@@ -163,7 +163,6 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                     variant="ghost"
                     size="sm"
                     onClick={() => setValue("perkara_id", undefined)}
-                    disabled={isLoading}
                   >
                     Hapus
                   </Button>
@@ -185,7 +184,6 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                 <Input
                   id="nama_klien"
                   placeholder="Nama calon klien"
-                  disabled={isLoading}
                   {...register("nama_klien")}
                   className="flex-1"
                 />
@@ -194,7 +192,6 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                   variant="secondary"
                   size="sm"
                   onClick={() => setOpenKlienModal(true)}
-                  disabled={isLoading}
                 >
                   <Database className="mr-2 h-4 w-4" />
                   Cek Database
@@ -217,7 +214,6 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                 <Input
                   id="pihak_lawan"
                   placeholder="Nama pihak lawan"
-                  disabled={isLoading}
                   {...register("pihak_lawan")}
                   className="flex-1"
                 />
@@ -226,7 +222,6 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                   variant="secondary"
                   size="sm"
                   onClick={() => setOpenPihakLawanModal(true)}
-                  disabled={isLoading}
                 >
                   <Database className="mr-2 h-4 w-4" />
                   Cek Database
@@ -246,7 +241,6 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                 id="ada_konflik"
                 checked={adaKonflik}
                 onCheckedChange={(checked) => setValue("ada_konflik", checked)}
-                disabled={isLoading}
               />
               <Label htmlFor="ada_konflik" className="cursor-pointer">
                 Ada konflik kepentingan
@@ -263,7 +257,6 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
                   id="detail_konflik"
                   placeholder="Jelaskan detail konflik yang ditemukan..."
                   rows={4}
-                  disabled={isLoading}
                   {...register("detail_konflik")}
                 />
                 <p className="text-xs text-muted-foreground">
