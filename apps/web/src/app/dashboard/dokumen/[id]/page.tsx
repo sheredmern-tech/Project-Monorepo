@@ -318,7 +318,7 @@ export default function DokumenDetailPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(dokumen.embed_link, '_blank')}
+                            onClick={() => window.open(dokumen.embed_link || dokumen.google_drive_link || '#', '_blank')}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Buka di Tab Baru

@@ -13,6 +13,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -72,6 +73,9 @@ export class DokumenController {
   @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Detail dokumen berhasil diambil' })
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   findOne(@Param('id') id: string) {
     return this.dokumenService.findOne(id);
   }
