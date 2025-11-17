@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search } from "lucide-react";
+import { parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,8 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import { sidangSchema, SidangFormData } from "@/lib/schemas/sidang.schema";
 import { JadwalSidangEntity, JenisSidang } from "@/types";
 import { perkaraApi } from "@/lib/api/perkara.api";
@@ -186,21 +189,44 @@ export function SidangForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tanggal_sidang">
+              <Label>
                 Tanggal Sidang <span className="text-red-500">*</span>
               </Label>
-              <Input id="tanggal_sidang" type="date" disabled={isLoading} {...register("tanggal_sidang")} />
+              <DatePicker
+                disabled={isLoading}
+                date={watch("tanggal_sidang") ? parseISO(watch("tanggal_sidang")) : undefined}
+                onDateChange={(date) => {
+                  if (date) {
+                    setValue("tanggal_sidang", date.toISOString().split("T")[0]);
+                  } else {
+                    setValue("tanggal_sidang", "");
+                  }
+                }}
+                placeholder="Pilih tanggal sidang"
+              />
               {errors.tanggal_sidang && <p className="text-sm text-red-500">{errors.tanggal_sidang.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="waktu_mulai">Waktu Mulai</Label>
-              <Input id="waktu_mulai" type="time" disabled={isLoading} {...register("waktu_mulai")} />
+              <Label>Waktu Mulai</Label>
+              <TimePicker
+                disabled={isLoading}
+                time={watch("waktu_mulai")}
+                onTimeChange={(time) => setValue("waktu_mulai", time)}
+                placeholder="Pilih waktu mulai"
+                maxTime={watch("waktu_selesai")}
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="waktu_selesai">Waktu Selesai</Label>
-              <Input id="waktu_selesai" type="time" disabled={isLoading} {...register("waktu_selesai")} />
+              <Label>Waktu Selesai</Label>
+              <TimePicker
+                disabled={isLoading}
+                time={watch("waktu_selesai")}
+                onTimeChange={(time) => setValue("waktu_selesai", time)}
+                placeholder="Pilih waktu selesai"
+                minTime={watch("waktu_mulai")}
+              />
             </div>
           </div>
 
