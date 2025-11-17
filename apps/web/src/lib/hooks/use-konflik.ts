@@ -83,11 +83,12 @@ export function useKonflik() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await konflikApi.create(data);
-        
+
         toast.success("Pemeriksaan konflik berhasil disimpan");
-        await fetchKonflik();
+        // ✅ FIXED: Don't fetch konflik after create - page will navigate away
+        // await fetchKonflik();
         return response.data;
       } catch (err) {
         const message = getErrorMessage(err);
@@ -98,7 +99,7 @@ export function useKonflik() {
         setLoading(false);
       }
     },
-    [fetchKonflik, setLoading, setError]
+    [setLoading, setError]
   );
 
   // Update Konflik

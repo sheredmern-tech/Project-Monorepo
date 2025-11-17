@@ -272,7 +272,7 @@ export function KonflikForm({ initialData, onSubmit, isLoading, onCancel }: Konf
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {initialData ? "Update Pemeriksaan" : "Simpan Hasil Pemeriksaan"}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={onCancel}>
             Batal
           </Button>
         </div>
