@@ -102,6 +102,90 @@ export class UsersController {
     res.send(csv);
   }
 
+  @Get('import-template-excel')
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Download Excel template for bulk import with data validation' })
+  @ApiResponse({ status: 200, description: 'Excel template downloaded' })
+  downloadExcelTemplate(@Res() res: Response): void {
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+
+    // Template data with sample rows
+    const templateData = [
+      {
+        email: 'john.doe@example.com',
+        nama_lengkap: 'John Doe',
+        role: 'advokat',
+        jabatan: 'Senior Partner',
+        telepon: '081234567890',
+      },
+      {
+        email: 'jane.smith@example.com',
+        nama_lengkap: 'Jane Smith',
+        role: 'paralegal',
+        jabatan: 'Paralegal',
+        telepon: '081298765432',
+      },
+      {
+        email: 'client@example.com',
+        nama_lengkap: 'Client Name',
+        role: 'klien',
+        jabatan: 'CEO',
+        telepon: '081234567891',
+      },
+    ];
+
+    // Create worksheet from data
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+
+    // Set column widths for better readability
+    worksheet['!cols'] = [
+      { wch: 30 }, // email
+      { wch: 25 }, // nama_lengkap
+      { wch: 15 }, // role
+      { wch: 25 }, // jabatan
+      { wch: 18 }, // telepon
+    ];
+
+    // Add instructions sheet
+    const instructionsData = [
+      { Field: 'email', Required: 'YES', Description: 'Email user (harus unik)', Example: 'john.doe@example.com' },
+      { Field: 'nama_lengkap', Required: 'YES', Description: 'Nama lengkap user', Example: 'John Doe' },
+      { Field: 'role', Required: 'YES', Description: 'Role: admin, advokat, paralegal, staff, klien', Example: 'advokat' },
+      { Field: 'jabatan', Required: 'NO', Description: 'Jabatan/posisi user (opsional)', Example: 'Senior Partner' },
+      { Field: 'telepon', Required: 'NO', Description: 'Nomor telepon (opsional)', Example: '081234567890' },
+    ];
+
+    const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
+    instructionsSheet['!cols'] = [
+      { wch: 15 }, // Field
+      { wch: 10 }, // Required
+      { wch: 45 }, // Description
+      { wch: 25 }, // Example
+    ];
+
+    // Add sheets to workbook
+    XLSX.utils.book_append_sheet(workbook, instructionsSheet, 'Instructions');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+
+    // Generate buffer
+    const buffer = XLSX.write(workbook, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    }) as Buffer;
+
+    // Set response headers
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=user-import-template.xlsx',
+    );
+    res.send(buffer);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get detail user by ID' })
   @ApiResponse({ status: 200, description: 'Detail user berhasil diambil' })

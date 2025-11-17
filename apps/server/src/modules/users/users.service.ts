@@ -9,6 +9,7 @@ import { Prisma, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import * as Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
@@ -735,33 +736,95 @@ export class UsersService {
     };
 
     try {
-      const csvData = file.buffer.toString('utf-8');
-      const parsed = Papa.parse(csvData, {
-        header: true,
-        skipEmptyLines: true,
-      });
+      // Detect file type based on extension or mimetype
+      const isExcel =
+        file.originalname.endsWith('.xlsx') ||
+        file.originalname.endsWith('.xls') ||
+        file.mimetype.includes('spreadsheet') ||
+        file.mimetype.includes('excel');
 
-      const rows = parsed.data as Array<{
+      let rows: Array<{
         email: string;
         nama_lengkap: string;
         role: UserRole;
         jabatan?: string;
         telepon?: string;
-      }>;
+      }> = [];
 
+      if (isExcel) {
+        // Parse Excel file
+        console.log('📊 Parsing Excel file...');
+        const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+
+        // Get first sheet or 'Users' sheet
+        let sheetName = workbook.SheetNames[0];
+        if (workbook.SheetNames.includes('Users')) {
+          sheetName = 'Users';
+        }
+
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+          raw: false,
+          defval: '',
+        });
+
+        rows = jsonData as Array<{
+          email: string;
+          nama_lengkap: string;
+          role: UserRole;
+          jabatan?: string;
+          telepon?: string;
+        }>;
+
+        console.log(`✅ Parsed ${rows.length} rows from Excel`);
+      } else {
+        // Parse CSV file
+        console.log('📄 Parsing CSV file...');
+        const csvData = file.buffer.toString('utf-8');
+        const parsed = Papa.parse(csvData, {
+          header: true,
+          skipEmptyLines: true,
+        });
+
+        rows = parsed.data as Array<{
+          email: string;
+          nama_lengkap: string;
+          role: UserRole;
+          jabatan?: string;
+          telepon?: string;
+        }>;
+
+        console.log(`✅ Parsed ${rows.length} rows from CSV`);
+      }
+
+      // Process rows
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         try {
+          // Validate required fields
           if (!row.email || !row.nama_lengkap || !row.role) {
             result.failed++;
             result.errors.push({
               row: i + 2,
               email: row.email || 'N/A',
-              reason: 'Missing required fields',
+              reason: 'Missing required fields (email, nama_lengkap, or role)',
             });
             continue;
           }
 
+          // Validate role
+          const validRoles = ['admin', 'advokat', 'paralegal', 'staff', 'klien'];
+          if (!validRoles.includes(row.role)) {
+            result.failed++;
+            result.errors.push({
+              row: i + 2,
+              email: row.email,
+              reason: `Invalid role: ${row.role}. Must be one of: ${validRoles.join(', ')}`,
+            });
+            continue;
+          }
+
+          // Check if email already exists
           const existing = await this.prisma.user.findUnique({
             where: { email: row.email },
           });
@@ -776,20 +839,23 @@ export class UsersService {
             continue;
           }
 
+          // Generate temporary password
           const tempPassword = crypto.randomBytes(4).toString('hex');
           const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
+          // Create user
           await this.prisma.user.create({
             data: {
               email: row.email,
               password: hashedPassword,
               nama_lengkap: row.nama_lengkap,
-              role: row.role,
+              role: row.role as UserRole,
               jabatan: row.jabatan || null,
               telepon: row.telepon || null,
             },
           });
 
+          // Log activity
           await this.prisma.logAktivitas.create({
             data: {
               user_id: currentUserId,
@@ -810,10 +876,14 @@ export class UsersService {
         }
       }
 
+      console.log(
+        `✅ Bulk import completed: ${result.success} success, ${result.failed} failed`,
+      );
+
       return result;
     } catch (error) {
       throw new BadRequestException(
-        `Failed to parse CSV: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }

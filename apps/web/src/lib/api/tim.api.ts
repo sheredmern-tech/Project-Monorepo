@@ -239,16 +239,33 @@ export const timApi = {
     const response = await apiClient.get('/users/import-template', {
       responseType: 'blob',
     });
-    
+
     if (response instanceof Blob) {
       return response;
     }
-    
+
     if (response && typeof response === 'object' && 'data' in response) {
       const wrappedResponse = response as unknown as { data: Blob };
       return wrappedResponse.data;
     }
-    
+
+    throw new Error("Invalid blob response");
+  },
+
+  downloadExcelTemplate: async (): Promise<Blob> => {
+    const response = await apiClient.get('/users/import-template-excel', {
+      responseType: 'blob',
+    });
+
+    if (response instanceof Blob) {
+      return response;
+    }
+
+    if (response && typeof response === 'object' && 'data' in response) {
+      const wrappedResponse = response as unknown as { data: Blob };
+      return wrappedResponse.data;
+    }
+
     throw new Error("Invalid blob response");
   },
 

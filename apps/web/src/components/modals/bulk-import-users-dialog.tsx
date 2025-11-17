@@ -43,12 +43,12 @@ export function BulkImportUsersDialog({
     errors: Array<{ row: number; email: string; reason: string }>;
   } | null>(null);
 
-  // ✅ NEW: Download template handler
+  // ✅ Download CSV template handler
   const handleDownloadTemplate = async () => {
     try {
       setIsDownloading(true);
       const blob = await timApi.downloadImportTemplate();
-      
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -57,7 +57,7 @@ export function BulkImportUsersDialog({
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Template Downloaded",
         description: "CSV template berhasil didownload",
@@ -74,13 +74,47 @@ export function BulkImportUsersDialog({
     }
   };
 
+  // ✅ Download Excel template handler
+  const handleDownloadExcelTemplate = async () => {
+    try {
+      setIsDownloading(true);
+      const blob = await timApi.downloadExcelTemplate();
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `user-import-template-${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Template Downloaded",
+        description: "Excel template berhasil didownload",
+      });
+    } catch (error) {
+      console.error('Download Excel template error:', error);
+      toast({
+        title: "Gagal",
+        description: "Gagal mendownload Excel template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (!selectedFile.name.endsWith('.csv')) {
+      const validExtensions = ['.csv', '.xlsx', '.xls'];
+      const isValid = validExtensions.some(ext => selectedFile.name.endsWith(ext));
+
+      if (!isValid) {
         toast({
           title: "File tidak valid",
-          description: "Hanya file CSV yang diperbolehkan",
+          description: "Hanya file CSV atau Excel (.xlsx) yang diperbolehkan",
           variant: "destructive",
         });
         return;
@@ -175,23 +209,38 @@ export function BulkImportUsersDialog({
           {/* Download Template Section */}
           <Alert>
             <FileSpreadsheet className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>Download template CSV untuk format yang benar</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadTemplate}
-                disabled={isDownloading}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                {isDownloading ? "Downloading..." : "Download Template"}
-              </Button>
+            <AlertDescription>
+              <div className="flex flex-col gap-2">
+                <span className="font-medium">Download template untuk format yang benar</span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadTemplate}
+                    disabled={isDownloading}
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    CSV Template
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadExcelTemplate}
+                    disabled={isDownloading}
+                    className="flex-1"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Excel Template
+                  </Button>
+                </div>
+              </div>
             </AlertDescription>
           </Alert>
 
           {/* Format Info */}
           <div className="rounded-lg border p-4 bg-muted/50">
-            <h4 className="font-medium mb-2">Format CSV:</h4>
+            <h4 className="font-medium mb-2">Format File (CSV atau Excel):</h4>
             <code className="text-sm">
               email,nama_lengkap,role,jabatan,telepon
             </code>
@@ -202,6 +251,9 @@ export function BulkImportUsersDialog({
               <p>• <strong>jabatan</strong>: Jabatan user (opsional)</p>
               <p>• <strong>telepon</strong>: Nomor telepon (opsional)</p>
             </div>
+            <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-xs text-blue-700 dark:text-blue-300">
+              💡 <strong>Tip:</strong> Download Excel template untuk format yang lebih rapi dengan sheet Instructions
+            </div>
           </div>
 
           {/* File Upload Section */}
@@ -211,7 +263,7 @@ export function BulkImportUsersDialog({
                 <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    Pilih file CSV untuk diupload
+                    Pilih file CSV atau Excel (.xlsx) untuk diupload
                   </p>
                   <Button variant="outline" asChild>
                     <label htmlFor="file-upload" className="cursor-pointer">
@@ -219,7 +271,7 @@ export function BulkImportUsersDialog({
                       <input
                         id="file-upload"
                         type="file"
-                        accept=".csv"
+                        accept=".csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
                         className="hidden"
                         onChange={handleFileChange}
                         disabled={isUploading}
