@@ -23,6 +23,17 @@ export default function KonflikPage() {
   const [total, setTotal] = useState(0);
   const limit = 10;
 
+  // 🔍 DEBUG: Log permission state for troubleshooting
+  useEffect(() => {
+    console.log('=== KONFLIK PERMISSION DEBUG ===');
+    console.log('User Role:', permissions.role);
+    console.log('Is Admin:', permissions.isAdmin);
+    console.log('Can Create Konflik:', permissions.konflik.create);
+    console.log('Can Read Konflik:', permissions.konflik.read);
+    console.log('User:', permissions.user);
+    console.log('================================');
+  }, [permissions]);
+
   const fetchKonflik = async () => {
     try {
       setIsLoading(true);
@@ -64,13 +75,22 @@ export default function KonflikPage() {
         title="Pemeriksaan Konflik"
         description="Kelola pemeriksaan konflik kepentingan"
         action={
-          /* 🔒 Only show button if user can create */
-          permissions.konflik.create ? (
-            <Button onClick={() => router.push("/dashboard/konflik/baru")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Periksa Konflik
-            </Button>
-          ) : undefined
+          <div className="flex gap-2">
+            {/* 🔒 Permission-based button */}
+            {permissions.konflik.create ? (
+              <Button onClick={() => router.push("/dashboard/konflik/baru")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Periksa Konflik
+              </Button>
+            ) : (
+              /* 🔍 DEBUG: Show why button is hidden */
+              <div className="text-sm text-muted-foreground">
+                {permissions.role
+                  ? `⚠️ Role "${permissions.role}" tidak punya akses konflik:create`
+                  : '⚠️ User role tidak terdeteksi - silakan login ulang'}
+              </div>
+            )}
+          </div>
         }
       />
 
