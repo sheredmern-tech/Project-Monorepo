@@ -73,13 +73,21 @@ export function SelectKlienModal({
   klienList,
 }: SelectKlienModalProps) {
   const { klien, isLoading, fetchKlien } = useKlien()
+  const [hasAttemptedFetch, setHasAttemptedFetch] = React.useState(false)
 
   // Fetch klien when modal opens (if not provided)
   React.useEffect(() => {
-    if (open && !klienList && klien.length === 0) {
+    if (open && !klienList && !hasAttemptedFetch) {
+      setHasAttemptedFetch(true)
       fetchKlien()
     }
-  }, [open, klienList, klien.length, fetchKlien])
+
+    // Reset flag when modal closes
+    if (!open) {
+      setHasAttemptedFetch(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, klienList])
 
   const items = klienList || klien
 
