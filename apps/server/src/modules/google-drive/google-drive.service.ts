@@ -196,15 +196,26 @@ export class GoogleDriveService {
       const file = response.data;
 
       // Set file permissions to 'anyone with link can view'
-      await this.drive.permissions.create({
-        fileId: file.id,
-        requestBody: {
-          role: 'reader',
-          type: 'anyone',
-        },
-      });
+      try {
+        this.logger.log(`🔓 Setting public permissions for file: ${file.id}`);
 
-      this.logger.log(`File uploaded successfully: ${file.id}`);
+        await this.drive.permissions.create({
+          fileId: file.id,
+          requestBody: {
+            role: 'reader',
+            type: 'anyone',
+          },
+        });
+
+        this.logger.log(`✅ File is now publicly accessible (anyone with link)`);
+      } catch (permError) {
+        this.logger.error(`❌ Failed to set public permissions: ${permError.message}`);
+        this.logger.warn(`⚠️  File uploaded but may not be publicly accessible!`);
+        this.logger.warn(`📋 Manual action: Share the file publicly in Google Drive`);
+        // Don't throw - file is uploaded successfully, just permissions might fail
+      }
+
+      this.logger.log(`✅ File uploaded successfully: ${file.id}`);
 
       return {
         id: file.id,
@@ -303,6 +314,50 @@ export class GoogleDriveService {
     } catch (error) {
       this.logger.error(`Failed to get file: ${fileId}`, error);
       throw new BadRequestException('Failed to get file from Google Drive');
+    }
+  }
+
+  /**
+   * Verify file permissions and accessibility
+   */
+  async verifyFileAccess(fileId: string): Promise<{
+    isPublic: boolean;
+    permissions: any[];
+    embedLink: string;
+    details: string;
+  }> {
+    try {
+      // Get file permissions
+      const permissionsResponse = await this.drive.permissions.list({
+        fileId,
+        fields: 'permissions(id, type, role, emailAddress)',
+      });
+
+      const permissions = permissionsResponse.data.permissions || [];
+      const isPublic = permissions.some(
+        (perm) => perm.type === 'anyone' && perm.role === 'reader',
+      );
+
+      let details = '';
+      if (isPublic) {
+        details = '✅ File is publicly accessible (anyone with link can view)';
+      } else {
+        details =
+          '❌ File is NOT public. Permissions: ' +
+          permissions.map((p) => `${p.type}:${p.role}`).join(', ');
+      }
+
+      this.logger.log(`🔍 File ${fileId} access check: ${details}`);
+
+      return {
+        isPublic,
+        permissions,
+        embedLink: `https://drive.google.com/file/d/${fileId}/preview`,
+        details,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to verify file access: ${fileId}`, error);
+      throw new BadRequestException('Failed to verify file permissions');
     }
   }
 

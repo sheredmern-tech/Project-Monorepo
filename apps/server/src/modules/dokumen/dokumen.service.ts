@@ -51,6 +51,20 @@ export class DokumenService {
       buffer: file.buffer,
     });
 
+    // ✅ VERIFY FILE ACCESSIBILITY (for debugging)
+    try {
+      const accessCheck = await this.googleDriveService.verifyFileAccess(
+        driveFile.id,
+      );
+      this.logger.log(
+        `📊 File accessibility: ${accessCheck.details}`,
+      );
+    } catch (verifyError) {
+      this.logger.warn(
+        `⚠️  Could not verify file access (non-critical): ${verifyError.message}`,
+      );
+    }
+
     // ✅ SAVE METADATA + GOOGLE DRIVE LINKS (not local file path)
     const dokumen = await this.prisma.dokumenHukum.create({
       data: {
