@@ -48,20 +48,23 @@ export default function DokumenDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [iframeError, setIframeError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadDokumen = async () => {
       if (params.id) {
         try {
-          setIsLoading(true); // ✅ Set loading true
+          setIsLoading(true);
+          setLoadError(null);
           const data = await fetchDokumenById(params.id as string);
           setDokumen(data);
         } catch (error) {
           // Error already handled by hook (toast shown)
-          // Just prevent infinite loading
+          // Set error state for display
           console.error('Failed to load dokumen:', error);
+          setLoadError(error instanceof Error ? error.message : 'Gagal memuat dokumen');
         } finally {
-          setIsLoading(false); // ✅ Set loading false after everything
+          setIsLoading(false);
         }
       }
     };
@@ -89,19 +92,24 @@ export default function DokumenDetailPage() {
   }
 
   // Show error if dokumen not found after loading
-  if (!dokumen) {
+  if (!dokumen && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
           <div className="text-6xl">📄</div>
           <h2 className="text-2xl font-semibold">Dokumen Tidak Ditemukan</h2>
           <p className="text-muted-foreground max-w-md">
-            Dokumen yang Anda cari tidak ditemukan atau Anda tidak memiliki akses untuk melihatnya.
+            {loadError || "Dokumen yang Anda cari tidak ditemukan atau Anda tidak memiliki akses untuk melihatnya."}
           </p>
-          <Button onClick={() => router.push("/dashboard/dokumen")}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali ke Daftar Dokumen
-          </Button>
+          <div className="flex gap-2 justify-center">
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Coba Lagi
+            </Button>
+            <Button onClick={() => router.push("/dashboard/dokumen")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Kembali ke Daftar Dokumen
+            </Button>
+          </div>
         </div>
       </div>
     );
