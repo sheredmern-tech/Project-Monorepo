@@ -61,6 +61,9 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
               className="w-full h-[70vh] border rounded"
               title={dokumen.nama_dokumen}
               allow="autoplay"
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              referrerPolicy="no-referrer-when-downgrade"
+              loading="lazy"
             />
           ) : (
             // Fallback if no embed link

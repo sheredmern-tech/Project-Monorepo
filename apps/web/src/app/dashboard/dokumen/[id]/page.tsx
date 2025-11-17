@@ -299,6 +299,9 @@ export default function DokumenDetailPage() {
                       className="w-full h-full"
                       title={dokumen.nama_dokumen}
                       allow="autoplay"
+                      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      loading="lazy"
                     />
                   </div>
                   <div className="space-y-2">
