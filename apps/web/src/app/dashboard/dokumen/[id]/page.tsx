@@ -47,6 +47,7 @@ export default function DokumenDetailPage() {
   const [isLoading, setIsLoading] = useState(true); // ✅ Local loading state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
 
   useEffect(() => {
     const loadDokumen = async () => {
@@ -293,16 +294,46 @@ export default function DokumenDetailPage() {
               {canPreview && dokumen.embed_link ? (
                 <div className="space-y-4">
                   {/* Embedded Preview - Langsung tampil */}
-                  <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden border">
-                    <iframe
-                      src={dokumen.embed_link}
-                      className="w-full h-full"
-                      title={dokumen.nama_dokumen}
-                      allow="autoplay"
-                      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      loading="lazy"
-                    />
+                  <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden border relative">
+                    {iframeError ? (
+                      // Fallback if iframe fails to load
+                      <div className="flex flex-col items-center justify-center h-full p-4">
+                        <p className="text-sm text-muted-foreground mb-4 text-center">
+                          Preview tidak dapat dimuat. Google Drive mungkin memblokir embedding.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(dokumen.embed_link, '_blank')}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Buka di Tab Baru
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIframeError(false)}
+                          >
+                            Coba Lagi
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <iframe
+                        src={dokumen.embed_link}
+                        className="w-full h-full"
+                        title={dokumen.nama_dokumen}
+                        allow="autoplay"
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        loading="lazy"
+                        onError={() => {
+                          console.error('Iframe failed to load:', dokumen.embed_link);
+                          setIframeError(true);
+                        }}
+                      />
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Button
