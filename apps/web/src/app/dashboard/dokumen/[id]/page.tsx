@@ -115,6 +115,11 @@ export default function DokumenDetailPage() {
     );
   }
 
+  // ✅ TypeScript guard - dokumen is not null at this point
+  if (!dokumen) {
+    return null;
+  }
+
   // ✅ TypeScript now knows dokumen is not null after this point
   const canPreview = isPreviewable(dokumen.tipe_file);
 

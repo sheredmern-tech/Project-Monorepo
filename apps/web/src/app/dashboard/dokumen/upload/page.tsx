@@ -14,7 +14,12 @@ export default function DokumenUploadPage() {
 
   const handleUpload = async (formData: FormData) => {
     try {
-      await uploadDokumen(formData);
+      const newDokumen = await uploadDokumen(formData);
+
+      // ✅ Invalidate Next.js cache to ensure fresh data
+      router.refresh();
+
+      // Redirect to list page
       router.push("/dashboard/dokumen");
     } catch {
       // Error handled by hook
