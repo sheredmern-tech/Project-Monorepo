@@ -29,6 +29,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TableSkeleton } from "@/components/shared/table-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
+import { DokumenPreview } from "@/components/shared/dokumen-preview";
 import { TablePagination } from "@/components/tables/table-pagination";
 import { DokumenWithRelations } from "@/types";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
@@ -53,6 +54,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [previewDokumen, setPreviewDokumen] = useState<DokumenWithRelations | null>(null);
 
   // 🔒 RBAC: Get user permissions
   const permissions = usePermission();
@@ -154,7 +156,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                 <TableRow
                   key={dokumen.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => router.push(`/dashboard/dokumen/${dokumen.id}`)}
+                  onClick={() => setPreviewDokumen(dokumen)}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -267,6 +269,15 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
       </Card>
 
       <TablePagination page={page} limit={limit} total={total} onPageChange={setPage} />
+
+      {/* Preview Modal */}
+      {previewDokumen && (
+        <DokumenPreview
+          dokumen={previewDokumen}
+          open={!!previewDokumen}
+          onClose={() => setPreviewDokumen(null)}
+        />
+      )}
 
       <ConfirmDialog
         open={!!deleteId}
