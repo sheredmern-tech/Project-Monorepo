@@ -234,17 +234,25 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
 
 /**
  * Check if a role has a specific permission
+ * ADMIN BYPASS: ADMIN always has ALL permissions
  */
 export function hasPermission(
   role: UserRole | undefined,
   permission: Permission
 ): boolean {
   if (!role) return false;
+
+  // ✅ ADMIN BYPASS - Admin has ALL permissions
+  if (role === UserRole.ADMIN) {
+    return true;
+  }
+
   return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
 }
 
 /**
  * Check if a role can perform an action on a resource
+ * ADMIN BYPASS: ADMIN can perform ALL actions
  */
 export function canPerformAction(
   role: UserRole | undefined,
@@ -252,6 +260,12 @@ export function canPerformAction(
   action: Action
 ): boolean {
   if (!role) return false;
+
+  // ✅ ADMIN BYPASS - Admin can perform ALL actions
+  if (role === UserRole.ADMIN) {
+    return true;
+  }
+
   const permission: Permission = `${resource}:${action}`;
   return hasPermission(role, permission);
 }
@@ -265,12 +279,18 @@ export function getRolePermissions(role: UserRole): Permission[] {
 
 /**
  * Check if role can access a specific route/page
+ * ADMIN BYPASS: ADMIN can access ALL resources
  */
 export function canAccessResource(
   role: UserRole | undefined,
   resource: Resource
 ): boolean {
   if (!role) return false;
+
+  // ✅ ADMIN BYPASS - Admin can access ALL resources
+  if (role === UserRole.ADMIN) {
+    return true;
+  }
 
   // Check if role has ANY permission for this resource
   const rolePermissions = ROLE_PERMISSIONS[role] || [];
@@ -280,12 +300,18 @@ export function canAccessResource(
 /**
  * Check if role can PERFORM ACTIONS on a resource (not just read)
  * Used for navigation filtering - only show menu if user can do something
+ * ADMIN BYPASS: ADMIN can perform ALL actions
  */
 export function canPerformActionsOnResource(
   role: UserRole | undefined,
   resource: Resource
 ): boolean {
   if (!role) return false;
+
+  // ✅ ADMIN BYPASS - Admin can perform ALL actions on ALL resources
+  if (role === UserRole.ADMIN) {
+    return true;
+  }
 
   // Get all permissions for this resource
   const rolePermissions = ROLE_PERMISSIONS[role] || [];
@@ -302,23 +328,37 @@ export function canPerformActionsOnResource(
 
 /**
  * Check multiple permissions (AND logic - must have ALL)
+ * ADMIN BYPASS: ADMIN has ALL permissions
  */
 export function hasAllPermissions(
   role: UserRole | undefined,
   permissions: Permission[]
 ): boolean {
   if (!role) return false;
+
+  // ✅ ADMIN BYPASS - Admin has ALL permissions
+  if (role === UserRole.ADMIN) {
+    return true;
+  }
+
   return permissions.every((perm) => hasPermission(role, perm));
 }
 
 /**
  * Check multiple permissions (OR logic - must have ANY)
+ * ADMIN BYPASS: ADMIN has ALL permissions
  */
 export function hasAnyPermission(
   role: UserRole | undefined,
   permissions: Permission[]
 ): boolean {
   if (!role) return false;
+
+  // ✅ ADMIN BYPASS - Admin has ALL permissions
+  if (role === UserRole.ADMIN) {
+    return true;
+  }
+
   return permissions.some((perm) => hasPermission(role, perm));
 }
 

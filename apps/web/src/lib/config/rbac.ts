@@ -146,8 +146,14 @@ export function getDefaultRedirect(userRole: UserRole): string {
 /**
  * Check if user can access a specific route
  * This is a simplified version - detailed checks should use permission system
+ * ADMIN BYPASS: ADMIN can access ALL routes
  */
 export function canAccessRoute(userRole: UserRole, pathname: string): boolean {
+  // ✅ ADMIN BYPASS - Admin can access ALL routes
+  if (userRole === UserRole.ADMIN) {
+    return true;
+  }
+
   // KLIEN cannot access any admin routes
   if (userRole === UserRole.KLIEN) {
     return false;
