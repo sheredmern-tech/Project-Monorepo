@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma, UserRole } from '@prisma/client';
@@ -21,6 +22,8 @@ import { GoogleDriveService } from '../google-drive/google-drive.service';
 
 @Injectable()
 export class DokumenService {
+  private readonly logger = new Logger(DokumenService.name);
+
   constructor(
     private prisma: PrismaService,
     private googleDriveService: GoogleDriveService,
