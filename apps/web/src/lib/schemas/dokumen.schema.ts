@@ -22,7 +22,6 @@ export const dokumenSchema = z.object({
   }),
   nomor_bukti: z.string().optional().or(z.literal("")),
   tanggal_dokumen: z.string().optional().or(z.literal("")),
-  adalah_rahasia: z.boolean(),
   catatan: z.string().optional().or(z.literal("")),
   file: z
     .instanceof(File)

@@ -22,7 +22,6 @@ export interface DokumenEntity {
   ukuran_file: number | null;
   tipe_file: string | null;
   versi: number;
-  adalah_rahasia: boolean;
   diunggah_oleh: string | null;
   tanggal_dokumen: Date | null;
   tanggal_upload: Date;
@@ -57,7 +56,6 @@ export interface CreateDokumenData {
   ukuran_file?: number | null;
   tipe_file?: string | null;
   versi?: number;
-  adalah_rahasia?: boolean;
   diunggah_oleh: string;
   tanggal_dokumen?: Date | null;
   catatan?: string | null;
@@ -73,7 +71,6 @@ export interface UpdateDokumenData {
   ukuran_file?: number | null;
   tipe_file?: string | null;
   versi?: number;
-  adalah_rahasia?: boolean;
   tanggal_dokumen?: Date | null;
   catatan?: string | null;
 }

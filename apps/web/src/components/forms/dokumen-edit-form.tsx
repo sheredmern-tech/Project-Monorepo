@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -33,17 +32,15 @@ export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: 
       nama_dokumen: initialData.nama_dokumen,
       kategori: initialData.kategori,
       nomor_bukti: initialData.nomor_bukti || "",
-      tanggal_dokumen: initialData.tanggal_dokumen 
+      tanggal_dokumen: initialData.tanggal_dokumen
         ? new Date(initialData.tanggal_dokumen).toISOString().split('T')[0]
         : "",
-      adalah_rahasia: initialData.adalah_rahasia,
       catatan: initialData.catatan || "",
     },
   });
 
   // Use useWatch instead of watch for better React Compiler compatibility
   const kategori = useWatch({ control, name: "kategori" });
-  const adalahRahasia = useWatch({ control, name: "adalah_rahasia" });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -101,16 +98,6 @@ export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: 
                 {...register("tanggal_dokumen")}
               />
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="adalah_rahasia"
-              checked={adalahRahasia}
-              onCheckedChange={(checked) => setValue("adalah_rahasia", checked)}
-              disabled={isLoading}
-            />
-            <Label htmlFor="adalah_rahasia">Dokumen rahasia (akses terbatas)</Label>
           </div>
 
           <div className="space-y-2">

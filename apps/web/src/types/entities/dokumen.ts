@@ -22,7 +22,6 @@ export interface DokumenEntity {
   ukuran_file: number | null;
   tipe_file: string | null;
   versi: number;
-  adalah_rahasia: boolean;
   diunggah_oleh: string | null;
   tanggal_dokumen: string | null;
   tanggal_upload: string;

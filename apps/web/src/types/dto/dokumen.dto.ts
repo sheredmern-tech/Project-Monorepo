@@ -17,7 +17,6 @@ export interface CreateDokumenDto {
   ukuran_file?: number;
   tipe_file?: string;
   versi?: number;
-  adalah_rahasia?: boolean;
   tanggal_dokumen?: string;
   catatan?: string;
 }
@@ -30,7 +29,6 @@ export interface UpdateDokumenDto {
   kategori?: KategoriDokumen;
   nomor_bukti?: string;
   tanggal_dokumen?: string;
-  adalah_rahasia?: boolean;
   catatan?: string;
 }
 /**

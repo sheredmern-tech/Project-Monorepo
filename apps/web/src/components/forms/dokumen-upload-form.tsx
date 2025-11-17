@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
@@ -64,7 +63,6 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
     resolver: zodResolver(dokumenSchema),
     defaultValues: {
       kategori: KategoriDokumen.LAINNYA,
-      adalah_rahasia: false,
       nomor_bukti: "",
       tanggal_dokumen: "",
       catatan: "",
@@ -81,7 +79,6 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
   } = form;
 
   const perkaraId = useWatch({ control, name: "perkara_id" });
-  const adalahRahasia = useWatch({ control, name: "adalah_rahasia" });
   const kategori = useWatch({ control, name: "kategori" });
   const namaDokumen = useWatch({ control, name: "nama_dokumen" });
 
@@ -144,7 +141,6 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
       formData.append("perkara_id", data.perkara_id);
       formData.append("nama_dokumen", data.nama_dokumen);
       formData.append("kategori", data.kategori);
-      formData.append("adalah_rahasia", String(data.adalah_rahasia ?? false));
 
       if (data.nomor_bukti) formData.append("nomor_bukti", data.nomor_bukti);
       
@@ -417,16 +413,6 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
                 {...register("tanggal_dokumen")}
               />
             </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="adalah_rahasia"
-              checked={adalahRahasia}
-              onCheckedChange={(checked) => setValue("adalah_rahasia", checked)}
-              disabled={isLoading}
-            />
-            <Label htmlFor="adalah_rahasia">Dokumen rahasia (akses terbatas)</Label>
           </div>
 
           <div className="space-y-2">

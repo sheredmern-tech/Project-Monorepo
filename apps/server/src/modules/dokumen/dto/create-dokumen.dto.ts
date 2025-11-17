@@ -30,17 +30,6 @@ export class CreateDokumenDto {
   @IsString()
   nomor_bukti?: string;
 
-  @ApiPropertyOptional({ example: false, default: false })
-  @IsOptional()
-  @Transform(({ value }) => {
-    // Handle FormData string to boolean conversion
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    return Boolean(value);
-  })
-  @IsBoolean()
-  adalah_rahasia?: boolean;
-
   @ApiPropertyOptional({ example: '2024-01-15T00:00:00Z' })
   @IsOptional()
   @IsDateString()

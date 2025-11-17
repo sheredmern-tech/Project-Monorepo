@@ -11,8 +11,6 @@ import {
   ArrowLeft,
   Download,
   Eye,
-  Lock,
-  Unlock,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -158,17 +156,6 @@ export default function DokumenDetailPage() {
             {getFileExtension(dokumen.nama_dokumen)}
           </Badge>
           <Badge variant="outline">v{dokumen.versi}</Badge>
-          {dokumen.adalah_rahasia ? (
-            <Badge variant="destructive">
-              <Lock className="mr-1 h-3 w-3" />
-              Rahasia
-            </Badge>
-          ) : (
-            <Badge variant="outline">
-              <Unlock className="mr-1 h-3 w-3" />
-              Publik
-            </Badge>
-          )}
         </div>
       </div>
 
@@ -358,14 +345,6 @@ export default function DokumenDetailPage() {
               <CardTitle>Informasi</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
-                {dokumen.adalah_rahasia ? (
-                  <Badge variant="destructive">Rahasia</Badge>
-                ) : (
-                  <Badge variant="outline">Publik</Badge>
-                )}
-              </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Versi</span>
                 <Badge variant="secondary">v{dokumen.versi}</Badge>

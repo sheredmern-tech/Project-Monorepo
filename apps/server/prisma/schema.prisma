@@ -184,7 +184,6 @@ model DokumenHukum {
   ukuran_file       Int?
   tipe_file         String?
   versi             Int             @default(1)
-  adalah_rahasia    Boolean         @default(false)
   diunggah_oleh     String?
   tanggal_dokumen   DateTime?
   tanggal_upload    DateTime        @default(now())

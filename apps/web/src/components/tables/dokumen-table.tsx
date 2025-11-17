@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Eye, Edit, Trash2, Download, Lock, AlertCircle } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, Download, AlertCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -160,14 +160,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                     <div className="flex items-center gap-3">
                       <Icon className="h-8 w-8 text-muted-foreground" />
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium">{dokumen.nama_dokumen}</p>
-                          {dokumen.adalah_rahasia && (
-                            <span title="Dokumen Rahasia">
-                              <Lock className="h-3 w-3 text-red-500" />
-                            </span>
-                          )}
-                        </div>
+                        <p className="font-medium">{dokumen.nama_dokumen}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="outline" className="text-xs">
                             {extension}
