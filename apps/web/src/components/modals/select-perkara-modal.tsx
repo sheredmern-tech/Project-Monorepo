@@ -85,9 +85,9 @@ export function SelectPerkaraModal({
         return "default"
       case "selesai":
         return "secondary"
-      case "ditunda":
+      case "pending":
         return "outline"
-      case "dibatalkan":
+      case "arsip":
         return "destructive"
       default:
         return "default"
@@ -99,10 +99,14 @@ export function SelectPerkaraModal({
     const jenisMap: Record<JenisPerkara, string> = {
       pidana: "Pidana",
       perdata: "Perdata",
+      keluarga: "Keluarga",
+      perusahaan: "Perusahaan",
+      pertanahan: "Pertanahan",
+      hki: "HKI",
+      ketenagakerjaan: "Ketenagakerjaan",
+      pajak: "Pajak",
       tata_usaha_negara: "TUN",
       niaga: "Niaga",
-      hubungan_industrial: "HI",
-      lain_lain: "Lainnya",
     }
     return jenisMap[jenis] || jenis
   }
