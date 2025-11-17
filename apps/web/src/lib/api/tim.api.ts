@@ -310,17 +310,111 @@ export const timApi = {
     const response = await apiClient.post('/users/export', params, {
       responseType: 'blob',
     });
-    
+
     if (response instanceof Blob) {
       return response;
     }
-    
+
     if (response && typeof response === 'object' && 'data' in response) {
       const wrappedResponse = response as unknown as { data: Blob };
       return wrappedResponse.data;
     }
-    
+
     throw new Error("Invalid blob response");
+  },
+
+  exportUsersToGoogleDrive: async (params: {
+    format: 'csv' | 'excel';
+    filters?: ExportUsersFilters;
+  }): Promise<{
+    fileId: string;
+    fileName: string;
+    webViewLink: string;
+    webContentLink: string;
+    embedLink: string;
+  }> => {
+    const response = await apiClient.post('/users/export-to-drive', params);
+
+    if (response && typeof response === 'object' && 'data' in response) {
+      const wrappedResponse = response as unknown as {
+        data: {
+          fileId: string;
+          fileName: string;
+          webViewLink: string;
+          webContentLink: string;
+          embedLink: string;
+        };
+      };
+      return wrappedResponse.data;
+    }
+
+    if (response && typeof response === 'object' && 'fileId' in response) {
+      return response as {
+        fileId: string;
+        fileName: string;
+        webViewLink: string;
+        webContentLink: string;
+        embedLink: string;
+      };
+    }
+
+    throw new Error("Invalid response format");
+  },
+
+  listGoogleDriveFiles: async (): Promise<Array<{
+    id: string;
+    name: string;
+    mimeType: string;
+    size: string;
+    createdTime: string;
+    modifiedTime: string;
+    webViewLink: string;
+  }>> => {
+    const response = await apiClient.get('/users/drive-files');
+
+    if (response && typeof response === 'object' && 'data' in response) {
+      const wrappedResponse = response as unknown as {
+        data: Array<{
+          id: string;
+          name: string;
+          mimeType: string;
+          size: string;
+          createdTime: string;
+          modifiedTime: string;
+          webViewLink: string;
+        }>;
+      };
+      return wrappedResponse.data;
+    }
+
+    if (Array.isArray(response)) {
+      return response as Array<{
+        id: string;
+        name: string;
+        mimeType: string;
+        size: string;
+        createdTime: string;
+        modifiedTime: string;
+        webViewLink: string;
+      }>;
+    }
+
+    throw new Error("Invalid response format");
+  },
+
+  importUsersFromGoogleDrive: async (fileId: string): Promise<BulkImportResult> => {
+    const response = await apiClient.post(`/users/import-from-drive/${fileId}`);
+
+    if (response && typeof response === 'object' && 'data' in response) {
+      const wrappedResponse = response as unknown as { data: BulkImportResult };
+      return wrappedResponse.data;
+    }
+
+    if (response && typeof response === 'object' && 'success' in response) {
+      return response as BulkImportResult;
+    }
+
+    throw new Error("Invalid response format");
   },
 
   // Tim Perkara Endpoints

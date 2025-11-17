@@ -266,32 +266,63 @@ export default function TimPage() {
     }
   };
 
-  const handleExport = async (format: 'csv' | 'excel' = 'csv') => {
+  const handleExport = async (format: 'csv' | 'excel' = 'csv', destination: 'local' | 'drive' = 'local') => {
     try {
-      const blob = await timApi.exportUsers({
-        format,
-        filters: {
-          ...(selectedUserIds.size > 0 && {
-            user_ids: Array.from(selectedUserIds)
-          })
-        }
-      });
+      if (destination === 'drive') {
+        // Export to Google Drive
+        const result = await timApi.exportUsersToGoogleDrive({
+          format,
+          filters: {
+            ...(selectedUserIds.size > 0 && {
+              user_ids: Array.from(selectedUserIds)
+            })
+          }
+        });
 
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `tim-export-${new Date().toISOString().split("T")[0]}.${format}`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Berhasil",
-        description: `${selectedUserIds.size > 0 ? selectedUserIds.size : 'Semua'} user berhasil diexport`,
-      });
-    } catch {
+        toast({
+          title: "Berhasil",
+          description: (
+            <div className="space-y-1">
+              <p>{`${selectedUserIds.size > 0 ? selectedUserIds.size : 'Semua'} user berhasil diexport ke Google Drive`}</p>
+              <a
+                href={result.webViewLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline text-sm"
+              >
+                Lihat di Google Drive
+              </a>
+            </div>
+          ),
+        });
+      } else {
+        // Export locally (download)
+        const blob = await timApi.exportUsers({
+          format,
+          filters: {
+            ...(selectedUserIds.size > 0 && {
+              user_ids: Array.from(selectedUserIds)
+            })
+          }
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `tim-export-${new Date().toISOString().split("T")[0]}.${format === 'csv' ? 'csv' : 'xlsx'}`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        toast({
+          title: "Berhasil",
+          description: `${selectedUserIds.size > 0 ? selectedUserIds.size : 'Semua'} user berhasil diexport`,
+        });
+      }
+    } catch (error) {
+      console.error('Export error:', error);
       toast({
         title: "Gagal",
-        description: "Gagal export data",
+        description: `Gagal export data${destination === 'drive' ? ' ke Google Drive' : ''}`,
         variant: "destructive",
       });
     }
@@ -327,14 +358,31 @@ export default function TimPage() {
                   Export
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Format Export</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleExport('csv')}>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuLabel>Export Lokal (Download)</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleExport('csv', 'local')}>
+                  <Download className="mr-2 h-4 w-4" />
                   Export CSV
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('excel')}>
+                <DropdownMenuItem onClick={() => handleExport('excel', 'local')}>
+                  <Download className="mr-2 h-4 w-4" />
                   Export Excel
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuLabel>Export ke Google Drive</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleExport('csv', 'drive')}>
+                  <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.01 1.485c-.291 0-.507.138-.65.254L3.52 8.727a1.121 1.121 0 0 0-.099 1.563l5.521 6.345c.292.376.807.459 1.17.194l7.653-5.598c.364-.265.47-.773.245-1.168L13.38 1.775c-.15-.263-.454-.29-.645-.29H12.01zM6.65 11.935L1.18 16.854a1.122 1.122 0 0 0-.18 1.573l3.695 4.597c.293.365.82.422 1.177.127l7.626-6.309a.86.86 0 0 0 .02-1.298l-5.617-3.85a1.121 1.121 0 0 0-1.251.241zm9.855-.263l5.445 9.633c.18.32.119.725-.148 1.001l-4.027 4.165c-.299.31-.787.333-1.116.05l-6.964-6.003a.861.861 0 0 1-.065-1.274l5.552-7.739c.206-.288.607-.357.91-.207.085.042.166.098.24.166l.173.208z"/>
+                  </svg>
+                  Save CSV to Drive
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('excel', 'drive')}>
+                  <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.01 1.485c-.291 0-.507.138-.65.254L3.52 8.727a1.121 1.121 0 0 0-.099 1.563l5.521 6.345c.292.376.807.459 1.17.194l7.653-5.598c.364-.265.47-.773.245-1.168L13.38 1.775c-.15-.263-.454-.29-.645-.29H12.01zM6.65 11.935L1.18 16.854a1.122 1.122 0 0 0-.18 1.573l3.695 4.597c.293.365.82.422 1.177.127l7.626-6.309a.86.86 0 0 0 .02-1.298l-5.617-3.85a1.121 1.121 0 0 0-1.251.241zm9.855-.263l5.445 9.633c.18.32.119.725-.148 1.001l-4.027 4.165c-.299.31-.787.333-1.116.05l-6.964-6.003a.861.861 0 0 1-.065-1.274l5.552-7.739c.206-.288.607-.357.91-.207.085.042.166.098.24.166l.173.208z"/>
+                  </svg>
+                  Save Excel to Drive
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

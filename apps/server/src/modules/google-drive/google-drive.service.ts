@@ -584,4 +584,105 @@ export class GoogleDriveService {
       };
     }
   }
+
+  /**
+   * Download file from Google Drive as Buffer
+   */
+  async downloadFile(fileId: string): Promise<Buffer> {
+    try {
+      this.logger.log(`📥 Downloading file from Google Drive: ${fileId}`);
+
+      const response = await this.drive.files.get(
+        {
+          fileId,
+          alt: 'media',
+        },
+        { responseType: 'arraybuffer' },
+      );
+
+      const buffer = Buffer.from(response.data as ArrayBuffer);
+
+      this.logger.log(
+        `✅ File downloaded successfully: ${buffer.length} bytes`,
+      );
+
+      return buffer;
+    } catch (error) {
+      this.logger.error(`Failed to download file: ${fileId}`, error);
+      throw new BadRequestException(
+        'Failed to download file from Google Drive',
+      );
+    }
+  }
+
+  /**
+   * List files in Google Drive (optionally filter by folder and mime type)
+   */
+  async listFiles(options?: {
+    folderId?: string;
+    mimeType?: string;
+    nameContains?: string;
+    pageSize?: number;
+  }): Promise<Array<{
+    id: string;
+    name: string;
+    mimeType: string;
+    size: string;
+    createdTime: string;
+    modifiedTime: string;
+    webViewLink: string;
+  }>> {
+    try {
+      const {
+        folderId,
+        mimeType,
+        nameContains,
+        pageSize = 100,
+      } = options || {};
+
+      // Build query
+      const queryParts: string[] = ['trashed=false'];
+
+      if (folderId) {
+        queryParts.push(`'${folderId}' in parents`);
+      }
+
+      if (mimeType) {
+        queryParts.push(`mimeType='${mimeType}'`);
+      }
+
+      if (nameContains) {
+        queryParts.push(`name contains '${nameContains}'`);
+      }
+
+      const query = queryParts.join(' and ');
+
+      this.logger.log(`📂 Listing files with query: ${query}`);
+
+      const response = await this.drive.files.list({
+        q: query,
+        pageSize,
+        orderBy: 'modifiedTime desc',
+        fields:
+          'files(id, name, mimeType, size, createdTime, modifiedTime, webViewLink)',
+      });
+
+      const files = response.data.files || [];
+
+      this.logger.log(`✅ Found ${files.length} files`);
+
+      return files.map((file) => ({
+        id: file.id,
+        name: file.name,
+        mimeType: file.mimeType,
+        size: file.size || '0',
+        createdTime: file.createdTime,
+        modifiedTime: file.modifiedTime,
+        webViewLink: file.webViewLink,
+      }));
+    } catch (error) {
+      this.logger.error('Failed to list files', error);
+      throw new BadRequestException('Failed to list files from Google Drive');
+    }
+  }
 }

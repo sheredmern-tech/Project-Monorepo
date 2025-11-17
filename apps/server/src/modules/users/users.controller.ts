@@ -412,7 +412,7 @@ export class UsersController {
 
   @Post('export')
   @Roles(UserRole.admin)
-  @ApiOperation({ summary: 'Export users to CSV/Excel' })
+  @ApiOperation({ summary: 'Export users to CSV/Excel (local download)' })
   @ApiResponse({ status: 200, description: 'Users exported successfully' })
   async exportUsers(
     @Body() dto: ExportUsersDto,
@@ -456,5 +456,97 @@ export class UsersController {
       `attachment; filename=users-export-${Date.now()}.xlsx`,
     );
     res.send(buffer);
+  }
+
+  @Post('export-to-drive')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Export users to Google Drive' })
+  @ApiResponse({
+    status: 200,
+    description: 'Users exported to Google Drive successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        fileId: { type: 'string', example: '1a2b3c4d5e6f7g8h9i0j' },
+        fileName: { type: 'string', example: 'users-export-1234567890.xlsx' },
+        webViewLink: {
+          type: 'string',
+          example: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view',
+        },
+        webContentLink: {
+          type: 'string',
+          example:
+            'https://drive.google.com/uc?id=1a2b3c4d5e6f7g8h9i0j&export=download',
+        },
+        embedLink: {
+          type: 'string',
+          example: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/preview',
+        },
+      },
+    },
+  })
+  async exportToGoogleDrive(@Body() dto: ExportUsersDto) {
+    const { format, filters } = dto;
+    return this.usersService.exportUsersToGoogleDrive(format, filters);
+  }
+
+  @Get('drive-files')
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'List import files from Google Drive' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of CSV/Excel files in Google Drive',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+          mimeType: { type: 'string' },
+          size: { type: 'string' },
+          createdTime: { type: 'string' },
+          modifiedTime: { type: 'string' },
+          webViewLink: { type: 'string' },
+        },
+      },
+    },
+  })
+  listGoogleDriveFiles() {
+    return this.usersService.listGoogleDriveImportFiles();
+  }
+
+  @Post('import-from-drive/:fileId')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Import users from Google Drive file' })
+  @ApiResponse({
+    status: 200,
+    description: 'Import completed',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'number', example: 5 },
+        failed: { type: 'number', example: 1 },
+        errors: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              row: { type: 'number' },
+              email: { type: 'string' },
+              reason: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+  })
+  importFromGoogleDrive(
+    @Param('fileId') fileId: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.usersService.importUsersFromGoogleDrive(fileId, userId);
   }
 }

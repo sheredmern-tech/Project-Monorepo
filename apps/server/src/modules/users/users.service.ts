@@ -16,6 +16,7 @@ import { QueryUserDto } from './dto/query-user.dto';
 import { StorageService } from '../storage/storage.service';
 import { EmailService } from '../email/email.service';
 import { ConfigService } from '@nestjs/config';
+import { GoogleDriveService } from '../google-drive/google-drive.service';
 import {
   PaginatedResult,
   UserEntity,
@@ -55,6 +56,7 @@ export class UsersService {
     private storage: StorageService,
     private email: EmailService,
     private config: ConfigService,
+    private googleDrive: GoogleDriveService,
   ) {}
 
   async create(
@@ -884,6 +886,175 @@ export class UsersService {
     } catch (error) {
       throw new BadRequestException(
         `Failed to parse file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * Export users to Google Drive
+   */
+  async exportUsersToGoogleDrive(
+    format: 'csv' | 'excel',
+    filters?: QueryUserDto,
+  ): Promise<{
+    fileId: string;
+    fileName: string;
+    webViewLink: string;
+    webContentLink: string;
+    embedLink: string;
+  }> {
+    try {
+      // Get users data
+      const result = await this.findAll(filters || {});
+      const users = result.data;
+
+      let buffer: Buffer;
+      let fileName: string;
+      let mimeType: string;
+
+      if (format === 'csv') {
+        // Generate CSV
+        const csv = Papa.unparse(users);
+        buffer = Buffer.from(csv, 'utf-8');
+        fileName = `users-export-${Date.now()}.csv`;
+        mimeType = 'text/csv';
+      } else {
+        // Generate Excel
+        const worksheet = XLSX.utils.json_to_sheet(users);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+
+        buffer = XLSX.write(workbook, {
+          type: 'buffer',
+          bookType: 'xlsx',
+        }) as Buffer;
+
+        fileName = `users-export-${Date.now()}.xlsx`;
+        mimeType =
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      }
+
+      // Upload to Google Drive
+      const driveFile = await this.googleDrive.uploadFile({
+        fileName,
+        mimeType,
+        buffer,
+      });
+
+      console.log(
+        `✅ Users exported to Google Drive: ${driveFile.name} (${driveFile.id})`,
+      );
+
+      return {
+        fileId: driveFile.id,
+        fileName: driveFile.name,
+        webViewLink: driveFile.webViewLink,
+        webContentLink: driveFile.webContentLink,
+        embedLink: driveFile.embedLink,
+      };
+    } catch (error) {
+      console.error('Export to Google Drive failed:', error);
+      throw new BadRequestException(
+        `Failed to export users to Google Drive: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * List import files from Google Drive (CSV & Excel only)
+   */
+  async listGoogleDriveImportFiles(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      mimeType: string;
+      size: string;
+      createdTime: string;
+      modifiedTime: string;
+      webViewLink: string;
+    }>
+  > {
+    try {
+      // Get CSV files
+      const csvFiles = await this.googleDrive.listFiles({
+        mimeType: 'text/csv',
+        nameContains: 'user',
+        pageSize: 50,
+      });
+
+      // Get Excel files
+      const excelFiles = await this.googleDrive.listFiles({
+        mimeType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        nameContains: 'user',
+        pageSize: 50,
+      });
+
+      // Combine and sort by modified time
+      const allFiles = [...csvFiles, ...excelFiles].sort(
+        (a, b) =>
+          new Date(b.modifiedTime).getTime() -
+          new Date(a.modifiedTime).getTime(),
+      );
+
+      console.log(
+        `✅ Found ${allFiles.length} import files in Google Drive`,
+      );
+
+      return allFiles;
+    } catch (error) {
+      console.error('List Google Drive files failed:', error);
+      throw new BadRequestException(
+        'Failed to list files from Google Drive',
+      );
+    }
+  }
+
+  /**
+   * Import users from Google Drive file
+   */
+  async importUsersFromGoogleDrive(
+    fileId: string,
+    currentUserId: string,
+  ): Promise<BulkOperationResult> {
+    try {
+      console.log(`📥 Importing users from Google Drive file: ${fileId}`);
+
+      // Download file from Google Drive
+      const buffer = await this.googleDrive.downloadFile(fileId);
+
+      // Get file metadata to determine type
+      const fileMetadata = await this.googleDrive.getFile(fileId);
+      const fileName = fileMetadata.name;
+
+      // Create a mock file object for bulkImportUsers
+      const mockFile: Express.Multer.File = {
+        fieldname: 'file',
+        originalname: fileName,
+        encoding: '7bit',
+        mimetype: fileName.endsWith('.xlsx')
+          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          : 'text/csv',
+        buffer,
+        size: buffer.length,
+        stream: null,
+        destination: '',
+        filename: fileName,
+        path: '',
+      };
+
+      // Reuse existing bulk import logic
+      const result = await this.bulkImportUsers(mockFile, currentUserId);
+
+      console.log(
+        `✅ Import from Google Drive completed: ${result.success} success, ${result.failed} failed`,
+      );
+
+      return result;
+    } catch (error) {
+      console.error('Import from Google Drive failed:', error);
+      throw new BadRequestException(
+        `Failed to import users from Google Drive: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
