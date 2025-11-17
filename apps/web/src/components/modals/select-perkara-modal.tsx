@@ -107,6 +107,7 @@ export function SelectPerkaraModal({
       pajak: "Pajak",
       tata_usaha_negara: "TUN",
       niaga: "Niaga",
+      lainnya: "Lainnya",
     }
     return jenisMap[jenis] || jenis
   }
