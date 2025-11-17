@@ -52,7 +52,7 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-[98vw] lg:max-w-[1600px] max-h-[90vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/50 flex-shrink-0">
           <div className="flex items-start justify-between gap-4">
