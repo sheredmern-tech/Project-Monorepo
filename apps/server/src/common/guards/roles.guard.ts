@@ -28,6 +28,11 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
+    // ✅ ADMIN BYPASS - ADMIN can access ALL endpoints
+    if (user.role === UserRole.admin) {
+      return true;
+    }
+
     return requiredRoles.some((role) => user.role === role);
   }
 }

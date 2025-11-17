@@ -267,6 +267,7 @@ model AksesPortalKlien {
 
 enum UserRole {
   admin
+  partner
   advokat
   paralegal
   staff
