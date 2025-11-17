@@ -4,7 +4,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '../../../common/dto/pagination.dto';
 import { Type } from 'class-transformer';
 
-export class QueryKonfikDto extends PaginationDto {
+export class QueryKonflikDto extends PaginationDto {
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Boolean)

@@ -16,10 +16,10 @@ import {
   ApiBearerAuth,
   ApiResponse,
 } from '@nestjs/swagger';
-import { KonfikService } from './konflik.service';
-import { CreateKonfikDto } from './dto/create-konflik.dto';
-import { UpdateKonfikDto } from './dto/update-konflik.dto';
-import { QueryKonfikDto } from './dto/query-konflik.dto';
+import { KonflikService } from './konflik.service';
+import { CreateKonflikDto } from './dto/create-konflik.dto';
+import { UpdateKonflikDto } from './dto/update-konflik.dto';
+import { QueryKonflikDto } from './dto/query-konflik.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -29,8 +29,8 @@ import { UserRole } from '@prisma/client';
 @ApiBearerAuth()
 @Controller('konflik')
 @UseGuards(RolesGuard)
-export class KonfikController {
-  constructor(private readonly konfikService: KonfikService) {}
+export class KonflikController {
+  constructor(private readonly konflikService: KonflikService) {}
 
   @Post()
   @Roles(UserRole.admin, UserRole.advokat)
@@ -39,8 +39,8 @@ export class KonfikController {
     status: 201,
     description: 'Pemeriksaan konflik berhasil dibuat',
   })
-  create(@Body() dto: CreateKonfikDto, @CurrentUser('id') userId: string) {
-    return this.konfikService.create(dto, userId);
+  create(@Body() dto: CreateKonflikDto, @CurrentUser('id') userId: string) {
+    return this.konflikService.create(dto, userId);
   }
 
   @Get()
@@ -50,8 +50,8 @@ export class KonfikController {
     status: 200,
     description: 'Data pemeriksaan konflik berhasil diambil',
   })
-  findAll(@Query() query: QueryKonfikDto) {
-    return this.konfikService.findAll(query);
+  findAll(@Query() query: QueryKonflikDto) {
+    return this.konflikService.findAll(query);
   }
 
   @Get(':id')
@@ -62,7 +62,7 @@ export class KonfikController {
     description: 'Detail pemeriksaan konflik berhasil diambil',
   })
   findOne(@Param('id') id: string) {
-    return this.konfikService.findOne(id);
+    return this.konflikService.findOne(id);
   }
 
   @Patch(':id')
@@ -74,10 +74,10 @@ export class KonfikController {
   })
   update(
     @Param('id') id: string,
-    @Body() dto: UpdateKonfikDto,
+    @Body() dto: UpdateKonflikDto,
     @CurrentUser('id') userId: string,
   ) {
-    return this.konfikService.update(id, dto, userId);
+    return this.konflikService.update(id, dto, userId);
   }
 
   @Delete(':id')
@@ -88,6 +88,6 @@ export class KonfikController {
     description: 'Pemeriksaan konflik berhasil dihapus',
   })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
-    return this.konfikService.remove(id, userId);
+    return this.konflikService.remove(id, userId);
   }
 }

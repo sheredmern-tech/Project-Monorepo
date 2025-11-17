@@ -2,9 +2,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { CreateKonfikDto } from './dto/create-konflik.dto';
-import { UpdateKonfikDto } from './dto/update-konflik.dto';
-import { QueryKonfikDto } from './dto/query-konflik.dto';
+import { CreateKonflikDto } from './dto/create-konflik.dto';
+import { UpdateKonflikDto } from './dto/update-konflik.dto';
+import { QueryKonflikDto } from './dto/query-konflik.dto';
 import {
   PaginatedResult,
   KonflikWithRelations,
@@ -12,11 +12,11 @@ import {
 } from '../../common/interfaces';
 
 @Injectable()
-export class KonfikService {
+export class KonflikService {
   constructor(private prisma: PrismaService) {}
 
   async create(
-    dto: CreateKonfikDto,
+    dto: CreateKonflikDto,
     userId: string,
   ): Promise<KonflikWithRelations> {
     const konflik = await this.prisma.pemeriksaanKonflik.create({
@@ -67,7 +67,7 @@ export class KonfikService {
   }
 
   async findAll(
-    query: QueryKonfikDto,
+    query: QueryKonflikDto,
   ): Promise<PaginatedResult<KonflikWithRelations>> {
     const {
       page = 1,
@@ -178,7 +178,7 @@ export class KonfikService {
 
   async update(
     id: string,
-    dto: UpdateKonfikDto,
+    dto: UpdateKonflikDto,
     userId: string,
   ): Promise<KonflikWithRelations> {
     await this.findOne(id);

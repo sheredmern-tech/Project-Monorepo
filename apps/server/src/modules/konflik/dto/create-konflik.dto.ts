@@ -2,7 +2,7 @@
 import { IsString, IsBoolean, IsOptional, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateKonfikDto {
+export class CreateKonflikDto {
   @ApiPropertyOptional({ example: 'uuid-perkara' })
   @IsOptional()
   @IsUUID()
