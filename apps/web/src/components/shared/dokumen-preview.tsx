@@ -54,8 +54,9 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-[90vw] md:max-w-[95vw] lg:max-w-[1600px] max-h-[90vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
+        {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/50 flex-shrink-0">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-3 pr-8">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-5 w-5 text-primary flex-shrink-0" />
@@ -82,7 +83,7 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
             </div>
 
             {/* Action Buttons */}
-            <div className="hidden lg:flex gap-2 flex-shrink-0">
+            <div className="hidden lg:flex gap-2">
               <Button variant="outline" size="sm" onClick={handleOpenInDrive}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open in Drive
