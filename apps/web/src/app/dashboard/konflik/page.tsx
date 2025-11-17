@@ -23,16 +23,20 @@ export default function KonflikPage() {
   const [total, setTotal] = useState(0);
   const limit = 10;
 
+  // Track if auth is loaded (fixes race condition)
+  const isAuthLoaded = permissions.user !== null || permissions.role !== undefined;
+
   // 🔍 DEBUG: Log permission state for troubleshooting
   useEffect(() => {
     console.log('=== KONFLIK PERMISSION DEBUG ===');
+    console.log('Auth Loaded:', isAuthLoaded);
     console.log('User Role:', permissions.role);
     console.log('Is Admin:', permissions.isAdmin);
     console.log('Can Create Konflik:', permissions.konflik.create);
     console.log('Can Read Konflik:', permissions.konflik.read);
     console.log('User:', permissions.user);
     console.log('================================');
-  }, [permissions]);
+  }, [permissions, isAuthLoaded]);
 
   const fetchKonflik = async () => {
     try {
@@ -76,18 +80,21 @@ export default function KonflikPage() {
         description="Kelola pemeriksaan konflik kepentingan"
         action={
           <div className="flex gap-2">
-            {/* 🔒 Permission-based button */}
-            {permissions.konflik.create ? (
+            {/* Show loading state while auth loads */}
+            {!isAuthLoaded ? (
+              <div className="text-sm text-muted-foreground animate-pulse">
+                Memuat...
+              </div>
+            ) : permissions.konflik.create ? (
+              /* ✅ Auth loaded + has permission */
               <Button onClick={() => router.push("/dashboard/konflik/baru")}>
                 <Plus className="mr-2 h-4 w-4" />
                 Periksa Konflik
               </Button>
             ) : (
-              /* 🔍 DEBUG: Show why button is hidden */
+              /* ❌ Auth loaded but no permission */
               <div className="text-sm text-muted-foreground">
-                {permissions.role
-                  ? `⚠️ Role "${permissions.role}" tidak punya akses konflik:create`
-                  : '⚠️ User role tidak terdeteksi - silakan login ulang'}
+                ⚠️ Role "{permissions.role}" tidak punya akses konflik:create
               </div>
             )}
           </div>
