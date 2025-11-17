@@ -3,7 +3,7 @@
 // ============================================================================
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,15 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { timApi } from "@/lib/api/tim.api";
+import { SelectAdvokatModal } from "@/components/modals/select-advokat-modal";
 import { CreateTimPerkaraDto } from "@/types";
 
 // ✅ Validation Schema
@@ -47,14 +39,8 @@ export function TimPerkaraForm({
   onCancel,
   existingMemberIds = [],
 }: TimPerkaraFormProps) {
-  const [userList, setUserList] = useState<Array<{
-    id: string;
-    nama_lengkap: string | null;
-    email: string;
-    jabatan: string | null;
-  }>>([]);
-  const [openUser, setOpenUser] = useState(false);
-  const [searchUser, setSearchUser] = useState("");
+  const [openUserModal, setOpenUserModal] = useState(false);
+  const [selectedUserName, setSelectedUserName] = useState<string>("");
 
   const form = useForm<TimPerkaraFormData>({
     resolver: zodResolver(timPerkaraSchema),
@@ -76,34 +62,6 @@ export function TimPerkaraForm({
   // Use useWatch instead of watch for React Compiler compatibility
   const userId = useWatch({ control, name: "user_id" });
 
-  // Fetch user list
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await timApi.getAllUsers({ limit: 100 });
-        // Filter out existing members
-        const availableUsers = response.data.filter(
-          (user) => !existingMemberIds.includes(user.id)
-        );
-        setUserList(availableUsers);
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-      }
-    };
-    fetchUsers();
-  }, [existingMemberIds]);
-
-  const selectedUser = userList.find((u) => u.id === userId);
-
-  // Filter users based on search using useMemo for performance
-  const filteredUsers = useMemo(() => {
-    return userList.filter((user) =>
-      (user.nama_lengkap || user.email)
-        .toLowerCase()
-        .includes(searchUser.toLowerCase())
-    );
-  }, [userList, searchUser]);
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <Card>
@@ -111,78 +69,32 @@ export function TimPerkaraForm({
           <CardTitle>Tambah Anggota Tim</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* User Selection */}
+          {/* User Selection with Searchable Modal */}
           <div className="space-y-2">
             <Label>
               Pilih Anggota Tim <span className="text-red-500">*</span>
             </Label>
-            <Popover open={openUser} onOpenChange={setOpenUser}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openUser}
-                  className="w-full justify-between"
-                  disabled={isLoading}
-                >
-                  {selectedUser ? (
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">
-                        {selectedUser.nama_lengkap || selectedUser.email}
-                      </span>
-                      {selectedUser.jabatan && (
-                        <span className="text-xs text-muted-foreground">
-                          {selectedUser.jabatan}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    "Pilih anggota tim..."
-                  )}
-                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0">
-                <Command>
-                  <CommandInput
-                    placeholder="Cari anggota tim..."
-                    value={searchUser}
-                    onValueChange={setSearchUser}
-                  />
-                  <CommandEmpty>
-                    {userList.length === 0
-                      ? "Semua anggota sudah ditambahkan"
-                      : "Anggota tidak ditemukan"}
-                  </CommandEmpty>
-                  <CommandGroup className="max-h-64 overflow-auto">
-                    {filteredUsers.map((user) => (
-                      <CommandItem
-                        key={user.id}
-                        value={user.nama_lengkap || user.email}
-                        onSelect={() => {
-                          setValue("user_id", user.id);
-                          setOpenUser(false);
-                        }}
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {user.nama_lengkap || user.email}
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            {user.email}
-                          </span>
-                          {user.jabatan && (
-                            <span className="text-xs text-muted-foreground">
-                              {user.jabatan}
-                            </span>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start gap-2 h-auto py-3"
+              disabled={isLoading}
+              onClick={() => setOpenUserModal(true)}
+            >
+              {selectedUserName ? (
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="font-medium">{selectedUserName}</span>
+                  <span className="text-xs text-muted-foreground">
+                    Klik untuk ubah
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <Search className="h-4 w-4" />
+                  <span>Pilih anggota tim...</span>
+                </>
+              )}
+            </Button>
             {errors.user_id && (
               <p className="text-sm text-red-500">{errors.user_id.message}</p>
             )}
@@ -219,6 +131,19 @@ export function TimPerkaraForm({
           Batal
         </Button>
       </div>
+
+      {/* User Selection Modal */}
+      <SelectAdvokatModal
+        open={openUserModal}
+        onOpenChange={setOpenUserModal}
+        onSelect={(user) => {
+          setValue("user_id", user.id);
+          setSelectedUserName(user.nama_lengkap || user.email);
+        }}
+        roleFilter="all"
+        title="Pilih Anggota Tim"
+        description="Pilih anggota tim untuk perkara ini"
+      />
     </form>
   );
 }

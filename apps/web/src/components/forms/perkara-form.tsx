@@ -3,7 +3,7 @@
 // ============================================================================
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search, AlertCircle } from "lucide-react";
@@ -20,25 +20,11 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { SelectKlienModal } from "@/components/modals/select-klien-modal";
 import { perkaraSchema, PerkaraFormData } from "@/lib/schemas/perkara.schema";
 import { PerkaraEntity, JenisPerkara, StatusPerkara, PrioritasTugas } from "@/types";
-import { klienApi } from "@/lib/api/klien.api";
 import { handleApiError, formatValidationErrors } from "@/lib/utils/error-handler";
 import { toast } from "sonner";
-
-interface KlienItem {
-  id: string;
-  nama: string;
-  email?: string | null;
-}
 
 interface PerkaraFormProps {
   initialData?: PerkaraEntity;
@@ -55,10 +41,8 @@ export function PerkaraForm({
   onCancel,
   mode = "create",
 }: PerkaraFormProps) {
-  const [klienList, setKlienList] = useState<KlienItem[]>([]);
-  const [openKlien, setOpenKlien] = useState(false);
-  const [searchKlien, setSearchKlien] = useState("");
-  const [loadingKlien, setLoadingKlien] = useState(false);
+  const [openKlienModal, setOpenKlienModal] = useState(false);
+  const [selectedKlienName, setSelectedKlienName] = useState<string>("");
   const [generalError, setGeneralError] = useState<string | null>(null);
 
   const getDefaultValues = (): Partial<PerkaraFormData> => {
@@ -113,24 +97,6 @@ export function PerkaraForm({
   const status = useWatch({ control, name: "status" });
   const prioritas = useWatch({ control, name: "prioritas" });
   const statusPembayaran = useWatch({ control, name: "status_pembayaran" });
-
-  // ✅ Fetch klien with error handling
-  useEffect(() => {
-    const fetchKlien = async () => {
-      try {
-        setLoadingKlien(true);
-        const response = await klienApi.getAll({ limit: 100 });
-        setKlienList(response.data);
-      } catch (error) {
-        handleApiError(error, "Gagal memuat data klien");
-      } finally {
-        setLoadingKlien(false);
-      }
-    };
-    fetchKlien();
-  }, []);
-
-  const selectedKlien = klienList.find((k) => k.id === klienId);
 
   // ✅ Enhanced submit with validation error handling
   const handleFormSubmit = async (data: PerkaraFormData) => {
@@ -295,70 +261,35 @@ export function PerkaraForm({
             </div>
           </div>
 
-          {/* ✅ Klien Selection with Loading State */}
+          {/* ✅ Klien Selection with Searchable Modal */}
           <div className="space-y-2">
             <Label>Klien</Label>
-            <Popover open={openKlien} onOpenChange={setOpenKlien}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openKlien}
-                  className="w-full justify-between"
-                  disabled={isLoading || loadingKlien}
-                >
-                  {loadingKlien ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading...
-                    </span>
-                  ) : selectedKlien ? (
-                    selectedKlien.nama
-                  ) : (
-                    "Pilih klien..."
-                  )}
-                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0">
-                <Command>
-                  <CommandInput
-                    placeholder="Cari klien..."
-                    value={searchKlien}
-                    onValueChange={setSearchKlien}
-                  />
-                  <CommandEmpty>Klien tidak ditemukan</CommandEmpty>
-                  <CommandGroup className="max-h-64 overflow-auto">
-                    <CommandItem
-                      value=""
-                      onSelect={() => {
-                        setValue("klien_id", "");
-                        setOpenKlien(false);
-                      }}
-                    >
-                      <span className="text-muted-foreground">Tidak ada klien</span>
-                    </CommandItem>
-                    {klienList.map((klien) => (
-                      <CommandItem
-                        key={klien.id}
-                        value={klien.nama}
-                        onSelect={() => {
-                          setValue("klien_id", klien.id);
-                          setOpenKlien(false);
-                        }}
-                      >
-                        <div className="flex flex-col">
-                          <span>{klien.nama}</span>
-                          {klien.email && (
-                            <span className="text-sm text-muted-foreground">{klien.email}</span>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start gap-2 h-auto py-3"
+              disabled={isLoading}
+              onClick={() => setOpenKlienModal(true)}
+            >
+              {selectedKlienName ? (
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="font-medium">{selectedKlienName}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {klienId ? "Klik untuk ubah" : ""}
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <Search className="h-4 w-4" />
+                  <span>Pilih klien...</span>
+                </>
+              )}
+            </Button>
+            {klienId && selectedKlienName && (
+              <p className="text-xs text-muted-foreground">
+                Klien dipilih: {selectedKlienName}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -562,6 +493,16 @@ export function PerkaraForm({
           Batal
         </Button>
       </div>
+
+      {/* Klien Selection Modal */}
+      <SelectKlienModal
+        open={openKlienModal}
+        onOpenChange={setOpenKlienModal}
+        onSelect={(klien) => {
+          setValue("klien_id", klien.id);
+          setSelectedKlienName(klien.nama);
+        }}
+      />
     </form>
   );
 }

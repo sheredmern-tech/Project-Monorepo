@@ -27,18 +27,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { SelectAdvokatModal } from "@/components/modals/select-advokat-modal";
 import { tugasSchema, TugasFormData } from "@/lib/schemas/tugas.schema";
 import { TugasEntity, StatusTugas, PrioritasTugas } from "@/types";
 import { perkaraApi } from "@/lib/api/perkara.api";
-import { timApi } from "@/lib/api/tim.api";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { handleApiError, formatValidationErrors } from "@/lib/utils/error-handler";
 import { toast } from "sonner";
@@ -47,12 +39,6 @@ interface PerkaraItem {
   id: string;
   nomor_perkara: string;
   judul: string;
-}
-
-interface UserItem {
-  id: string;
-  nama_lengkap: string;
-  email?: string | null;
 }
 
 interface TugasFormProps {
@@ -72,13 +58,11 @@ export function TugasForm({
 }: TugasFormProps) {
   useAuthStore();
   const [perkaraList, setPerkaraList] = useState<PerkaraItem[]>([]);
-  const [userList, setUserList] = useState<UserItem[]>([]);
   const [openPerkara, setOpenPerkara] = useState(false);
-  const [openUser, setOpenUser] = useState(false);
   const [searchPerkara, setSearchPerkara] = useState("");
-  const [searchUser, setSearchUser] = useState("");
   const [loadingPerkara, setLoadingPerkara] = useState(false);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [openUserModal, setOpenUserModal] = useState(false);
+  const [selectedUserName, setSelectedUserName] = useState<string>("");
   const [generalError, setGeneralError] = useState<string | null>(null);
 
   const getDefaultValues = (): Partial<TugasFormData> => {
@@ -139,34 +123,9 @@ export function TugasForm({
     fetchPerkara();
   }, []);
 
-  // ✅ Fetch users with error handling
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoadingUsers(true);
-        const response = await timApi.getAllUsers({ limit: 100 });
-        setUserList(response.data.map(u => ({
-          id: u.id,
-          nama_lengkap: u.nama_lengkap || u.email,
-          email: u.email,
-        })));
-      } catch (error) {
-        handleApiError(error, "Gagal memuat data user");
-      } finally {
-        setLoadingUsers(false);
-      }
-    };
-    fetchUsers();
-  }, []);
-
   const selectedPerkara = useMemo(
     () => perkaraList.find((p) => p.id === perkaraId),
     [perkaraList, perkaraId]
-  );
-
-  const selectedUser = useMemo(
-    () => userList.find((u) => u.id === ditugaskanKe),
-    [userList, ditugaskanKe]
   );
 
   // ✅ Enhanced submit with validation error handling
@@ -364,68 +323,30 @@ export function TugasForm({
           <CardTitle>Penugasan</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* ✅ User Selection with Loading */}
+          {/* ✅ User Selection with Searchable Modal */}
           <div className="space-y-2">
             <Label>Ditugaskan Kepada</Label>
-            <Popover open={openUser} onOpenChange={setOpenUser}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openUser}
-                  className="w-full justify-between"
-                  disabled={isLoading || loadingUsers}
-                >
-                  {loadingUsers ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading users...
-                    </span>
-                  ) : selectedUser ? (
-                    selectedUser.nama_lengkap
-                  ) : (
-                    "Pilih petugas..."
-                  )}
-                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0">
-                <Command>
-                  <CommandInput
-                    placeholder="Cari petugas..."
-                    value={searchUser}
-                    onValueChange={setSearchUser}
-                  />
-                  <CommandEmpty>Petugas tidak ditemukan</CommandEmpty>
-                  <CommandGroup>
-                    <CommandItem
-                      value=""
-                      onSelect={() => {
-                        setValue("ditugaskan_ke", "");
-                        setOpenUser(false);
-                      }}
-                    >
-                      <span className="text-muted-foreground">Belum ditugaskan</span>
-                    </CommandItem>
-                    {userList.map((usr) => (
-                      <CommandItem
-                        key={usr.id}
-                        value={usr.nama_lengkap}
-                        onSelect={() => {
-                          setValue("ditugaskan_ke", usr.id);
-                          setOpenUser(false);
-                        }}
-                      >
-                        <div className="flex flex-col">
-                          <span>{usr.nama_lengkap}</span>
-                          <span className="text-sm text-muted-foreground">{usr.email}</span>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-start gap-2 h-auto py-3"
+              disabled={isLoading}
+              onClick={() => setOpenUserModal(true)}
+            >
+              {selectedUserName ? (
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="font-medium">{selectedUserName}</span>
+                  <span className="text-xs text-muted-foreground">
+                    Klik untuk ubah
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <Search className="h-4 w-4" />
+                  <span>Pilih petugas...</span>
+                </>
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -485,6 +406,19 @@ export function TugasForm({
           Batal
         </Button>
       </div>
+
+      {/* User Selection Modal */}
+      <SelectAdvokatModal
+        open={openUserModal}
+        onOpenChange={setOpenUserModal}
+        onSelect={(user) => {
+          setValue("ditugaskan_ke", user.id);
+          setSelectedUserName(user.nama_lengkap || user.email);
+        }}
+        roleFilter="all"
+        title="Pilih Petugas"
+        description="Pilih petugas yang akan ditugaskan"
+      />
     </form>
   );
 }
