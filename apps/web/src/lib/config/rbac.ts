@@ -121,6 +121,7 @@ export function getNavigationForRole(userRole: UserRole): NavItem[] {
 
 export const ROLE_NAVIGATION: Record<UserRole, NavItem[]> = {
   [UserRole.ADMIN]: getNavigationForRole(UserRole.ADMIN),
+  [UserRole.PARTNER]: getNavigationForRole(UserRole.PARTNER),
   [UserRole.ADVOKAT]: getNavigationForRole(UserRole.ADVOKAT),
   [UserRole.PARALEGAL]: getNavigationForRole(UserRole.PARALEGAL),
   [UserRole.STAFF]: getNavigationForRole(UserRole.STAFF),

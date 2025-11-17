@@ -102,6 +102,7 @@ export function usePermission() {
 
       // Role checks
       isAdmin: userRole === UserRole.ADMIN,
+      isPartner: userRole === UserRole.PARTNER,
       isAdvokat: userRole === UserRole.ADVOKAT,
       isParalegal: userRole === UserRole.PARALEGAL,
       isStaff: userRole === UserRole.STAFF,

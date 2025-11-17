@@ -105,6 +105,69 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "users:import",
   ],
 
+  // PARTNER: Same as ADMIN (senior partner with full access)
+  [UserRole.PARTNER]: [
+    // Klien
+    "klien:create",
+    "klien:read",
+    "klien:update",
+    "klien:delete",
+    "klien:export",
+    "klien:import",
+    // Perkara
+    "perkara:create",
+    "perkara:read",
+    "perkara:update",
+    "perkara:delete",
+    "perkara:export",
+    "perkara:assign",
+    // Tugas
+    "tugas:create",
+    "tugas:read",
+    "tugas:update",
+    "tugas:delete",
+    "tugas:assign",
+    // Dokumen
+    "dokumen:create",
+    "dokumen:read",
+    "dokumen:update",
+    "dokumen:delete",
+    "dokumen:upload",
+    "dokumen:download",
+    "dokumen:export",
+    // Sidang
+    "sidang:create",
+    "sidang:read",
+    "sidang:update",
+    "sidang:delete",
+    "sidang:export",
+    // Konflik
+    "konflik:create",
+    "konflik:read",
+    "konflik:update",
+    "konflik:delete",
+    // Tim
+    "tim:create",
+    "tim:read",
+    "tim:update",
+    "tim:delete",
+    "tim:manage",
+    // Laporan
+    "laporan:read",
+    "laporan:export",
+    "laporan:create",
+    // Pengaturan
+    "pengaturan:read",
+    "pengaturan:update",
+    "pengaturan:manage",
+    // Users
+    "users:create",
+    "users:read",
+    "users:update",
+    "users:delete",
+    "users:import",
+  ],
+
   // ADVOKAT (Lawyer): Can manage cases, clients, and documents
   [UserRole.ADVOKAT]: [
     // Klien

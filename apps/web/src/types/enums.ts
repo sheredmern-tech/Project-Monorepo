@@ -7,6 +7,7 @@
  */
 export enum UserRole {
   ADMIN = 'admin',
+  PARTNER = 'partner',
   ADVOKAT = 'advokat',
   PARALEGAL = 'paralegal',
   STAFF = 'staff',
