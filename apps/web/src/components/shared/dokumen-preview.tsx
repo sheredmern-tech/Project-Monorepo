@@ -52,7 +52,7 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] lg:max-w-5xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[90vh] p-0 gap-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/50 flex-shrink-0">
           <div className="flex items-start justify-between gap-4">
@@ -187,7 +187,7 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
           </div>
 
           {/* Sidebar Info */}
-          <div className="w-full lg:w-96 lg:max-w-sm border-t lg:border-t-0 lg:border-l bg-muted/30 overflow-y-auto flex-shrink-0">
+          <div className="w-full lg:w-[420px] lg:max-w-md border-t lg:border-t-0 lg:border-l bg-muted/30 overflow-y-auto flex-shrink-0">
             <div className="p-4 lg:p-6 space-y-4">
               <h3 className="font-semibold flex items-center sticky top-0 bg-muted/30 py-2 -mt-2 backdrop-blur-sm">
                 <FileText className="h-4 w-4 mr-2" />
