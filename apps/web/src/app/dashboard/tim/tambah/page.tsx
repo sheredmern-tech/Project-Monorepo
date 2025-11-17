@@ -152,6 +152,7 @@ export default function TambahUserPage() {
 
   const roleDescriptions: Record<UserRole, string> = {
     [UserRole.ADMIN]: "Akses penuh ke semua fitur sistem",
+    [UserRole.PARTNER]: "Partner senior dengan akses penuh seperti admin",
     [UserRole.ADVOKAT]: "Kelola perkara, klien, dokumen, dan sidang",
     [UserRole.PARALEGAL]: "Bantu advokat dalam persiapan perkara",
     [UserRole.STAFF]: "Akses terbatas untuk administrasi",
