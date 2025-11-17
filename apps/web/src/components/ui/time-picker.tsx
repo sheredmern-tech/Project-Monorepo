@@ -131,11 +131,11 @@ export function TimePicker({
       <PopoverContent className="w-auto p-0" align="start">
         <div className="flex">
           {/* Hours Column */}
-          <div className="border-r">
-            <div className="px-3 py-2 text-xs font-medium border-b bg-muted/50 text-center">
+          <div className="w-16 border-r">
+            <div className="px-2 py-1.5 text-xs font-medium border-b bg-muted/50 text-center">
               Jam
             </div>
-            <ScrollArea className="h-[200px]">
+            <ScrollArea className="h-[160px]">
               <div className="p-1">
                 {hours.map((hour) => (
                   <button
@@ -143,7 +143,7 @@ export function TimePicker({
                     type="button"
                     onClick={() => setSelectedHour(hour)}
                     className={cn(
-                      "w-full px-3 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
+                      "w-full px-2 py-1 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
                       selectedHour === hour &&
                         "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground font-medium"
                     )}
@@ -156,19 +156,19 @@ export function TimePicker({
           </div>
 
           {/* Minutes Column */}
-          <div className="border-r">
-            <div className="px-3 py-2 text-xs font-medium border-b bg-muted/50 text-center">
+          <div className="w-16 border-r">
+            <div className="px-2 py-1.5 text-xs font-medium border-b bg-muted/50 text-center">
               Menit
             </div>
-            <ScrollArea className="h-[200px]">
-              <div className="p-1">
+            <ScrollArea className="h-[160px]">
+              <div className="p-1 flex flex-col justify-start">
                 {minutes.map((minute) => (
                   <button
                     key={minute}
                     type="button"
                     onClick={() => setSelectedMinute(minute)}
                     className={cn(
-                      "w-full px-3 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
+                      "w-full px-2 py-1 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
                       selectedMinute === minute &&
                         "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground font-medium"
                     )}
@@ -181,16 +181,16 @@ export function TimePicker({
           </div>
 
           {/* AM/PM Column */}
-          <div>
-            <div className="px-3 py-2 text-xs font-medium border-b bg-muted/50 text-center">
-              Period
+          <div className="w-16">
+            <div className="px-2 py-1.5 text-xs font-medium border-b bg-muted/50 text-center">
+              AM/PM
             </div>
-            <div className="p-1 space-y-1 pt-2">
+            <div className="h-[160px] p-1 flex flex-col justify-start gap-1 pt-2">
               <button
                 type="button"
                 onClick={() => setSelectedPeriod("AM")}
                 className={cn(
-                  "w-full px-3 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
+                  "w-full px-2 py-1 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
                   selectedPeriod === "AM" &&
                     "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground font-medium"
                 )}
@@ -201,7 +201,7 @@ export function TimePicker({
                 type="button"
                 onClick={() => setSelectedPeriod("PM")}
                 className={cn(
-                  "w-full px-3 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
+                  "w-full px-2 py-1 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-center transition-colors",
                   selectedPeriod === "PM" &&
                     "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground font-medium"
                 )}
@@ -213,18 +213,18 @@ export function TimePicker({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 p-2 border-t bg-muted/50">
+        <div className="flex gap-1.5 p-2 border-t bg-muted/50">
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 h-8"
+            className="flex-1 h-7 text-xs"
             onClick={handleClear}
           >
             Clear
           </Button>
           <Button
             size="sm"
-            className="flex-1 h-8"
+            className="flex-1 h-7 text-xs"
             onClick={handleConfirm}
           >
             OK
