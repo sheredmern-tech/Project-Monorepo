@@ -335,8 +335,6 @@ export default function TimPage() {
     filteredUsers.length > 0 &&
     filteredUsers.every((u) => selectedUserIds.has(u.id));
 
-  if (isLoading) return <ListPageSkeleton showStats={true} statsCount={5} />;
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -428,67 +426,89 @@ export default function TimPage() {
 
       {/* Statistics Cards */}
       <div className="grid gap-4 md:grid-cols-5">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Tim</p>
-                <h3 className="text-2xl font-bold">{stats.total}</h3>
-              </div>
-              <UsersIcon className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Tim Internal</p>
-                <h3 className="text-2xl font-bold">{stats.internal}</h3>
-              </div>
-              <UsersIcon className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Aktif</p>
-                <h3 className="text-2xl font-bold text-green-600">{stats.active}</h3>
-              </div>
-              <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                <div className="h-3 w-3 rounded-full bg-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Advokat</p>
-                <h3 className="text-2xl font-bold">{stats.advokat}</h3>
-              </div>
-              <UsersIcon className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Baru (30 hari)</p>
-                <h3 className="text-2xl font-bold">{stats.recent}</h3>
-              </div>
-              <BarChart3 className="h-8 w-8 text-orange-500" />
-            </div>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          /* Show skeleton cards while loading */
+          <>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-20 mb-2" />
+                      <Skeleton className="h-8 w-12" />
+                    </div>
+                    <Skeleton className="h-8 w-8 rounded" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </>
+        ) : (
+          /* Show actual statistics */
+          <>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Tim</p>
+                    <h3 className="text-2xl font-bold">{stats.total}</h3>
+                  </div>
+                  <UsersIcon className="h-8 w-8 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tim Internal</p>
+                    <h3 className="text-2xl font-bold">{stats.internal}</h3>
+                  </div>
+                  <UsersIcon className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Aktif</p>
+                    <h3 className="text-2xl font-bold text-green-600">{stats.active}</h3>
+                  </div>
+                  <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                    <div className="h-3 w-3 rounded-full bg-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Advokat</p>
+                    <h3 className="text-2xl font-bold">{stats.advokat}</h3>
+                  </div>
+                  <UsersIcon className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Baru (30 hari)</p>
+                    <h3 className="text-2xl font-bold">{stats.recent}</h3>
+                  </div>
+                  <BarChart3 className="h-8 w-8 text-orange-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Filters */}
@@ -583,7 +603,25 @@ export default function TimPage() {
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6">
-          {filteredUsers.length > 0 ? (
+          {isLoading ? (
+            /* Show skeleton user cards while loading */
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <Skeleton className="h-12 w-12 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-40" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : filteredUsers.length > 0 ? (
             <>
               <div className="mb-4 flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">
@@ -601,7 +639,7 @@ export default function TimPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredUsers.map((user) => (
                   <UserCard
