@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { TableSkeleton } from "@/components/shared/table-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { TablePagination } from "@/components/tables/table-pagination";
@@ -65,8 +65,9 @@ export function KonflikTable({
     }
   };
 
+  // ✅ Loading State
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <TableSkeleton rows={10} columns={7} />;
   }
 
   if (!data.length) {

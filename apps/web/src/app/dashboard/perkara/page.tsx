@@ -15,6 +15,7 @@ import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/shared/table-skeleton";
 import {
   Select,
   SelectContent,
@@ -86,9 +87,28 @@ export default function PerkaraPage() {
     fetchPerkara();
   }, [fetchPerkara, user, clientFilterSet]);
 
-  // ✅ Fix hydration: Show loading until mounted
+  // ✅ Fix hydration: Show skeleton until mounted
   if (!isMounted) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="space-y-6">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-10 w-40" />
+        </div>
+        {/* Filters skeleton */}
+        <div className="flex gap-4">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        {/* Table skeleton */}
+        <TableSkeleton rows={10} columns={9} />
+      </div>
+    );
   }
 
   const isKlien = user?.role === UserRole.KLIEN;
