@@ -112,8 +112,19 @@ export function SidangForm({
 
   const selectedPerkara = perkaraList.find((p) => p.id === perkaraId);
 
+  // ✅ FIX: Wrapper to convert tanggal_sidang to ISO DateTime
+  const handleFormSubmit = (data: SidangFormData) => {
+    const submitData: SidangFormData = {
+      ...data,
+      tanggal_sidang: data.tanggal_sidang
+        ? new Date(data.tanggal_sidang).toISOString()
+        : "",
+    };
+    onSubmit(submitData);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Informasi Dasar */}
       <Card>
         <CardHeader>

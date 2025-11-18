@@ -130,11 +130,20 @@ export function TugasForm({
     [perkaraList, perkaraId]
   );
 
-  // ✅ Enhanced submit with validation error handling
+  // ✅ Enhanced submit with validation error handling + ISO DateTime conversion
   const handleFormSubmit = async (data: TugasFormData) => {
     try {
       setGeneralError(null);
-      await onSubmit(data);
+
+      // ✅ FIX: Konversi tenggat_waktu ke ISO DateTime untuk Prisma
+      const submitData: TugasFormData = {
+        ...data,
+        tenggat_waktu: data.tenggat_waktu
+          ? new Date(data.tenggat_waktu).toISOString()
+          : undefined,
+      };
+
+      await onSubmit(submitData);
       toast.success(
         mode === "create"
           ? "Tugas berhasil ditambahkan"

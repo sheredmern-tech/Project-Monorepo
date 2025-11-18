@@ -98,14 +98,26 @@ export function PerkaraForm({
   const prioritas = useWatch({ control, name: "prioritas" });
   const statusPembayaran = useWatch({ control, name: "status_pembayaran" });
 
-  // ✅ Enhanced submit with validation error handling
+  // ✅ Enhanced submit with validation error handling + ISO DateTime conversion
   const handleFormSubmit = async (data: PerkaraFormData) => {
     try {
       setGeneralError(null);
-      await onSubmit(data);
+
+      // ✅ FIX: Konversi date fields ke ISO DateTime untuk Prisma
+      const submitData: PerkaraFormData = {
+        ...data,
+        tanggal_register: data.tanggal_register
+          ? new Date(data.tanggal_register).toISOString()
+          : undefined,
+        tanggal_sidang_pertama: data.tanggal_sidang_pertama
+          ? new Date(data.tanggal_sidang_pertama).toISOString()
+          : undefined,
+      };
+
+      await onSubmit(submitData);
       toast.success(
-        mode === "create" 
-          ? "Perkara berhasil ditambahkan" 
+        mode === "create"
+          ? "Perkara berhasil ditambahkan"
           : "Perkara berhasil diperbarui"
       );
     } catch (error) {

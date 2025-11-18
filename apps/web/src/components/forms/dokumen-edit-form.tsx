@@ -42,8 +42,19 @@ export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: 
   // Use useWatch instead of watch for better React Compiler compatibility
   const kategori = useWatch({ control, name: "kategori" });
 
+  // ✅ FIX: Wrapper to convert tanggal_dokumen to ISO DateTime
+  const handleFormSubmit = (data: UpdateDokumenDto) => {
+    const submitData: UpdateDokumenDto = {
+      ...data,
+      tanggal_dokumen: data.tanggal_dokumen
+        ? new Date(data.tanggal_dokumen).toISOString()
+        : "",
+    };
+    onSubmit(submitData);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Metadata Dokumen</CardTitle>
