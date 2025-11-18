@@ -1058,4 +1058,169 @@ export class UsersService {
       );
     }
   }
+
+  /**
+   * Export Kinerja (Performance) Report to Google Drive
+   */
+  async exportKinerjaReportToGoogleDrive(
+    format: 'csv' | 'excel',
+  ): Promise<{
+    fileId: string;
+    fileName: string;
+    webViewLink: string;
+    webContentLink: string;
+    embedLink: string;
+  }> {
+    try {
+      // Get performance data
+      const statistics = await this.getTeamStatistics();
+      const workloadData = await this.getWorkloadDistribution();
+
+      let buffer: Buffer;
+      let fileName: string;
+      let mimeType: string;
+
+      if (format === 'csv') {
+        // Generate CSV with workload data
+        const csv = Papa.unparse(workloadData);
+        buffer = Buffer.from(csv, 'utf-8');
+        fileName = `laporan-kinerja-${Date.now()}.csv`;
+        mimeType = 'text/csv';
+      } else {
+        // Generate Excel with ExcelJS for professional formatting
+        const ExcelJS = require('exceljs');
+        const workbook = new ExcelJS.Workbook();
+
+        // Sheet 1: Statistics
+        const statsSheet = workbook.addWorksheet('Ringkasan Statistik', {
+          views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
+        });
+
+        statsSheet.columns = [
+          { header: 'Metrik', key: 'metric', width: 30 },
+          { header: 'Nilai', key: 'value', width: 20 },
+        ];
+
+        statsSheet.addRow({ metric: 'Total User', value: statistics.total_users });
+        statsSheet.addRow({ metric: 'User Aktif', value: statistics.active_users });
+        statsSheet.addRow({ metric: 'User Tidak Aktif', value: statistics.inactive_users });
+        statsSheet.addRow({ metric: 'Penambahan Terbaru', value: statistics.recent_additions });
+        statsSheet.addRow({ metric: '', value: '' });
+        statsSheet.addRow({ metric: 'Distribusi Berdasarkan Role', value: '' });
+        Object.entries(statistics.by_role).forEach(([role, count]) => {
+          statsSheet.addRow({ metric: `  ${role}`, value: count });
+        });
+
+        // Style statistics sheet
+        statsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        statsSheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF4472C4' },
+        };
+        statsSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+        statsSheet.getRow(1).height = 25;
+
+        statsSheet.eachRow((row, rowNumber) => {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+              left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+              bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+              right: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            };
+            if (rowNumber > 1) {
+              cell.alignment = { vertical: 'middle' };
+              if (rowNumber % 2 === 0) {
+                cell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FFF2F2F2' },
+                };
+              }
+            }
+          });
+        });
+
+        // Sheet 2: Workload Distribution
+        const workloadSheet = workbook.addWorksheet('Distribusi Beban Kerja', {
+          views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
+        });
+
+        workloadSheet.columns = [
+          { header: 'Nama User', key: 'user_name', width: 30 },
+          { header: 'Email', key: 'email', width: 35 },
+          { header: 'Role', key: 'role', width: 18 },
+          { header: 'Perkara Aktif', key: 'active_perkara', width: 18 },
+          { header: 'Tugas Pending', key: 'pending_tugas', width: 18 },
+          { header: 'Tugas Selesai', key: 'completed_tugas', width: 18 },
+          { header: 'Total Dokumen', key: 'total_dokumen', width: 18 },
+          { header: 'Skor Beban Kerja', key: 'workload_score', width: 20 },
+        ];
+
+        workloadData.forEach((user) => {
+          workloadSheet.addRow(user);
+        });
+
+        workloadSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        workloadSheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF70AD47' },
+        };
+        workloadSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+        workloadSheet.getRow(1).height = 25;
+
+        workloadSheet.eachRow((row, rowNumber) => {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+              left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+              bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+              right: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            };
+            if (rowNumber > 1) {
+              cell.alignment = { vertical: 'middle' };
+              if (rowNumber % 2 === 0) {
+                cell.fill = {
+                  type: 'pattern',
+                  pattern: 'solid',
+                  fgColor: { argb: 'FFF2F2F2' },
+                };
+              }
+            }
+          });
+        });
+
+        buffer = Buffer.from(await workbook.xlsx.writeBuffer());
+        fileName = `laporan-kinerja-${Date.now()}.xlsx`;
+        mimeType =
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      }
+
+      // Upload to Google Drive
+      const driveFile = await this.googleDrive.uploadFile({
+        fileName,
+        mimeType,
+        buffer,
+      });
+
+      console.log(
+        `✅ Kinerja report exported to Google Drive: ${driveFile.name} (${driveFile.id})`,
+      );
+
+      return {
+        fileId: driveFile.id,
+        fileName: driveFile.name,
+        webViewLink: driveFile.webViewLink,
+        webContentLink: driveFile.webContentLink,
+        embedLink: driveFile.embedLink,
+      };
+    } catch (error) {
+      console.error('Export Kinerja report to Google Drive failed:', error);
+      throw new BadRequestException(
+        `Failed to export Kinerja report to Google Drive: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
 }
