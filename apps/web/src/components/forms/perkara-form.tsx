@@ -90,6 +90,7 @@ export function PerkaraForm({
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
     setError,
   } = form;
