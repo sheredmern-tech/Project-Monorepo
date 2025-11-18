@@ -55,7 +55,7 @@ export function FormSelect<T extends Record<string, any>>({
       </Label>
       <Select
         value={value}
-        onValueChange={(val) => setValue(name as any, val as any, { shouldValidate: true, shouldDirty: true })}
+        onValueChange={(val) => setValue(name as any, val as any)}
         disabled={disabled}
       >
         <SelectTrigger id={name}>

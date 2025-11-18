@@ -42,7 +42,7 @@ export function FormSwitch<T extends Record<string, any>>({
           id={name}
           checked={isChecked}
           onCheckedChange={(checked) => {
-            setValue(name as any, checked as any, { shouldValidate: true, shouldDirty: true });
+            setValue(name as any, checked as any);
           }}
           disabled={disabled}
         />

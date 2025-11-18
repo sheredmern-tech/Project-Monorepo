@@ -100,8 +100,7 @@ export function FormCombobox<T extends Record<string, any>>({
                     onSelect={(currentValue) => {
                       setValue(
                         name as any,
-                        (currentValue === selectedValue ? "" : currentValue) as any,
-                        { shouldValidate: true, shouldDirty: true }
+                        (currentValue === selectedValue ? "" : currentValue) as any
                       );
                       setOpen(false);
                     }}

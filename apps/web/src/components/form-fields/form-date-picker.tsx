@@ -64,10 +64,10 @@ export function FormDatePicker<T extends Record<string, any>>({
           if (date) {
             // Convert to YYYY-MM-DD format in LOCAL timezone (not UTC)
             const formattedDate = formatDateLocal(date);
-            setValue(name as any, formattedDate as any, { shouldValidate: true, shouldDirty: true });
+            setValue(name as any, formattedDate as any);
           } else {
             // Clear the field
-            setValue(name as any, "" as any, { shouldValidate: true, shouldDirty: true });
+            setValue(name as any, "" as any);
           }
         }}
         placeholder={placeholder || `Pilih ${label.toLowerCase()}`}
