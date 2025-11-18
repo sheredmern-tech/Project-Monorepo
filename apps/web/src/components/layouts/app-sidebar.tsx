@@ -267,13 +267,17 @@ export function AppSidebar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    Profil Saya
+                  <DropdownMenuItem asChild>
+                    <Link href={`/dashboard/tim/${user?.id}`} className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      Profil Saya
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Pengaturan
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/pengaturan" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Pengaturan
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   {/* ✅ FIX LOGOUT BUTTON */}
