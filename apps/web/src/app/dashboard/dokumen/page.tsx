@@ -12,6 +12,8 @@ import { DokumenTable } from "@/components/tables/dokumen-table";
 import { SearchInput } from "@/components/shared/search-input";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
 import { usePermission } from "@/lib/hooks/use-permission";
+import { useAuthStore } from "@/lib/stores/auth.store";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -23,6 +25,7 @@ import { KategoriDokumen } from "@/types";
 
 export default function DokumenPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const permissions = usePermission();
   const {
     dokumen,
@@ -47,8 +50,10 @@ export default function DokumenPage() {
         title="Dokumen"
         description="Kelola semua dokumen hukum"
         action={
-          /* 🔒 Only show button if user can upload */
-          permissions.dokumen.upload ? (
+          /* 🔒 Show skeleton while user loading, then check permission */
+          !user ? (
+            <Skeleton className="h-10 w-40" />
+          ) : permissions.dokumen.upload ? (
             <Button onClick={() => router.push("/dashboard/dokumen/upload")}>
               <Upload className="mr-2 h-4 w-4" />
               Upload Dokumen

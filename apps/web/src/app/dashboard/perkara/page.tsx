@@ -14,6 +14,7 @@ import { usePerkara } from "@/lib/hooks/use-perkara";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -98,8 +99,10 @@ export default function PerkaraPage() {
         title={isKlien ? "Perkara Saya" : "Perkara"}
         description={isKlien ? "Daftar perkara hukum Anda" : "Kelola semua perkara hukum"}
         action={
-          /* 🔒 Only show button if user can create */
-          permissions.perkara.create ? (
+          /* 🔒 Show skeleton while user loading, then check permission */
+          !user ? (
+            <Skeleton className="h-10 w-32" />
+          ) : permissions.perkara.create ? (
             <Button onClick={() => router.push("/dashboard/perkara/baru")}>
               <Plus className="mr-2 h-4 w-4" />
               Tambah Perkara

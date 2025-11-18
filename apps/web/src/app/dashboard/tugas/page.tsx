@@ -14,6 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useTugas } from "@/lib/hooks/use-tugas";
 import { usePermission } from "@/lib/hooks/use-permission";
+import { useAuthStore } from "@/lib/stores/auth.store";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -25,6 +27,7 @@ import { StatusTugas, PrioritasTugas } from "@/types";
 
 export default function TugasPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const permissions = usePermission();
   const {
     tugas,
@@ -53,8 +56,10 @@ export default function TugasPage() {
         title="Tugas"
         description="Kelola semua tugas perkara"
         action={
-          /* 🔒 Only show button if user can create */
-          permissions.tugas.create ? (
+          /* 🔒 Show skeleton while user loading, then check permission */
+          !user ? (
+            <Skeleton className="h-10 w-32" />
+          ) : permissions.tugas.create ? (
             <Button onClick={() => router.push("/dashboard/tugas/baru")}>
               <Plus className="mr-2 h-4 w-4" />
               Tambah Tugas

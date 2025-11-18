@@ -63,8 +63,10 @@ export default function KlienPage() {
         title="Klien"
         description="Kelola data klien firma hukum"
         action={
-          /* 🔒 Only show "Tambah Klien" button if user can create klien */
-          permissions.klien.create ? (
+          /* 🔒 Show skeleton while user loading, then check permission */
+          !user ? (
+            <Skeleton className="h-10 w-32" />
+          ) : permissions.klien.create ? (
             <Button onClick={() => router.push("/dashboard/klien/baru")}>
               <Plus className="mr-2 h-4 w-4" />
               Tambah Klien

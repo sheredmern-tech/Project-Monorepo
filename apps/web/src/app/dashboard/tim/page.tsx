@@ -24,6 +24,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { usePermission } from "@/lib/hooks/use-permission";
+import { useAuthStore } from "@/lib/stores/auth.store";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -52,6 +54,7 @@ type TabValue = "all" | "internal" | "client";
 
 export default function TimPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const { toast } = useToast();
   const permissions = usePermission();
 
@@ -410,13 +413,15 @@ export default function TimPage() {
               {bulkSelectMode ? "Batal Pilih" : "Pilih Multiple"}
             </Button>
 
-            {/* 🔒 Only show button if user can create */}
-            {permissions.users.create && (
+            {/* 🔒 Show skeleton while user loading, then check permission */}
+            {!user ? (
+              <Skeleton className="h-10 w-40" />
+            ) : permissions.users.create ? (
               <Button onClick={() => router.push("/dashboard/tim/tambah")}>
                 <UserPlus className="mr-2 h-4 w-4" />
                 Tambah Anggota
               </Button>
-            )}
+            ) : null}
           </div>
         }
       />
