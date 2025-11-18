@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import * as Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import { Readable } from 'stream';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
@@ -1037,7 +1038,7 @@ export class UsersService {
           : 'text/csv',
         buffer,
         size: buffer.length,
-        stream: null,
+        stream: Readable.from(buffer),
         destination: '',
         filename: fileName,
         path: '',
