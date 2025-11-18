@@ -54,6 +54,7 @@ import { EditUserDialog } from "@/components/modals/edit-user-dialog";
 import { UserActivityLog } from "@/components/tim/user-activity-log";
 import { timApi } from "@/lib/api/tim.api";
 import { usePermission } from "@/lib/hooks/use-permission";
+import { useAuthStore } from "@/lib/stores/auth.store";
 import { UserWithStats, UserEntity } from "@/types";
 import { formatDate } from "@/lib/utils/date";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -64,23 +65,30 @@ export default function TimDetailPage() {
   const router = useRouter();
   const { toast } = useToast();
   const permissions = usePermission();
+  const { user: currentUser } = useAuthStore();
 
   const [user, setUser] = useState<UserWithStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Dialog states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [deleteAvatarDialogOpen, setDeleteAvatarDialogOpen] = useState(false);
-  
+
   // Action states
   const [isDeleting, setIsDeleting] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
   const [isSendingInvitation, setIsSendingInvitation] = useState(false);
   const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
+
+  // Delete confirmation state
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
+  // Check if user is viewing their own profile
+  const isSelfView = currentUser?.id === params.id;
 
   const loadUser = useCallback(async () => {
     try {
@@ -129,18 +137,33 @@ export default function TimDetailPage() {
     try {
       setIsDeleting(true);
       await timApi.deleteUser(params.id as string);
-      toast({
-        title: "Berhasil",
-        description: "User berhasil dihapus",
-      });
-      router.push("/dashboard/tim");
+
+      if (isSelfView) {
+        // Self-delete: show message, logout, and redirect to login
+        toast({
+          title: "Akun Dihapus",
+          description: "Akun Anda telah dihapus. Anda akan keluar dari sistem.",
+        });
+
+        // Clear auth store and redirect to login
+        setTimeout(() => {
+          useAuthStore.getState().logout();
+          router.push("/auth/login");
+        }, 1500);
+      } else {
+        // Admin deleting other user: redirect to team page
+        toast({
+          title: "Berhasil",
+          description: "User berhasil dihapus",
+        });
+        router.push("/dashboard/tim");
+      }
     } catch (err) {
       toast({
         title: "Gagal",
         description: err instanceof Error ? err.message : "Gagal menghapus user",
         variant: "destructive",
       });
-    } finally {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
     }
@@ -400,7 +423,8 @@ export default function TimDetailPage() {
                 </>
               )}
 
-              {permissions.users.delete && (
+              {/* Show delete option if: user has permission OR viewing own profile */}
+              {(permissions.users.delete || isSelfView) && (
                 <>
                   <DropdownMenuSeparator />
 
@@ -409,7 +433,7 @@ export default function TimDetailPage() {
                     className="text-red-600"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Hapus User
+                    {isSelfView ? "Hapus Akun Saya" : "Hapus User"}
                   </DropdownMenuItem>
                 </>
               )}
@@ -702,23 +726,50 @@ export default function TimDetailPage() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setDeleteConfirmText(""); // Reset text when closing
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus User?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus user{" "}
-              <span className="font-semibold">
-                {user.nama_lengkap || user.email}
-              </span>
-              ? Tindakan ini tidak dapat dibatalkan.
+            <AlertDialogTitle>
+              {isSelfView ? "⚠️ Hapus Akun Saya?" : "Hapus User?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                {isSelfView
+                  ? "Anda akan menghapus akun Anda sendiri secara permanen. Semua data terkait akun Anda akan dihapus dan Anda akan keluar dari sistem."
+                  : <>
+                      Apakah Anda yakin ingin menghapus user{" "}
+                      <span className="font-semibold">
+                        {user.nama_lengkap || user.email}
+                      </span>
+                      ? Tindakan ini tidak dapat dibatalkan.
+                    </>
+                }
+              </p>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  Ketik <span className="px-2 py-0.5 bg-muted rounded font-mono text-destructive">saya yakin hapus akun saya</span> untuk konfirmasi:
+                </p>
+                <Input
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="saya yakin hapus akun saya"
+                  className="font-mono"
+                  disabled={isDeleting}
+                />
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={isDeleting || deleteConfirmText !== "saya yakin hapus akun saya"}
               className="bg-destructive hover:bg-destructive/90"
             >
               {isDeleting ? "Menghapus..." : "Hapus"}
