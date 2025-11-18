@@ -24,29 +24,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Download, TrendingUp, Users, Activity } from "lucide-react";
-import { timApi } from "@/lib/api/tim.api";
 import { useToast } from "@/hooks/use-toast";
 import { StatisticWidget } from "@/components/widgets/statistics-widget";
-
-interface TeamStatistics {
-  total_users: number;
-  by_role: Record<string, number>;
-  active_users: number;
-  inactive_users: number;
-  recent_additions: number;
-}
-
-interface WorkloadDistribution {
-  user_id: string;
-  user_name: string;
-  email: string;
-  role: string;
-  active_perkara: number;
-  pending_tugas: number;
-  completed_tugas: number;
-  total_dokumen: number;
-  workload_score: number;
-}
+import { laporanApi, TeamStatistics, WorkloadDistribution } from "@/lib/api/laporan.api";
 
 export default function LaporanKinerjaPage() {
   const { toast } = useToast();
@@ -63,8 +43,8 @@ export default function LaporanKinerjaPage() {
     try {
       setIsLoading(true);
       const [statsData, workloadData] = await Promise.all([
-        timApi.getTeamStatistics(),
-        timApi.getWorkloadDistribution(),
+        laporanApi.getTeamStatistics(),
+        laporanApi.getWorkloadDistribution(),
       ]);
       setStatistics(statsData);
       setWorkload(workloadData);
@@ -88,18 +68,7 @@ export default function LaporanKinerjaPage() {
       setIsExporting(true);
 
       if (destination === "drive") {
-        const result = await fetch("/api/users/reports/kinerja/export-to-drive", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ format }),
-        });
-
-        if (!result.ok) throw new Error("Export failed");
-
-        const data = await result.json();
+        const data = await laporanApi.exportKinerjaToDrive(format);
         toast({
           title: "Export Berhasil",
           description: (
@@ -117,18 +86,7 @@ export default function LaporanKinerjaPage() {
           ),
         });
       } else {
-        const response = await fetch("/api/users/reports/kinerja/export", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ format }),
-        });
-
-        if (!response.ok) throw new Error("Export failed");
-
-        const blob = await response.blob();
+        const blob = await laporanApi.exportKinerjaLocal(format);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;

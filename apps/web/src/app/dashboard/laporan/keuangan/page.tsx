@@ -18,15 +18,7 @@ import {
 import { Download, DollarSign, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { StatisticWidget } from "@/components/widgets/statistics-widget";
-
-interface FinanceStatistics {
-  total_perkara: number;
-  total_nilai_perkara: number;
-  total_nilai_fee: number;
-  by_status_pembayaran: Record<string, number>;
-  pending_payment: number;
-  paid_payment: number;
-}
+import { laporanApi, FinanceStatistics } from "@/lib/api/laporan.api";
 
 export default function LaporanKeuanganPage() {
   const { toast } = useToast();
@@ -41,15 +33,7 @@ export default function LaporanKeuanganPage() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/perkara/reports/keuangan/statistics", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch");
-
-      const data = await response.json();
+      const data = await laporanApi.getFinanceStatistics();
       setStatistics(data);
     } catch (error) {
       console.error("Failed to fetch keuangan data", error);
@@ -71,18 +55,7 @@ export default function LaporanKeuanganPage() {
       setIsExporting(true);
 
       if (destination === "drive") {
-        const result = await fetch("/api/perkara/reports/keuangan/export-to-drive", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ format }),
-        });
-
-        if (!result.ok) throw new Error("Export failed");
-
-        const data = await result.json();
+        const data = await laporanApi.exportKeuanganToDrive(format);
         toast({
           title: "Export Berhasil",
           description: (
@@ -100,18 +73,7 @@ export default function LaporanKeuanganPage() {
           ),
         });
       } else {
-        const response = await fetch("/api/perkara/reports/keuangan/export", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ format }),
-        });
-
-        if (!response.ok) throw new Error("Export failed");
-
-        const blob = await response.blob();
+        const blob = await laporanApi.exportKeuanganLocal(format);
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
