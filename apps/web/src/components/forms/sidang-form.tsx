@@ -113,7 +113,13 @@ export function SidangForm({
   const selectedPerkara = perkaraList.find((p) => p.id === perkaraId);
 
   // ✅ FIX: Time validation handler to prevent race conditions
-  const handleTimeChange = useCallback((field: "waktu_mulai" | "waktu_selesai", time: string) => {
+  const handleTimeChange = useCallback((field: "waktu_mulai" | "waktu_selesai", time: string | undefined) => {
+    // Handle undefined case
+    if (!time) {
+      setValue(field, "");
+      return;
+    }
+
     setValue(field, time);
 
     // Get both time values for validation
