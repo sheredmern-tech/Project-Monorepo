@@ -55,10 +55,20 @@ export function FormDatePicker<T extends Record<string, any>>({
         disabled={disabled}
         date={parseDateLocal(dateValue || "")}
         onDateChange={(date) => {
+          console.log("🔄 FormDatePicker: onDateChange called for field:", name);
+          console.log("🔄 FormDatePicker: date received:", date);
+
           if (date) {
+            const formattedDate = formatDateLocal(date);
+            console.log("✅ FormDatePicker: Formatted date:", formattedDate);
+            console.log("✅ FormDatePicker: Calling setValue for:", name);
+
             // Convert to YYYY-MM-DD format in LOCAL timezone (not UTC)
-            setValue(name as any, formatDateLocal(date) as any);
+            setValue(name as any, formattedDate as any);
+
+            console.log("✅ FormDatePicker: setValue called successfully");
           } else {
+            console.log("⚠️ FormDatePicker: No date, clearing field");
             setValue(name as any, "" as any);
           }
         }}
