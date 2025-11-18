@@ -4,6 +4,7 @@
 "use client";
 
 import { useForm, useWatch } from "react-hook-form";
+import { parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import { DokumenEntity, UpdateDokumenDto, KategoriDokumen } from "@/types";
 
 interface DokumenEditFormProps {
@@ -27,7 +29,7 @@ interface DokumenEditFormProps {
 }
 
 export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: DokumenEditFormProps) {
-  const { register, handleSubmit, control, setValue } = useForm<UpdateDokumenDto>({
+  const { register, handleSubmit, control, setValue, watch } = useForm<UpdateDokumenDto>({
     defaultValues: {
       nama_dokumen: initialData.nama_dokumen,
       kategori: initialData.kategori,
@@ -102,11 +104,17 @@ export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: 
 
             <div className="space-y-2">
               <Label htmlFor="tanggal_dokumen">Tanggal Dokumen</Label>
-              <Input
-                id="tanggal_dokumen"
-                type="date"
+              <DatePicker
                 disabled={isLoading}
-                {...register("tanggal_dokumen")}
+                date={watch("tanggal_dokumen") ? parseISO(watch("tanggal_dokumen")) : undefined}
+                onDateChange={(date) => {
+                  if (date) {
+                    setValue("tanggal_dokumen", date.toISOString().split("T")[0]);
+                  } else {
+                    setValue("tanggal_dokumen", "");
+                  }
+                }}
+                placeholder="Pilih tanggal dokumen"
               />
             </div>
           </div>

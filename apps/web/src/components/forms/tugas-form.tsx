@@ -12,6 +12,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { parseISO } from "date-fns";
 import { Loader2, Search, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import { SelectAdvokatModal } from "@/components/modals/select-advokat-modal";
 import { tugasSchema, TugasFormData } from "@/lib/schemas/tugas.schema";
 import { TugasEntity, StatusTugas, PrioritasTugas } from "@/types";
@@ -316,13 +318,22 @@ export function TugasForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tenggat_waktu">Tenggat Waktu</Label>
-              <Input
-                id="tenggat_waktu"
-                type="date"
+              <Label>Tenggat Waktu</Label>
+              <DatePicker
                 disabled={isLoading}
-                {...register("tenggat_waktu")}
+                date={watch("tenggat_waktu") ? parseISO(watch("tenggat_waktu")) : undefined}
+                onDateChange={(date) => {
+                  if (date) {
+                    setValue("tenggat_waktu", date.toISOString().split("T")[0]);
+                  } else {
+                    setValue("tenggat_waktu", "");
+                  }
+                }}
+                placeholder="Pilih tenggat waktu"
               />
+              {errors.tenggat_waktu && (
+                <p className="text-sm text-red-500">{errors.tenggat_waktu.message}</p>
+              )}
             </div>
           </div>
         </CardContent>

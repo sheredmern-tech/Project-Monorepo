@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { parseISO } from "date-fns";
 import { Loader2, Upload, X, FileText, AlertCircle, Search } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DatePicker } from "@/components/ui/date-picker";
 import { dokumenSchema, DokumenFormData } from "@/lib/schemas/dokumen.schema";
 import { KategoriDokumen } from "@/types";
 import { perkaraApi } from "@/lib/api/perkara.api";
@@ -74,6 +76,7 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
     setError,
   } = form;
@@ -406,11 +409,17 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
 
             <div className="space-y-2">
               <Label htmlFor="tanggal_dokumen">Tanggal Dokumen</Label>
-              <Input
-                id="tanggal_dokumen"
-                type="date"
+              <DatePicker
                 disabled={isLoading}
-                {...register("tanggal_dokumen")}
+                date={watch("tanggal_dokumen") ? parseISO(watch("tanggal_dokumen")) : undefined}
+                onDateChange={(date) => {
+                  if (date) {
+                    setValue("tanggal_dokumen", date.toISOString().split("T")[0]);
+                  } else {
+                    setValue("tanggal_dokumen", "");
+                  }
+                }}
+                placeholder="Pilih tanggal dokumen"
               />
             </div>
           </div>
