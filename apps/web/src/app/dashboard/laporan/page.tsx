@@ -58,28 +58,28 @@ export default function LaporanPage() {
       title: "Laporan Aktivitas",
       description: "Log aktivitas pengguna dan sistem",
       icon: Activity,
-      href: "/laporan/aktivitas",
+      href: "/dashboard/laporan/aktivitas",
     },
     {
       id: "kinerja", // ADD UNIQUE ID
       title: "Laporan Kinerja",
       description: "Analisis kinerja tim dan produktivitas",
       icon: TrendingUp,
-      href: "/laporan/kinerja",
+      href: "/dashboard/laporan/kinerja",
     },
     {
       id: "keuangan", // ADD UNIQUE ID
       title: "Laporan Keuangan",
       description: "Ringkasan fee dan penagihan",
       icon: BarChart3,
-      href: "/laporan/keuangan", // Changed from "#"
+      href: "/dashboard/laporan/keuangan",
     },
     {
       id: "custom", // ADD UNIQUE ID
       title: "Laporan Custom",
       description: "Buat laporan sesuai kebutuhan",
       icon: FileText,
-      href: "/laporan/custom", // Changed from "#"
+      href: "/dashboard/laporan/custom",
     },
   ];
 
