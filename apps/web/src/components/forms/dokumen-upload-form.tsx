@@ -6,8 +6,8 @@
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { parseISO } from "date-fns";
 import { Loader2, Upload, X, FileText, AlertCircle, Search } from "lucide-react";
+import { parseDateLocal } from "@/lib/utils/date";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -411,11 +411,7 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
               <Label htmlFor="tanggal_dokumen">Tanggal Dokumen</Label>
               <DatePicker
                 disabled={isLoading}
-                date={
-                  watch("tanggal_dokumen") && watch("tanggal_dokumen") !== ""
-                    ? parseISO(watch("tanggal_dokumen")!)
-                    : undefined
-                }
+                date={parseDateLocal(watch("tanggal_dokumen") || "")}
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tanggal_dokumen", date.toISOString().split("T")[0]);

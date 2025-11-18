@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search } from "lucide-react";
-import { parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { parseDateLocal } from "@/lib/utils/date";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -205,7 +205,7 @@ export function SidangForm({
               </Label>
               <DatePicker
                 disabled={isLoading}
-                date={watch("tanggal_sidang") ? parseISO(watch("tanggal_sidang")) : undefined}
+                date={parseDateLocal(watch("tanggal_sidang") || "")}
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tanggal_sidang", date.toISOString().split("T")[0]);

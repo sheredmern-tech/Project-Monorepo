@@ -12,8 +12,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { parseISO } from "date-fns";
 import { Loader2, Search, AlertCircle } from "lucide-react";
+import { parseDateLocal } from "@/lib/utils/date";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -322,11 +322,7 @@ export function TugasForm({
               <Label>Tenggat Waktu</Label>
               <DatePicker
                 disabled={isLoading}
-                date={
-                  watch("tenggat_waktu") && watch("tenggat_waktu") !== ""
-                    ? parseISO(watch("tenggat_waktu")!)
-                    : undefined
-                }
+                date={parseDateLocal(watch("tenggat_waktu") || "")}
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tenggat_waktu", date.toISOString().split("T")[0]);

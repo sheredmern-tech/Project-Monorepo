@@ -6,8 +6,8 @@
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { parseISO } from "date-fns";
 import { Loader2, Search, AlertCircle } from "lucide-react";
+import { parseDateLocal } from "@/lib/utils/date";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -460,11 +460,7 @@ export function PerkaraForm({
               <Label>Tanggal Register</Label>
               <DatePicker
                 disabled={isLoading}
-                date={
-                  watch("tanggal_register") && watch("tanggal_register") !== ""
-                    ? parseISO(watch("tanggal_register")!)
-                    : undefined
-                }
+                date={parseDateLocal(watch("tanggal_register") || "")}
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tanggal_register", date.toISOString().split("T")[0]);
@@ -483,11 +479,7 @@ export function PerkaraForm({
               <Label>Tanggal Sidang Pertama</Label>
               <DatePicker
                 disabled={isLoading}
-                date={
-                  watch("tanggal_sidang_pertama") && watch("tanggal_sidang_pertama") !== ""
-                    ? parseISO(watch("tanggal_sidang_pertama")!)
-                    : undefined
-                }
+                date={parseDateLocal(watch("tanggal_sidang_pertama") || "")}
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tanggal_sidang_pertama", date.toISOString().split("T")[0]);
