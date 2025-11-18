@@ -56,6 +56,7 @@
     "class-validator": "^0.14.2",
     "csv-parser": "^3.2.0",
     "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
     "googleapis": "^166.0.0",
     "graphql": "^16.11.0",
     "handlebars": "^4.7.8",

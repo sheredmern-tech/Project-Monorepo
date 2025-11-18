@@ -104,14 +104,134 @@ export class UsersController {
 
   @Get('import-template-excel')
   @Roles(UserRole.admin)
-  @ApiOperation({ summary: 'Download Excel template for bulk import with data validation' })
+  @ApiOperation({
+    summary:
+      'Download Excel template for bulk import with professional styling, borders, and data validation',
+  })
   @ApiResponse({ status: 200, description: 'Excel template downloaded' })
-  downloadExcelTemplate(@Res() res: Response): void {
-    // Create workbook
-    const workbook = XLSX.utils.book_new();
+  async downloadExcelTemplate(@Res() res: Response): Promise<void> {
+    // ✅ Use ExcelJS for professional styling with borders, colors, and formatting
+    const ExcelJS = require('exceljs');
+    const workbook = new ExcelJS.Workbook();
 
-    // Template data with sample rows
-    const templateData = [
+    // ===== SHEET 1: Instructions =====
+    const instructionsSheet = workbook.addWorksheet('Instructions', {
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
+    });
+
+    // Instructions header
+    instructionsSheet.columns = [
+      { header: 'Field', key: 'field', width: 18 },
+      { header: 'Required', key: 'required', width: 12 },
+      { header: 'Description', key: 'description', width: 50 },
+      { header: 'Example', key: 'example', width: 30 },
+    ];
+
+    // Add instruction rows
+    const instructions = [
+      {
+        field: 'email',
+        required: 'YES',
+        description: 'Email user (harus unik, format email valid)',
+        example: 'john.doe@example.com',
+      },
+      {
+        field: 'nama_lengkap',
+        required: 'YES',
+        description: 'Nama lengkap user',
+        example: 'John Doe',
+      },
+      {
+        field: 'role',
+        required: 'YES',
+        description: 'Role user: admin, advokat, paralegal, staff, atau klien',
+        example: 'advokat',
+      },
+      {
+        field: 'jabatan',
+        required: 'NO',
+        description: 'Jabatan atau posisi user (opsional)',
+        example: 'Senior Partner',
+      },
+      {
+        field: 'telepon',
+        required: 'NO',
+        description: 'Nomor telepon user (opsional)',
+        example: '081234567890',
+      },
+    ];
+
+    instructions.forEach((instruction) => {
+      instructionsSheet.addRow(instruction);
+    });
+
+    // Style instructions header (row 1)
+    instructionsSheet.getRow(1).font = {
+      bold: true,
+      color: { argb: 'FFFFFFFF' },
+    };
+    instructionsSheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF4472C4' },
+    };
+    instructionsSheet.getRow(1).alignment = {
+      vertical: 'middle',
+      horizontal: 'center',
+    };
+    instructionsSheet.getRow(1).height = 25;
+
+    // Add borders to all cells in instructions
+    instructionsSheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          right: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+        };
+        if (rowNumber > 1) {
+          cell.alignment = { vertical: 'middle', wrapText: true };
+        }
+      });
+    });
+
+    // Highlight required fields
+    for (let i = 2; i <= instructions.length + 1; i++) {
+      const requiredCell = instructionsSheet.getCell(`B${i}`);
+      if (requiredCell.value === 'YES') {
+        requiredCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFFE699' },
+        };
+        requiredCell.font = { bold: true, color: { argb: 'FFD97706' } };
+      } else {
+        requiredCell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE2EFDA' },
+        };
+        requiredCell.font = { color: { argb: 'FF70AD47' } };
+      }
+    }
+
+    // ===== SHEET 2: Users (Template Data) =====
+    const usersSheet = workbook.addWorksheet('Users', {
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
+    });
+
+    // Users header
+    usersSheet.columns = [
+      { header: 'email', key: 'email', width: 35 },
+      { header: 'nama_lengkap', key: 'nama_lengkap', width: 30 },
+      { header: 'role', key: 'role', width: 18 },
+      { header: 'jabatan', key: 'jabatan', width: 28 },
+      { header: 'telepon', key: 'telepon', width: 20 },
+    ];
+
+    // Sample data
+    const sampleUsers = [
       {
         email: 'john.doe@example.com',
         nama_lengkap: 'John Doe',
@@ -135,44 +255,75 @@ export class UsersController {
       },
     ];
 
-    // Create worksheet from data
-    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    sampleUsers.forEach((user) => {
+      usersSheet.addRow(user);
+    });
 
-    // Set column widths for better readability
-    worksheet['!cols'] = [
-      { wch: 30 }, // email
-      { wch: 25 }, // nama_lengkap
-      { wch: 15 }, // role
-      { wch: 25 }, // jabatan
-      { wch: 18 }, // telepon
-    ];
+    // Style users header
+    usersSheet.getRow(1).font = {
+      bold: true,
+      color: { argb: 'FFFFFFFF' },
+    };
+    usersSheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF70AD47' },
+    };
+    usersSheet.getRow(1).alignment = {
+      vertical: 'middle',
+      horizontal: 'center',
+    };
+    usersSheet.getRow(1).height = 25;
 
-    // Add instructions sheet
-    const instructionsData = [
-      { Field: 'email', Required: 'YES', Description: 'Email user (harus unik)', Example: 'john.doe@example.com' },
-      { Field: 'nama_lengkap', Required: 'YES', Description: 'Nama lengkap user', Example: 'John Doe' },
-      { Field: 'role', Required: 'YES', Description: 'Role: admin, advokat, paralegal, staff, klien', Example: 'advokat' },
-      { Field: 'jabatan', Required: 'NO', Description: 'Jabatan/posisi user (opsional)', Example: 'Senior Partner' },
-      { Field: 'telepon', Required: 'NO', Description: 'Nomor telepon (opsional)', Example: '081234567890' },
-    ];
+    // Add borders and styling to all cells
+    usersSheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          right: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+        };
 
-    const instructionsSheet = XLSX.utils.json_to_sheet(instructionsData);
-    instructionsSheet['!cols'] = [
-      { wch: 15 }, // Field
-      { wch: 10 }, // Required
-      { wch: 45 }, // Description
-      { wch: 25 }, // Example
-    ];
+        // Alternate row colors for sample data
+        if (rowNumber > 1) {
+          cell.alignment = { vertical: 'middle' };
+          if (rowNumber % 2 === 0) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF2F2F2' },
+            };
+          }
+        }
+      });
+    });
 
-    // Add sheets to workbook
-    XLSX.utils.book_append_sheet(workbook, instructionsSheet, 'Instructions');
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+    // Add note row
+    const noteRow = usersSheet.addRow([
+      '← Delete sample rows above and add your data here',
+      '',
+      '',
+      '',
+      '',
+    ]);
+    noteRow.font = { italic: true, color: { argb: 'FF666666' } };
+    noteRow.getCell(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFFFF2CC' },
+    };
+    noteRow.eachCell((cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+        left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+        bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+        right: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+      };
+    });
 
     // Generate buffer
-    const buffer = XLSX.write(workbook, {
-      type: 'buffer',
-      bookType: 'xlsx',
-    }) as Buffer;
+    const buffer = await workbook.xlsx.writeBuffer();
 
     // Set response headers
     res.setHeader(
@@ -183,7 +334,7 @@ export class UsersController {
       'Content-Disposition',
       'attachment; filename=user-import-template.xlsx',
     );
-    res.send(buffer);
+    res.send(Buffer.from(buffer));
   }
 
   @Get(':id')
