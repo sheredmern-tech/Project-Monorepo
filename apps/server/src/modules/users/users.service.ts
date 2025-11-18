@@ -28,6 +28,7 @@ import {
   WorkloadDistribution,
   BulkOperationResult,
 } from '../../common/interfaces/statistics.interface';
+import { Readable } from 'stream';
 
 type UserWithoutPassword = Omit<UserEntity, 'password'>;
 
@@ -57,7 +58,7 @@ export class UsersService {
     private email: EmailService,
     private config: ConfigService,
     private googleDrive: GoogleDriveService,
-  ) {}
+  ) { }
 
   async create(
     dto: CreateUserDto,
@@ -1037,7 +1038,7 @@ export class UsersService {
           : 'text/csv',
         buffer,
         size: buffer.length,
-        stream: null,
+        stream: Readable.from(buffer), // ← CREATE READABLE STREAM
         destination: '',
         filename: fileName,
         path: '',

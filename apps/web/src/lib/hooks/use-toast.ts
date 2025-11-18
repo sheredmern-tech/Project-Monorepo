@@ -24,7 +24,7 @@ type ToastActionElement = React.ReactElement;
 
 export interface ToastProps {
   title?: string;
-  description?: string;
+  description?: string | React.ReactNode;
   variant?: ToastVariant;
   action?: ToastActionElement;
 }
@@ -38,21 +38,21 @@ function genId() {
 
 type Action =
   | {
-      type: "ADD_TOAST";
-      toast: ToasterToast;
-    }
+    type: "ADD_TOAST";
+    toast: ToasterToast;
+  }
   | {
-      type: "UPDATE_TOAST";
-      toast: Partial<ToasterToast>;
-    }
+    type: "UPDATE_TOAST";
+    toast: Partial<ToasterToast>;
+  }
   | {
-      type: "DISMISS_TOAST";
-      toastId?: string;
-    }
+    type: "DISMISS_TOAST";
+    toastId?: string;
+  }
   | {
-      type: "REMOVE_TOAST";
-      toastId?: string;
-    };
+    type: "REMOVE_TOAST";
+    toastId?: string;
+  };
 
 interface State {
   toasts: ToasterToast[];
@@ -108,9 +108,9 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t
         ),
       };
