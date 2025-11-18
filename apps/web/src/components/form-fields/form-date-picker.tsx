@@ -57,6 +57,7 @@ export function FormDatePicker<T extends Record<string, any>>({
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <DatePicker
+        id={name}
         disabled={disabled}
         date={parseDateLocal(dateValue || "")}
         onDateChange={(date) => {

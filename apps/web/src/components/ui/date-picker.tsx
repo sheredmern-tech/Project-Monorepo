@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 
 interface DatePickerProps {
+  id?: string;
   date?: Date;
   onDateChange?: (date: Date | undefined) => void;
   placeholder?: string;
@@ -23,6 +24,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({
+  id,
   date,
   onDateChange,
   placeholder = "Pilih tanggal",
@@ -75,6 +77,7 @@ export function DatePicker({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
           type="button"
           variant="outline"
           disabled={disabled}

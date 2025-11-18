@@ -50,15 +50,15 @@ export function FormSelect<T extends Record<string, any>>({
 
   return (
     <div className={className}>
-      <Label>
+      <Label htmlFor={name}>
         {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Select
         value={value}
-        onValueChange={(val) => setValue(name as any, val as any)}
+        onValueChange={(val) => setValue(name as any, val as any, { shouldValidate: true, shouldDirty: true })}
         disabled={disabled}
       >
-        <SelectTrigger>
+        <SelectTrigger id={name}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
