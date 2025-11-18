@@ -322,7 +322,11 @@ export function TugasForm({
               <Label>Tenggat Waktu</Label>
               <DatePicker
                 disabled={isLoading}
-                date={watch("tenggat_waktu") ? parseISO(watch("tenggat_waktu")) : undefined}
+                date={
+                  watch("tenggat_waktu") && watch("tenggat_waktu") !== ""
+                    ? parseISO(watch("tenggat_waktu")!)
+                    : undefined
+                }
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tenggat_waktu", date.toISOString().split("T")[0]);
@@ -330,7 +334,7 @@ export function TugasForm({
                     setValue("tenggat_waktu", "");
                   }
                 }}
-                placeholder="Pilih tenggat waktu"
+                placeholder="Pilih tenggal waktu"
               />
               {errors.tenggat_waktu && (
                 <p className="text-sm text-red-500">{errors.tenggat_waktu.message}</p>

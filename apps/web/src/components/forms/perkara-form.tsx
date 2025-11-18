@@ -460,7 +460,11 @@ export function PerkaraForm({
               <Label>Tanggal Register</Label>
               <DatePicker
                 disabled={isLoading}
-                date={watch("tanggal_register") ? parseISO(watch("tanggal_register")) : undefined}
+                date={
+                  watch("tanggal_register") && watch("tanggal_register") !== ""
+                    ? parseISO(watch("tanggal_register")!)
+                    : undefined
+                }
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tanggal_register", date.toISOString().split("T")[0]);
@@ -479,7 +483,11 @@ export function PerkaraForm({
               <Label>Tanggal Sidang Pertama</Label>
               <DatePicker
                 disabled={isLoading}
-                date={watch("tanggal_sidang_pertama") ? parseISO(watch("tanggal_sidang_pertama")) : undefined}
+                date={
+                  watch("tanggal_sidang_pertama") && watch("tanggal_sidang_pertama") !== ""
+                    ? parseISO(watch("tanggal_sidang_pertama")!)
+                    : undefined
+                }
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tanggal_sidang_pertama", date.toISOString().split("T")[0]);
