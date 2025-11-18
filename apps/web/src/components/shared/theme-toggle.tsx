@@ -16,19 +16,6 @@ import {
 
 export function ThemeToggle() {
   const { setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  // Prevent hydration mismatch
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Show skeleton during SSR/hydration
-  if (!mounted) {
-    return (
-      <div className="h-9 w-9 rounded-md bg-muted animate-pulse" />
-    );
-  }
 
   return (
     <DropdownMenu>
