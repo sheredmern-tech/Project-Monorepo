@@ -31,8 +31,33 @@ export function DatePicker({
   minDate,
   maxDate,
 }: DatePickerProps) {
+  const [open, setOpen] = React.useState(false);
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(date);
+
+  // Sync with external date prop
+  React.useEffect(() => {
+    setSelectedDate(date);
+  }, [date]);
+
+  const handleSelect = (newDate: Date | undefined) => {
+    setSelectedDate(newDate);
+    // Don't close yet - wait for user to click "Pilih" button
+  };
+
+  const handleConfirm = () => {
+    if (onDateChange) {
+      onDateChange(selectedDate);
+    }
+    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setSelectedDate(date); // Reset to original
+    setOpen(false);
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -49,17 +74,40 @@ export function DatePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={onDateChange}
-          disabled={(date) => {
-            if (minDate && date < minDate) return true;
-            if (maxDate && date > maxDate) return true;
-            return false;
-          }}
-          initialFocus
-        />
+        <div className="flex flex-col">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={handleSelect}
+            disabled={(date) => {
+              if (minDate && date < minDate) return true;
+              if (maxDate && date > maxDate) return true;
+              return false;
+            }}
+            initialFocus
+            className="min-h-[280px]"
+          />
+          <div className="flex gap-2 p-3 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCancel}
+              className="flex-1"
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleConfirm}
+              disabled={!selectedDate}
+              className="flex-1"
+            >
+              Pilih
+            </Button>
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );
