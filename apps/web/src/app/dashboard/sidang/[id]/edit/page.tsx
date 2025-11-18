@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { FormSkeleton } from "@/components/shared/form-skeleton";
@@ -32,6 +33,7 @@ export default function SidangEditPage() {
   const handleSubmit = async (data: UpdateJadwalSidangDto) => {
     try {
       await updateSidang(params.id as string, data);
+      toast.success("Jadwal sidang berhasil diperbarui");
       router.push(`/dashboard/sidang/${params.id}`);
     } catch {
       // Error handled by hook

@@ -4,6 +4,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { TugasForm } from "@/components/forms/tugas-form";
 import { useTugas } from "@/lib/hooks/use-tugas";
@@ -16,6 +17,7 @@ export default function TugasBaruPage() {
   const handleSubmit = async (data: CreateTugasDto) => {
     try {
       await createTugas(data);
+      toast.success("Tugas berhasil ditambahkan");
       router.push("/dashboard/tugas");
     } catch {
       // Error handled by hook

@@ -4,6 +4,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { SidangForm } from "@/components/forms/sidang-form";
 import { useSidang } from "@/lib/hooks/use-sidang";
@@ -16,6 +17,7 @@ export default function SidangBaruPage() {
   const handleSubmit = async (data: CreateJadwalSidangDto) => {
     try {
       await createSidang(data);
+      toast.success("Jadwal sidang berhasil ditambahkan");
       router.push("/dashboard/sidang");
     } catch {
       // Error handled by hook

@@ -111,7 +111,7 @@ export function useTugas() {
         setLoading(true);
         setError(null);
         const tugas = await tugasApi.create(data);
-        toast.success("Tugas berhasil ditambahkan");
+        // ✅ REMOVED: Toast handled by component (page)
         await fetchTugas();
         return tugas;
       } catch (err) {
@@ -132,10 +132,10 @@ export function useTugas() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const tugas = await tugasApi.update(id, data);
-        toast.success("Tugas berhasil diperbarui");
-        
+        // ✅ REMOVED: Toast handled by component (page)
+
         await fetchTugas();
         return tugas;
       } catch (err) {
@@ -157,7 +157,7 @@ export function useTugas() {
         setLoading(true);
         setError(null);
         await tugasApi.delete(id);
-        toast.success("Tugas berhasil dihapus");
+        // ✅ REMOVED: Toast handled by component (table)
         await fetchTugas();
       } catch (err) {
         const message = getErrorMessage(err);

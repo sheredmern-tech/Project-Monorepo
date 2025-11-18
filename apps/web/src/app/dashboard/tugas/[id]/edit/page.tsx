@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { FormSkeleton } from "@/components/shared/form-skeleton";
@@ -32,6 +33,7 @@ export default function TugasEditPage() {
   const handleSubmit = async (data: UpdateTugasDto) => {
     try {
       await updateTugas(params.id as string, data);
+      toast.success("Tugas berhasil diperbarui");
       router.push(`/dashboard/tugas/${params.id}`);
     } catch {
       // Error handled by hook
