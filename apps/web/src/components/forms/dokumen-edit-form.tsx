@@ -106,7 +106,11 @@ export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: 
               <Label htmlFor="tanggal_dokumen">Tanggal Dokumen</Label>
               <DatePicker
                 disabled={isLoading}
-                date={watch("tanggal_dokumen") ? parseISO(watch("tanggal_dokumen")) : undefined}
+                date={
+                  watch("tanggal_dokumen") && watch("tanggal_dokumen") !== ""
+                    ? parseISO(watch("tanggal_dokumen")!)
+                    : undefined
+                }
                 onDateChange={(date) => {
                   if (date) {
                     setValue("tanggal_dokumen", date.toISOString().split("T")[0]);
