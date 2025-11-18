@@ -10,11 +10,43 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PengaturanPage() {
   const { user } = useAuthStore();
 
-  if (!user) return null;
+  // ✅ Show skeleton while user loading
+  if (!user) {
+    return (
+      <div className="space-y-6">
+        {/* Header skeleton */}
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        {/* Profile card skeleton */}
+        <div className="max-w-2xl">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-4 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-20 w-20 rounded-full" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const initials = user.nama_lengkap
     ?.split(" ")
