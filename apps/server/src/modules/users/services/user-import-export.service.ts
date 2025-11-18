@@ -8,7 +8,7 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { GoogleDriveService } from '../../google-drive/google-drive.service';
 import { UserRole } from '@prisma/client';
 import { BulkOperationResult } from '../../../common/interfaces/statistics.interface';
-import { PaginatedResult } from '../../../common/interfaces';
+import { PaginatedResult, UserEntity } from '../../../common/interfaces';
 import { QueryUserDto } from '../dto/query-user.dto';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
@@ -16,7 +16,7 @@ import * as Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { Readable } from 'stream';
 
-type UserWithoutPassword = Omit<any, 'password'>;
+type UserWithoutPassword = Omit<UserEntity, 'password'>;
 
 @Injectable()
 export class UserImportExportService {

@@ -11,9 +11,9 @@ import { EmailService } from '../../email/email.service';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { CreateLogAktivitasData } from '../../../common/interfaces';
+import { CreateLogAktivitasData, UserEntity } from '../../../common/interfaces';
 
-type UserWithoutPassword = Omit<any, 'password'>;
+type UserWithoutPassword = Omit<UserEntity, 'password'>;
 
 const userSelectWithoutPassword = {
   id: true,
