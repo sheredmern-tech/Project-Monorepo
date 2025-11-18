@@ -6,7 +6,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart3, Activity, TrendingUp, FileText } from "lucide-react";
 import { StatisticWidget } from "@/components/widgets/statistics-widget";
 import { Briefcase, Users, CheckSquare, Calendar } from "lucide-react";
@@ -92,30 +93,48 @@ export default function LaporanPage() {
 
       {/* Statistics - DYNAMIC */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-        <StatisticWidget
-          title="Total Perkara"
-          value={isLoading ? "-" : stats.totalPerkara.toString()}
-          description="Perkara aktif"
-          icon={Briefcase}
-        />
-        <StatisticWidget
-          title="Total Klien"
-          value={isLoading ? "-" : stats.totalKlien.toString()}
-          description="Klien terdaftar"
-          icon={Users}
-        />
-        <StatisticWidget
-          title="Tugas Aktif"
-          value={isLoading ? "-" : stats.tugasAktif.toString()}
-          description="Tugas menunggu"
-          icon={CheckSquare}
-        />
-        <StatisticWidget
-          title="Sidang Bulan Ini"
-          value={isLoading ? "-" : stats.sidangBulanIni.toString()}
-          description="Jadwal sidang"
-          icon={Calendar}
-        />
+        {isLoading ? (
+          // ✅ Skeleton loading for statistics
+          Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-4 rounded" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-16 mb-1" />
+                <Skeleton className="h-3 w-20" />
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <>
+            <StatisticWidget
+              title="Total Perkara"
+              value={stats.totalPerkara.toString()}
+              description="Perkara aktif"
+              icon={Briefcase}
+            />
+            <StatisticWidget
+              title="Total Klien"
+              value={stats.totalKlien.toString()}
+              description="Klien terdaftar"
+              icon={Users}
+            />
+            <StatisticWidget
+              title="Tugas Aktif"
+              value={stats.tugasAktif.toString()}
+              description="Tugas menunggu"
+              icon={CheckSquare}
+            />
+            <StatisticWidget
+              title="Sidang Bulan Ini"
+              value={stats.sidangBulanIni.toString()}
+              description="Jadwal sidang"
+              icon={Calendar}
+            />
+          </>
+        )}
       </div>
 
       {/* Report Cards - USE UNIQUE ID FOR KEY */}

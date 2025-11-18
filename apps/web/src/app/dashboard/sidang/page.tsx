@@ -18,6 +18,7 @@ export default function SidangPage() {
   const { sidang, isLoading, error, fetchSidang } = useSidang();
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [isMounted, setIsMounted] = useState(false); // ✅ Track if initial fetch is done
   const limit = 10;
 
   useEffect(() => {
@@ -31,10 +32,14 @@ export default function SidangPage() {
       if (response) {
         setTotal(response.meta.total);
       }
+      setIsMounted(true); // ✅ Mark as mounted after first fetch
     };
     loadSidang();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
+
+  // ✅ Show loading state until first fetch is complete OR while loading
+  const showLoading = !isMounted || isLoading;
 
   return (
     <div>
@@ -54,7 +59,7 @@ export default function SidangPage() {
 
       <SidangTable
         data={sidang}
-        isLoading={isLoading}
+        isLoading={showLoading}
         error={error}
         page={page}
         limit={limit}

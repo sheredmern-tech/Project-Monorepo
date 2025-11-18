@@ -16,7 +16,8 @@ import { useKlien } from "@/lib/hooks/use-klien";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
-import { LoadingSpinner } from "@/components/shared/loading-spinner";
+import { TableSkeleton } from "@/components/shared/table-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function KlienPage() {
@@ -58,9 +59,9 @@ export default function KlienPage() {
     }
   }, [fetchKlien, user]);
 
-  // ✅ Fix hydration: Show loading until mounted AND checked role
+  // ✅ Fix hydration: Show loading skeleton until mounted AND checked role
   if (!isMounted || user?.role === UserRole.KLIEN) {
-    return <LoadingSpinner />;
+    return <TableSkeleton rows={10} columns={7} />;
   }
 
   return (
@@ -114,9 +115,21 @@ export default function KlienPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading ? (
-            <div className="col-span-full">
-              <LoadingSpinner />
-            </div>
+            // ✅ Grid skeleton loading
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-5 w-20" />
+                </div>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex gap-2 pt-2">
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-8 w-20" />
+                </div>
+              </div>
+            ))
           ) : klien && klien.length > 0 ? (
             klien.map((k) => (
               <KlienCard key={k.id} klien={k} />
