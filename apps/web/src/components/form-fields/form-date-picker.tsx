@@ -42,14 +42,14 @@ export function FormDatePicker<T extends Record<string, any>>({
   maxDate,
   className,
 }: FormDatePickerProps<T>) {
-  // Cast name to any for watch() to avoid Path<T> type issues
+  // ✅ FIX RACE CONDITION: Watch field value with defensive check
   const fieldValue = watch(name as any);
-  const dateValue = typeof fieldValue === "string" ? fieldValue : "";
 
-  console.log("🔍 FormDatePicker RENDER - Field:", name);
-  console.log("🔍 FormDatePicker RENDER - fieldValue:", fieldValue);
-  console.log("🔍 FormDatePicker RENDER - dateValue:", dateValue);
-  console.log("🔍 FormDatePicker RENDER - parseDateLocal result:", parseDateLocal(dateValue || ""));
+  // ✅ Handle undefined, null, and non-string values safely
+  const dateValue = (fieldValue != null && typeof fieldValue === "string") ? fieldValue : "";
+
+  // ✅ Parse date safely (returns undefined if invalid)
+  const parsedDate = dateValue ? parseDateLocal(dateValue) : undefined;
 
   return (
     <div className={className}>
@@ -59,28 +59,14 @@ export function FormDatePicker<T extends Record<string, any>>({
       <DatePicker
         id={name}
         disabled={disabled}
-        date={parseDateLocal(dateValue || "")}
+        date={parsedDate}
         onDateChange={(date) => {
-          console.log("🔄 FormDatePicker: onDateChange called for field:", name);
-          console.log("🔄 FormDatePicker: date received:", date);
-
           if (date) {
-            const formattedDate = formatDateLocal(date);
-            console.log("✅ FormDatePicker: Formatted date:", formattedDate);
-            console.log("✅ FormDatePicker: Calling setValue for:", name);
-
             // Convert to YYYY-MM-DD format in LOCAL timezone (not UTC)
+            const formattedDate = formatDateLocal(date);
             setValue(name as any, formattedDate as any, { shouldValidate: true, shouldDirty: true });
-
-            console.log("✅ FormDatePicker: setValue called successfully");
-
-            // Check if value was set
-            setTimeout(() => {
-              const newValue = watch(name as any);
-              console.log("🔍 FormDatePicker: Value after setValue:", newValue);
-            }, 100);
           } else {
-            console.log("⚠️ FormDatePicker: No date, clearing field");
+            // Clear the field
             setValue(name as any, "" as any, { shouldValidate: true, shouldDirty: true });
           }
         }}

@@ -42,7 +42,6 @@ export function DatePicker({
   }, [date]);
 
   const handleSelect = (newDate: Date | undefined) => {
-    console.log("📅 DatePicker: Date selected:", newDate);
     setSelectedDate(newDate);
     // Don't close yet - wait for user to click "Pilih" button
   };
@@ -51,14 +50,8 @@ export function DatePicker({
     e?.preventDefault();
     e?.stopPropagation();
 
-    console.log("✅ DatePicker: Pilih clicked, selectedDate:", selectedDate);
-    console.log("✅ DatePicker: onDateChange exists?", !!onDateChange);
-
     if (onDateChange && selectedDate) {
-      console.log("✅ DatePicker: Calling onDateChange with:", selectedDate);
       onDateChange(selectedDate);
-    } else {
-      console.warn("⚠️ DatePicker: Cannot confirm - missing onDateChange or selectedDate");
     }
 
     setOpen(false);
@@ -68,7 +61,6 @@ export function DatePicker({
     e?.preventDefault();
     e?.stopPropagation();
 
-    console.log("❌ DatePicker: Batal clicked");
     setSelectedDate(date); // Reset to original
     setOpen(false);
   };
