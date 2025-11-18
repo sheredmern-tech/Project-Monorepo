@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Download, TrendingUp, Users, Activity } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 import { StatisticWidget } from "@/components/widgets/statistics-widget";
 import { laporanApi, TeamStatistics, WorkloadDistribution } from "@/lib/api/laporan.api";
 

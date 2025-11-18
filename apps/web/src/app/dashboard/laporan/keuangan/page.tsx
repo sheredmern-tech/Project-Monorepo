@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Download, DollarSign, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/hooks/use-toast";
 import { StatisticWidget } from "@/components/widgets/statistics-widget";
 import { laporanApi, FinanceStatistics } from "@/lib/api/laporan.api";
 
