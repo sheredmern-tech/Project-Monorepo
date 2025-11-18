@@ -42,7 +42,8 @@ export function FormDatePicker<T extends Record<string, any>>({
   maxDate,
   className,
 }: FormDatePickerProps<T>) {
-  const fieldValue = watch(name);
+  // Cast name to any for watch() to avoid Path<T> type issues
+  const fieldValue = watch(name as any);
   const dateValue = typeof fieldValue === "string" ? fieldValue : "";
 
   return (
@@ -56,9 +57,9 @@ export function FormDatePicker<T extends Record<string, any>>({
         onDateChange={(date) => {
           if (date) {
             // Convert to YYYY-MM-DD format for backend
-            setValue(name, date.toISOString().split("T")[0] as any);
+            setValue(name as any, date.toISOString().split("T")[0] as any);
           } else {
-            setValue(name, "" as any);
+            setValue(name as any, "" as any);
           }
         }}
         placeholder={placeholder || `Pilih ${label.toLowerCase()}`}

@@ -45,7 +45,8 @@ export function FormSelect<T extends Record<string, any>>({
   error,
   className,
 }: FormSelectProps<T>) {
-  const value = watch(name) as string;
+  // Cast name to any for watch() to avoid Path<T> type issues
+  const value = watch(name as any) as string;
 
   return (
     <div className={className}>
@@ -54,7 +55,7 @@ export function FormSelect<T extends Record<string, any>>({
       </Label>
       <Select
         value={value}
-        onValueChange={(val) => setValue(name, val as any)}
+        onValueChange={(val) => setValue(name as any, val as any)}
         disabled={disabled}
       >
         <SelectTrigger>
