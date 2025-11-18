@@ -46,6 +46,11 @@ export function FormDatePicker<T extends Record<string, any>>({
   const fieldValue = watch(name as any);
   const dateValue = typeof fieldValue === "string" ? fieldValue : "";
 
+  console.log("🔍 FormDatePicker RENDER - Field:", name);
+  console.log("🔍 FormDatePicker RENDER - fieldValue:", fieldValue);
+  console.log("🔍 FormDatePicker RENDER - dateValue:", dateValue);
+  console.log("🔍 FormDatePicker RENDER - parseDateLocal result:", parseDateLocal(dateValue || ""));
+
   return (
     <div className={className}>
       <Label htmlFor={name}>
@@ -64,12 +69,18 @@ export function FormDatePicker<T extends Record<string, any>>({
             console.log("✅ FormDatePicker: Calling setValue for:", name);
 
             // Convert to YYYY-MM-DD format in LOCAL timezone (not UTC)
-            setValue(name as any, formattedDate as any);
+            setValue(name as any, formattedDate as any, { shouldValidate: true, shouldDirty: true });
 
             console.log("✅ FormDatePicker: setValue called successfully");
+
+            // Check if value was set
+            setTimeout(() => {
+              const newValue = watch(name as any);
+              console.log("🔍 FormDatePicker: Value after setValue:", newValue);
+            }, 100);
           } else {
             console.log("⚠️ FormDatePicker: No date, clearing field");
-            setValue(name as any, "" as any);
+            setValue(name as any, "" as any, { shouldValidate: true, shouldDirty: true });
           }
         }}
         placeholder={placeholder || `Pilih ${label.toLowerCase()}`}
