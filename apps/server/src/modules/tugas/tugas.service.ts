@@ -1,4 +1,5 @@
 // ===== FILE: server/src/modules/tugas/tugas.service.ts (UPDATED) =====
+// ✅ FIXED: Invalidate perkara cache after create/update/delete
 import {
   Injectable,
   NotFoundException,
@@ -6,6 +7,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PerkaraService } from '../perkara/perkara.service';
 import { Prisma, UserRole } from '@prisma/client';
 import { CreateTugasDto } from './dto/create-tugas.dto';
 import { UpdateTugasDto } from './dto/update-tugas.dto';
@@ -18,7 +20,10 @@ import {
 
 @Injectable()
 export class TugasService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private perkaraService: PerkaraService, // ✅ Inject for cache invalidation
+  ) {}
 
   async create(
     dto: CreateTugasDto,
@@ -96,6 +101,9 @@ export class TugasService {
     await this.prisma.logAktivitas.create({
       data: logData,
     });
+
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(dto.perkara_id);
 
     return tugas;
   }
@@ -359,6 +367,9 @@ export class TugasService {
       data: logData,
     });
 
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(tugas.perkara.id);
+
     return tugas;
   }
 
@@ -380,6 +391,9 @@ export class TugasService {
     await this.prisma.logAktivitas.create({
       data: logData,
     });
+
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(tugas.perkara.id);
 
     return { message: 'Tugas berhasil dihapus' };
   }

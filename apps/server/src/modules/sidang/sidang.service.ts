@@ -1,5 +1,6 @@
 // ============================================================================
 // FILE: server/src/modules/sidang/sidang.service.ts - WITH RBAC FILTERING
+// ✅ FIXED: Invalidate perkara cache after create/update/delete
 // ============================================================================
 import {
   Injectable,
@@ -7,6 +8,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PerkaraService } from '../perkara/perkara.service';
 import { Prisma, UserRole } from '@prisma/client';
 import { CreateSidangDto } from './dto/create-sidang.dto';
 import { UpdateSidangDto } from './dto/update-sidang.dto';
@@ -19,7 +21,10 @@ import {
 
 @Injectable()
 export class SidangService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private perkaraService: PerkaraService, // ✅ Inject to invalidate perkara cache
+  ) {}
 
   async create(
     dto: CreateSidangDto,
@@ -82,6 +87,9 @@ export class SidangService {
     await this.prisma.logAktivitas.create({
       data: logData,
     });
+
+    // ✅ FIX: Invalidate perkara cache so detail page shows new sidang
+    await this.perkaraService.invalidatePerkaraCache(dto.perkara_id);
 
     return sidang;
   }
@@ -275,7 +283,7 @@ export class SidangService {
     dto: UpdateSidangDto,
     userId: string,
   ): Promise<JadwalSidangWithRelations> {
-    await this.findOne(id);
+    const existingSidang = await this.findOne(id);
 
     const updateData: Prisma.JadwalSidangUpdateInput = { ...dto };
 
@@ -323,6 +331,9 @@ export class SidangService {
       data: logData,
     });
 
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(existingSidang.perkara.id);
+
     return sidang;
   }
 
@@ -344,6 +355,9 @@ export class SidangService {
     await this.prisma.logAktivitas.create({
       data: logData,
     });
+
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(sidang.perkara.id);
 
     return { message: 'Jadwal sidang berhasil dihapus' };
   }

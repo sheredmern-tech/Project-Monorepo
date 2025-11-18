@@ -1,5 +1,6 @@
 // ============================================================================
 // FILE: server/src/modules/dokumen/dokumen.service.ts - WITH GOOGLE DRIVE API
+// ✅ FIXED: Invalidate perkara cache after create/update/delete
 // ============================================================================
 import {
   Injectable,
@@ -8,6 +9,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PerkaraService } from '../perkara/perkara.service';
 import { Prisma, UserRole } from '@prisma/client';
 import { CreateDokumenDto } from './dto/create-dokumen.dto';
 import { UpdateDokumenDto } from './dto/update-dokumen.dto';
@@ -27,6 +29,7 @@ export class DokumenService {
   constructor(
     private prisma: PrismaService,
     private googleDriveService: GoogleDriveService,
+    private perkaraService: PerkaraService, // ✅ Inject for cache invalidation
   ) {}
 
   async create(
@@ -132,6 +135,9 @@ export class DokumenService {
     await this.prisma.logAktivitas.create({
       data: logData,
     });
+
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(dto.perkara_id);
 
     return dokumen;
   }
@@ -369,6 +375,9 @@ export class DokumenService {
       data: logData,
     });
 
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(dokumen.perkara.id);
+
     return dokumen;
   }
 
@@ -406,6 +415,9 @@ export class DokumenService {
     await this.prisma.logAktivitas.create({
       data: logData,
     });
+
+    // ✅ FIX: Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(dokumen.perkara.id);
 
     return { message: 'Dokumen berhasil dihapus' };
   }
