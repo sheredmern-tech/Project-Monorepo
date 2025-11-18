@@ -51,6 +51,16 @@ export function FormDatePicker<T extends Record<string, any>>({
   // ✅ Parse date safely (returns undefined if invalid)
   const parsedDate = dateValue ? parseDateLocal(dateValue) : undefined;
 
+  // ✅ Format tanggal untuk display yang user-friendly
+  const displayDate = parsedDate
+    ? parsedDate.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    : null;
+
   return (
     <div className={className}>
       <Label htmlFor={name}>
@@ -74,6 +84,16 @@ export function FormDatePicker<T extends Record<string, any>>({
         minDate={minDate}
         maxDate={maxDate}
       />
+
+      {/* ✅ DISPLAY SELECTED DATE - Visual feedback for user */}
+      {displayDate && (
+        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            ✓ Tanggal terpilih: <span className="font-semibold">{displayDate}</span>
+          </p>
+        </div>
+      )}
+
       {error && <p className="text-sm text-red-500 mt-2">{error.message}</p>}
     </div>
   );
