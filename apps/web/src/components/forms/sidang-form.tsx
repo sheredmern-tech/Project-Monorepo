@@ -3,10 +3,11 @@
 // ============================================================================
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -110,6 +111,25 @@ export function SidangForm({
   }, []);
 
   const selectedPerkara = perkaraList.find((p) => p.id === perkaraId);
+
+  // ✅ FIX: Time validation handler to prevent race conditions
+  const handleTimeChange = useCallback((field: "waktu_mulai" | "waktu_selesai", time: string) => {
+    setValue(field, time);
+
+    // Get both time values for validation
+    const waktuMulai = field === "waktu_mulai" ? time : watch("waktu_mulai");
+    const waktuSelesai = field === "waktu_selesai" ? time : watch("waktu_selesai");
+
+    // Validate time range if both values are set
+    if (waktuMulai && waktuSelesai) {
+      // Compare times in HH:mm format (works because format is consistent)
+      if (waktuMulai >= waktuSelesai) {
+        toast.error("Waktu selesai harus lebih dari waktu mulai");
+        // Clear the invalid field to prevent submission
+        setValue(field, "");
+      }
+    }
+  }, [setValue, watch]);
 
   // ✅ FIX: Wrapper to convert tanggal_sidang to ISO DateTime
   const handleFormSubmit = (data: SidangFormData) => {
@@ -215,7 +235,7 @@ export function SidangForm({
               <TimePicker
                 disabled={isLoading}
                 time={watch("waktu_mulai")}
-                onTimeChange={(time) => setValue("waktu_mulai", time)}
+                onTimeChange={(time) => handleTimeChange("waktu_mulai", time)}
                 placeholder="Pilih waktu mulai"
                 maxTime={watch("waktu_selesai")}
               />
@@ -226,7 +246,7 @@ export function SidangForm({
               <TimePicker
                 disabled={isLoading}
                 time={watch("waktu_selesai")}
-                onTimeChange={(time) => setValue("waktu_selesai", time)}
+                onTimeChange={(time) => handleTimeChange("waktu_selesai", time)}
                 placeholder="Pilih waktu selesai"
                 minTime={watch("waktu_mulai")}
               />

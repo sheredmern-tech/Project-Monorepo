@@ -3,7 +3,7 @@
 // ============================================================================
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload, X, FileText, AlertCircle, Search } from "lucide-react";
@@ -99,7 +99,11 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
     fetchPerkara();
   }, []);
 
-  const selectedPerkara = perkaraList.find((p) => p.id === perkaraId);
+  // ✅ FIX: Use useMemo to prevent race condition with async data loading
+  const selectedPerkara = useMemo(
+    () => perkaraList.find((p) => p.id === perkaraId),
+    [perkaraList, perkaraId]
+  );
 
   const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
     accept: {
