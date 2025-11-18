@@ -14,7 +14,7 @@ import { QueryLogDto } from './dto/query-log.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { UserRole } from '@prisma/client';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 @ApiTags('Activity Logs')
 @ApiBearerAuth()
