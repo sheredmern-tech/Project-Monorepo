@@ -461,8 +461,12 @@ export class PerkaraService {
     filters?: QueryPerkaraDto,
     res?: Response,
   ): Promise<void> {
+    if (!res) {
+      throw new BadRequestException('Response object is required');
+    }
+
     // Get perkara data with financial info
-    const result = await this.findAll(filters || {}, null, UserRole.admin);
+    const result = await this.findAll(filters || {}, '', UserRole.admin);
     const perkaraList = result.data;
 
     // Prepare finance data
@@ -636,7 +640,7 @@ export class PerkaraService {
   }> {
     try {
       // Get perkara data with financial info
-      const result = await this.findAll(filters || {}, null, UserRole.admin);
+      const result = await this.findAll(filters || {}, '', UserRole.admin);
       const perkaraList = result.data;
 
       // Prepare finance data
