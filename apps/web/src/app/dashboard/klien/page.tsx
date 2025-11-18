@@ -16,7 +16,6 @@ import { useKlien } from "@/lib/hooks/use-klien";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePermission } from "@/lib/hooks/use-permission";
 import { UserRole } from "@/types/enums";
-import { TableSkeleton } from "@/components/shared/table-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -37,12 +36,6 @@ export default function KlienPage() {
   } = useKlien();
 
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
-  const [isMounted, setIsMounted] = useState(false);
-
-  // ✅ Fix hydration: Only render user-dependent content after mount
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // ✅ CLIENT REDIRECT - NO STATE UPDATE IN EFFECT
   useEffect(() => {
@@ -59,9 +52,9 @@ export default function KlienPage() {
     }
   }, [fetchKlien, user]);
 
-  // ✅ Fix hydration: Show loading skeleton until mounted AND checked role
-  if (!isMounted || user?.role === UserRole.KLIEN) {
-    return <TableSkeleton rows={10} columns={7} />;
+  // ✅ Redirecting - just return null, don't show skeleton for whole page
+  if (user?.role === UserRole.KLIEN) {
+    return null;
   }
 
   return (
