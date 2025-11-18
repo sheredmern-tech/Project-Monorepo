@@ -4,6 +4,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Scale,
@@ -91,7 +92,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard">
+              <Link href="/dashboard" prefetch={true}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Scale className="size-4" />
                 </div>
@@ -99,7 +100,7 @@ export function AppSidebar() {
                   <span className="truncate font-semibold">{APP_NAME}</span>
                   <span className="truncate text-xs">Enterprise</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -118,12 +119,12 @@ export function AppSidebar() {
 
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton 
-                      asChild 
+                    <SidebarMenuButton
+                      asChild
                       isActive={isActive}
                       tooltip={item.title}
                     >
-                      <a href={item.href}>
+                      <Link href={item.href} prefetch={true}>
                         <Icon />
                         <span>{item.title}</span>
                         {item.badge && (
@@ -131,7 +132,7 @@ export function AppSidebar() {
                             {item.badge === "my" ? "Saya" : item.badge}
                           </Badge>
                         )}
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -152,15 +153,15 @@ export function AppSidebar() {
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton 
-                        asChild 
+                      <SidebarMenuButton
+                        asChild
                         isActive={isActive}
                         tooltip={item.title}
                       >
-                        <a href={item.href}>
+                        <Link href={item.href} prefetch={true}>
                           <Icon />
                           <span>{item.title}</span>
-                        </a>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
