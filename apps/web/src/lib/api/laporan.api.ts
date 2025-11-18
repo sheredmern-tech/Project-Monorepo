@@ -51,7 +51,7 @@ export const laporanApi = {
    */
   getTeamStatistics: async (): Promise<TeamStatistics> => {
     const response = await apiClient.get<TeamStatistics>("/users/statistics");
-    return response.data;
+    return response as any; // ✅ Interceptor already unwrapped, return response directly
   },
 
   /**
@@ -61,7 +61,7 @@ export const laporanApi = {
     const response = await apiClient.get<WorkloadDistribution[]>(
       "/users/workload-distribution"
     );
-    return response.data;
+    return response as any; // ✅ Interceptor already unwrapped, return response directly
   },
 
   /**
@@ -75,7 +75,7 @@ export const laporanApi = {
         responseType: "blob",
       }
     );
-    return response.data;
+    return response as any; // ✅ Blob responses are not wrapped, return directly
   },
 
   /**
@@ -88,7 +88,7 @@ export const laporanApi = {
       "/users/reports/kinerja/export-to-drive",
       { format }
     );
-    return response.data;
+    return response as any; // ✅ Interceptor already unwrapped, return response directly
   },
 
   // ============================================================================
@@ -102,7 +102,7 @@ export const laporanApi = {
     const response = await apiClient.get<FinanceStatistics>(
       "/perkara/reports/keuangan/statistics"
     );
-    return response.data;
+    return response as any; // ✅ Interceptor already unwrapped, return response directly
   },
 
   /**
@@ -119,7 +119,7 @@ export const laporanApi = {
         responseType: "blob",
       }
     );
-    return response.data;
+    return response as any; // ✅ Blob responses are not wrapped, return directly
   },
 
   /**
@@ -133,6 +133,6 @@ export const laporanApi = {
       "/perkara/reports/keuangan/export-to-drive",
       { format, filters }
     );
-    return response.data;
+    return response as any; // ✅ Interceptor already unwrapped, return response directly
   },
 };
