@@ -2,11 +2,12 @@
 // FILE: components/modals/bulk-import-users-dialog.tsx - FIXED VERSION
 // ✅ Added Download Template functionality
 // ✅ Better error display with details
+// ✅ Google Drive Import Integration
 // ============================================================================
 "use client";
 
-import { useState } from "react";
-import { Upload, Download, X, AlertCircle, CheckCircle2, FileSpreadsheet } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Upload, Download, X, AlertCircle, CheckCircle2, FileSpreadsheet, Cloud, File } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { timApi } from "@/lib/api/tim.api";
 import { useToast } from "@/lib/hooks/use-toast";
 
@@ -37,6 +39,17 @@ export function BulkImportUsersDialog({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"upload" | "drive">("upload");
+  const [driveFiles, setDriveFiles] = useState<Array<{
+    id: string;
+    name: string;
+    mimeType: string;
+    size: string;
+    createdTime: string;
+    modifiedTime: string;
+    webViewLink: string;
+  }>>([]);
+  const [isLoadingDriveFiles, setIsLoadingDriveFiles] = useState(false);
   const [result, setResult] = useState<{
     success: number;
     failed: number;
@@ -142,7 +155,7 @@ export function BulkImportUsersDialog({
           title: "Import Selesai",
           description: `${importResult.success} user berhasil diimport, ${importResult.failed} gagal`,
         });
-        
+
         if (importResult.failed === 0) {
           setTimeout(() => {
             onSuccess();
@@ -161,6 +174,67 @@ export function BulkImportUsersDialog({
       toast({
         title: "Gagal",
         description: error instanceof Error ? error.message : "Gagal import users",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Fetch Google Drive files when tab changes to "drive"
+  useEffect(() => {
+    if (open && activeTab === "drive" && driveFiles.length === 0) {
+      fetchDriveFiles();
+    }
+  }, [open, activeTab]);
+
+  const fetchDriveFiles = async () => {
+    try {
+      setIsLoadingDriveFiles(true);
+      const files = await timApi.listGoogleDriveFiles();
+      setDriveFiles(files);
+    } catch (error) {
+      console.error('Fetch Google Drive files error:', error);
+      toast({
+        title: "Gagal",
+        description: "Gagal mengambil daftar file dari Google Drive",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDriveFiles(false);
+    }
+  };
+
+  const handleImportFromDrive = async (fileId: string, fileName: string) => {
+    try {
+      setIsUploading(true);
+      const importResult = await timApi.importUsersFromGoogleDrive(fileId);
+      setResult(importResult);
+
+      if (importResult.success > 0) {
+        toast({
+          title: "Import Selesai",
+          description: `${importResult.success} user berhasil diimport dari ${fileName}`,
+        });
+
+        if (importResult.failed === 0) {
+          setTimeout(() => {
+            onSuccess();
+            onOpenChange(false);
+          }, 2000);
+        }
+      } else {
+        toast({
+          title: "Import Gagal",
+          description: "Semua user gagal diimport",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Import from Google Drive error:', error);
+      toast({
+        title: "Gagal",
+        description: error instanceof Error ? error.message : "Gagal import dari Google Drive",
         variant: "destructive",
       });
     } finally {
@@ -197,90 +271,103 @@ export function BulkImportUsersDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Bulk Import Users</DialogTitle>
           <DialogDescription>
-            Import multiple users sekaligus menggunakan file CSV
+            Import users dari file lokal atau Google Drive
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Download Template Section */}
-          <Alert>
-            <FileSpreadsheet className="h-4 w-4" />
-            <AlertDescription>
-              <div className="flex flex-col gap-2">
-                <span className="font-medium">Download template untuk format yang benar</span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDownloadTemplate}
-                    disabled={isDownloading}
-                    className="flex-1"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    CSV Template
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDownloadExcelTemplate}
-                    disabled={isDownloading}
-                    className="flex-1"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Excel Template
-                  </Button>
-                </div>
-              </div>
-            </AlertDescription>
-          </Alert>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "upload" | "drive")} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="upload" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Upload File
+            </TabsTrigger>
+            <TabsTrigger value="drive" className="flex items-center gap-2">
+              <Cloud className="h-4 w-4" />
+              Google Drive
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Format Info */}
-          <div className="rounded-lg border p-4 bg-muted/50">
-            <h4 className="font-medium mb-2">Format File (CSV atau Excel):</h4>
-            <code className="text-sm">
-              email,nama_lengkap,role,jabatan,telepon
-            </code>
-            <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-              <p>• <strong>email</strong>: Email user (wajib, unique)</p>
-              <p>• <strong>nama_lengkap</strong>: Nama lengkap (wajib)</p>
-              <p>• <strong>role</strong>: admin, advokat, paralegal, staff, klien (wajib)</p>
-              <p>• <strong>jabatan</strong>: Jabatan user (opsional)</p>
-              <p>• <strong>telepon</strong>: Nomor telepon (opsional)</p>
-            </div>
-            <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-xs text-blue-700 dark:text-blue-300">
-              💡 <strong>Tip:</strong> Download Excel template untuk format yang lebih rapi dengan sheet Instructions
-            </div>
-          </div>
-
-          {/* File Upload Section */}
-          <div className="space-y-4">
-            {!file ? (
-              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
-                <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Pilih file CSV atau Excel (.xlsx) untuk diupload
-                  </p>
-                  <Button variant="outline" asChild>
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      Browse Files
-                      <input
-                        id="file-upload"
-                        type="file"
-                        accept=".csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
-                        className="hidden"
-                        onChange={handleFileChange}
-                        disabled={isUploading}
-                      />
-                    </label>
-                  </Button>
+          {/* TAB 1: Upload File */}
+          <TabsContent value="upload" className="space-y-6 mt-6">
+            {/* Download Template Section */}
+            <Alert>
+              <FileSpreadsheet className="h-4 w-4" />
+              <AlertDescription>
+                <div className="flex flex-col gap-2">
+                  <span className="font-medium">Download template untuk format yang benar</span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownloadTemplate}
+                      disabled={isDownloading}
+                      className="flex-1"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      CSV Template
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownloadExcelTemplate}
+                      disabled={isDownloading}
+                      className="flex-1"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Excel Template
+                    </Button>
+                  </div>
                 </div>
+              </AlertDescription>
+            </Alert>
+
+            {/* Format Info */}
+            <div className="rounded-lg border p-4 bg-muted/50">
+              <h4 className="font-medium mb-2">Format File (CSV atau Excel):</h4>
+              <code className="text-sm">
+                email,nama_lengkap,role,jabatan,telepon
+              </code>
+              <div className="mt-3 space-y-1 text-sm text-muted-foreground">
+                <p>• <strong>email</strong>: Email user (wajib, unique)</p>
+                <p>• <strong>nama_lengkap</strong>: Nama lengkap (wajib)</p>
+                <p>• <strong>role</strong>: admin, advokat, paralegal, staff, klien (wajib)</p>
+                <p>• <strong>jabatan</strong>: Jabatan user (opsional)</p>
+                <p>• <strong>telepon</strong>: Nomor telepon (opsional)</p>
               </div>
-            ) : (
+              <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-xs text-blue-700 dark:text-blue-300">
+                💡 <strong>Tip:</strong> Download Excel template untuk format yang lebih rapi dengan sheet Instructions
+              </div>
+            </div>
+
+            {/* File Upload Section */}
+            <div className="space-y-4">
+              {!file ? (
+                <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
+                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Pilih file CSV atau Excel (.xlsx) untuk diupload
+                    </p>
+                    <Button variant="outline" asChild>
+                      <label htmlFor="file-upload" className="cursor-pointer">
+                        Browse Files
+                        <input
+                          id="file-upload"
+                          type="file"
+                          accept=".csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
+                          className="hidden"
+                          onChange={handleFileChange}
+                          disabled={isUploading}
+                        />
+                      </label>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
               <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/50">
                 <div className="flex items-center gap-3">
                   <FileSpreadsheet className="h-8 w-8 text-primary" />
@@ -399,7 +486,177 @@ export function BulkImportUsersDialog({
               {result ? "Close" : "Cancel"}
             </Button>
           </div>
-        </div>
+        </TabsContent>
+
+        {/* TAB 2: Import from Google Drive */}
+        <TabsContent value="drive" className="space-y-6 mt-6">
+          <Alert>
+            <Cloud className="h-4 w-4" />
+            <AlertDescription>
+              <div className="flex items-center justify-between">
+                <span>Import users dari file yang ada di Google Drive</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchDriveFiles}
+                  disabled={isLoadingDriveFiles}
+                >
+                  {isLoadingDriveFiles ? "Loading..." : "Refresh"}
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+
+          {/* Google Drive Files List */}
+          {isLoadingDriveFiles ? (
+            <div className="flex items-center justify-center p-12">
+              <div className="text-center space-y-2">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p className="text-sm text-muted-foreground">Loading files from Google Drive...</p>
+              </div>
+            </div>
+          ) : driveFiles.length === 0 ? (
+            <div className="border-2 border-dashed rounded-lg p-12 text-center">
+              <Cloud className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="font-medium mb-2">No Import Files Found</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Tidak ada file CSV atau Excel dengan nama "user" di Google Drive
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Tip: Export users terlebih dahulu ke Google Drive untuk membuat file import
+              </p>
+            </div>
+          ) : (
+            <ScrollArea className="h-[400px] rounded-lg border">
+              <div className="p-4 space-y-2">
+                {driveFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <File className="h-8 w-8 text-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{file.name}</p>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>
+                            {file.mimeType.includes('csv') ? 'CSV' : 'Excel'}
+                          </span>
+                          <span>
+                            {(parseInt(file.size) / 1024).toFixed(2)} KB
+                          </span>
+                          <span>
+                            {new Date(file.modifiedTime).toLocaleDateString('id-ID', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(file.webViewLink, '_blank')}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleImportFromDrive(file.id, file.name)}
+                        disabled={isUploading}
+                      >
+                        {isUploading ? "Importing..." : "Import"}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+
+          {/* Results (same as upload tab) */}
+          {result && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertDescription>
+                    <div className="font-semibold text-green-900 dark:text-green-100">
+                      {result.success} Berhasil
+                    </div>
+                    <div className="text-sm text-green-700 dark:text-green-200">
+                      User berhasil diimport
+                    </div>
+                  </AlertDescription>
+                </Alert>
+
+                <Alert className="border-red-200 bg-red-50 dark:bg-red-900/20">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription>
+                    <div className="font-semibold text-red-900 dark:text-red-100">
+                      {result.failed} Gagal
+                    </div>
+                    <div className="text-sm text-red-700 dark:text-red-200">
+                      User gagal diimport
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              </div>
+
+              {/* Error Details */}
+              {result.errors.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-sm">Error Details:</h4>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDownloadErrors}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Errors
+                    </Button>
+                  </div>
+                  <ScrollArea className="h-[200px] rounded-lg border p-4">
+                    <div className="space-y-2">
+                      {result.errors.map((error, index) => (
+                        <div
+                          key={index}
+                          className="flex items-start gap-2 text-sm p-2 rounded bg-muted"
+                        >
+                          <Badge variant="destructive" className="shrink-0">
+                            Row {error.row}
+                          </Badge>
+                          <div className="flex-1 space-y-1">
+                            <p className="font-medium">{error.email}</p>
+                            <p className="text-muted-foreground text-xs">
+                              {error.reason}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Close Button */}
+          <div className="flex justify-end pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              disabled={isUploading}
+            >
+              {result ? "Close" : "Cancel"}
+            </Button>
+          </div>
+        </TabsContent>
+      </Tabs>
       </DialogContent>
     </Dialog>
   );
