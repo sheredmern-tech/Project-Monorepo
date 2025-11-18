@@ -5,7 +5,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
+import { usePermission } from "@/lib/hooks/use-permission";
+import { useAuthStore } from "@/lib/stores/auth.store";
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart3, Activity, TrendingUp, FileText } from "lucide-react";
@@ -18,6 +21,9 @@ import { sidangApi } from "@/lib/api/sidang.api";
 
 export default function LaporanPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const permissions = usePermission();
+
   const [stats, setStats] = useState({
     totalPerkara: 0,
     totalKlien: 0,
@@ -25,6 +31,13 @@ export default function LaporanPage() {
     sidangBulanIni: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+
+  // 🔒 RBAC: Check if user has permission to access Laporan page
+  useEffect(() => {
+    if (user && !permissions.reports.read) {
+      notFound(); // Redirect to 404 if no permission
+    }
+  }, [user, permissions.reports.read]);
 
   useEffect(() => {
     const fetchStats = async () => {

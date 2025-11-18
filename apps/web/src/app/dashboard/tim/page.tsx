@@ -5,6 +5,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import {
   Users as UsersIcon,
   Search,
@@ -84,6 +85,13 @@ export default function TimPage() {
     inactive_users: number;
     recent_additions: number;
   } | null>(null);
+
+  // 🔒 RBAC: Check if user has permission to access Tim page
+  useEffect(() => {
+    if (user && !permissions.users.read) {
+      notFound(); // Redirect to 404 if no permission
+    }
+  }, [user, permissions.users.read]);
 
   // ✅ FIXED: useCallback to avoid exhaustive-deps warning
   const fetchUsers = useCallback(async () => {

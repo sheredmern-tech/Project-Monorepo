@@ -268,7 +268,7 @@ export function AppSidebar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href={`/dashboard/tim/${user?.id}`} className="cursor-pointer">
+                    <Link href="/dashboard/profile" className="cursor-pointer">
                       <User className="mr-2 h-4 w-4" />
                       Profil Saya
                     </Link>
