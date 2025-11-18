@@ -16,7 +16,7 @@ export function useLog() {
   // State
   const [logs, setLogs] = useState<LogAktivitasWithUser[]>([]);
   const [myLogs, setMyLogs] = useState<LogAktivitasWithUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // ✅ Start with loading state to show skeleton on mount
+  const [isLoading, setIsLoading] = useState(false); // ✅ FIX: Start with false to prevent stuck loading
   const [error, setError] = useState<string | null>(null);
 
   /**
