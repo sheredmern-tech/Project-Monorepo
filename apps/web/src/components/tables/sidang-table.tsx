@@ -3,7 +3,7 @@
 // ============================================================================
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Eye, Edit, Trash2, Calendar, Clock, MapPin, AlertCircle } from "lucide-react";
 import {
@@ -47,14 +47,14 @@ interface SidangTableProps {
   onPageChange: (page: number) => void;
 }
 
-export function SidangTable({ 
-  data, 
-  isLoading, 
+export function SidangTable({
+  data,
+  isLoading,
   error,
-  page, 
-  limit, 
-  total, 
-  onPageChange 
+  page,
+  limit,
+  total,
+  onPageChange
 }: SidangTableProps) {
   const router = useRouter();
   const { deleteSidang, fetchSidang } = useSidang();
@@ -63,6 +63,16 @@ export function SidangTable({
   const permissions = usePermission();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Track if we've attempted to load data (prevent flash of empty state on first render)
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+
+  useEffect(() => {
+    // Mark that we've attempted load once isLoading becomes false for the first time
+    if (!isLoading) {
+      setHasAttemptedLoad(true);
+    }
+  }, [isLoading]);
 
   // ✅ Enhanced delete with error handling
   const handleDelete = async () => {
@@ -115,8 +125,8 @@ export function SidangTable({
     );
   }
 
-  // ✅ Empty State
-  if (!data.length) {
+  // ✅ Empty State - only show if we've attempted to load data
+  if (!data.length && hasAttemptedLoad) {
     return (
       <EmptyState
         icon={Calendar}
@@ -128,6 +138,11 @@ export function SidangTable({
         }}
       />
     );
+  }
+
+  // Show skeleton if data not loaded yet and we haven't attempted load
+  if (!hasAttemptedLoad) {
+    return <TableSkeleton rows={10} columns={7} />;
   }
 
   return (
