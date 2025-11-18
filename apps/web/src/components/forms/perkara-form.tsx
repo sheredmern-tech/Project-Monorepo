@@ -7,7 +7,6 @@ import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search, AlertCircle } from "lucide-react";
-import { parseDateLocal } from "@/lib/utils/date";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DatePicker } from "@/components/ui/date-picker";
+import { FormDatePicker } from "@/components/form-fields";
 import { SelectKlienModal } from "@/components/modals/select-klien-modal";
 import { perkaraSchema, PerkaraFormData } from "@/lib/schemas/perkara.schema";
 import { PerkaraEntity, JenisPerkara, StatusPerkara, PrioritasTugas } from "@/types";
@@ -456,43 +455,27 @@ export function PerkaraForm({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Tanggal Register</Label>
-              <DatePicker
-                disabled={isLoading}
-                date={parseDateLocal(watch("tanggal_register") || "")}
-                onDateChange={(date) => {
-                  if (date) {
-                    setValue("tanggal_register", date.toISOString().split("T")[0]);
-                  } else {
-                    setValue("tanggal_register", "");
-                  }
-                }}
-                placeholder="Pilih tanggal register"
-              />
-              {errors.tanggal_register && (
-                <p className="text-sm text-red-500">{errors.tanggal_register.message}</p>
-              )}
-            </div>
+            <FormDatePicker
+              name="tanggal_register"
+              label="Tanggal Register"
+              disabled={isLoading}
+              placeholder="Pilih tanggal register"
+              watch={watch}
+              setValue={setValue}
+              error={errors.tanggal_register}
+              className="space-y-2"
+            />
 
-            <div className="space-y-2">
-              <Label>Tanggal Sidang Pertama</Label>
-              <DatePicker
-                disabled={isLoading}
-                date={parseDateLocal(watch("tanggal_sidang_pertama") || "")}
-                onDateChange={(date) => {
-                  if (date) {
-                    setValue("tanggal_sidang_pertama", date.toISOString().split("T")[0]);
-                  } else {
-                    setValue("tanggal_sidang_pertama", "");
-                  }
-                }}
-                placeholder="Pilih tanggal sidang pertama"
-              />
-              {errors.tanggal_sidang_pertama && (
-                <p className="text-sm text-red-500">{errors.tanggal_sidang_pertama.message}</p>
-              )}
-            </div>
+            <FormDatePicker
+              name="tanggal_sidang_pertama"
+              label="Tanggal Sidang Pertama"
+              disabled={isLoading}
+              placeholder="Pilih tanggal sidang pertama"
+              watch={watch}
+              setValue={setValue}
+              error={errors.tanggal_sidang_pertama}
+              className="space-y-2"
+            />
           </div>
         </CardContent>
       </Card>

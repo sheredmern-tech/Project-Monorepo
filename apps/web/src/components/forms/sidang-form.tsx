@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { parseDateLocal } from "@/lib/utils/date";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,8 +27,8 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DatePicker } from "@/components/ui/date-picker";
 import { TimePicker } from "@/components/ui/time-picker";
+import { FormDatePicker } from "@/components/form-fields";
 import { sidangSchema, SidangFormData } from "@/lib/schemas/sidang.schema";
 import { JadwalSidangEntity, JenisSidang } from "@/types";
 import { perkaraApi } from "@/lib/api/perkara.api";
@@ -199,24 +198,17 @@ export function SidangForm({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>
-                Tanggal Sidang <span className="text-red-500">*</span>
-              </Label>
-              <DatePicker
-                disabled={isLoading}
-                date={parseDateLocal(watch("tanggal_sidang") || "")}
-                onDateChange={(date) => {
-                  if (date) {
-                    setValue("tanggal_sidang", date.toISOString().split("T")[0]);
-                  } else {
-                    setValue("tanggal_sidang", "");
-                  }
-                }}
-                placeholder="Pilih tanggal sidang"
-              />
-              {errors.tanggal_sidang && <p className="text-sm text-red-500">{errors.tanggal_sidang.message}</p>}
-            </div>
+            <FormDatePicker
+              name="tanggal_sidang"
+              label="Tanggal Sidang"
+              required
+              disabled={isLoading}
+              placeholder="Pilih tanggal sidang"
+              watch={watch}
+              setValue={setValue}
+              error={errors.tanggal_sidang}
+              className="space-y-2"
+            />
 
             <div className="space-y-2">
               <Label>Waktu Mulai</Label>

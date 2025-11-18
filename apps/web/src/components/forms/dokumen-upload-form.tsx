@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload, X, FileText, AlertCircle, Search } from "lucide-react";
-import { parseDateLocal } from "@/lib/utils/date";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +29,7 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DatePicker } from "@/components/ui/date-picker";
+import { FormDatePicker } from "@/components/form-fields";
 import { dokumenSchema, DokumenFormData } from "@/lib/schemas/dokumen.schema";
 import { KategoriDokumen } from "@/types";
 import { perkaraApi } from "@/lib/api/perkara.api";
@@ -407,21 +406,15 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tanggal_dokumen">Tanggal Dokumen</Label>
-              <DatePicker
-                disabled={isLoading}
-                date={parseDateLocal(watch("tanggal_dokumen") || "")}
-                onDateChange={(date) => {
-                  if (date) {
-                    setValue("tanggal_dokumen", date.toISOString().split("T")[0]);
-                  } else {
-                    setValue("tanggal_dokumen", "");
-                  }
-                }}
-                placeholder="Pilih tanggal dokumen"
-              />
-            </div>
+            <FormDatePicker
+              name="tanggal_dokumen"
+              label="Tanggal Dokumen"
+              disabled={isLoading}
+              placeholder="Pilih tanggal dokumen"
+              watch={watch}
+              setValue={setValue}
+              className="space-y-2"
+            />
           </div>
 
           <div className="space-y-2">

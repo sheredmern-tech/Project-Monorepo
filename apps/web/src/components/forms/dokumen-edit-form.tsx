@@ -5,7 +5,6 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { Loader2 } from "lucide-react";
-import { parseDateLocal } from "@/lib/utils/date";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DatePicker } from "@/components/ui/date-picker";
+import { FormDatePicker } from "@/components/form-fields";
 import { DokumenEntity, UpdateDokumenDto, KategoriDokumen } from "@/types";
 
 interface DokumenEditFormProps {
@@ -102,21 +101,15 @@ export function DokumenEditForm({ initialData, onSubmit, isLoading, onCancel }: 
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tanggal_dokumen">Tanggal Dokumen</Label>
-              <DatePicker
-                disabled={isLoading}
-                date={parseDateLocal(watch("tanggal_dokumen") || "")}
-                onDateChange={(date) => {
-                  if (date) {
-                    setValue("tanggal_dokumen", date.toISOString().split("T")[0]);
-                  } else {
-                    setValue("tanggal_dokumen", "");
-                  }
-                }}
-                placeholder="Pilih tanggal dokumen"
-              />
-            </div>
+            <FormDatePicker
+              name="tanggal_dokumen"
+              label="Tanggal Dokumen"
+              disabled={isLoading}
+              placeholder="Pilih tanggal dokumen"
+              watch={watch}
+              setValue={setValue}
+              className="space-y-2"
+            />
           </div>
 
           <div className="space-y-2">

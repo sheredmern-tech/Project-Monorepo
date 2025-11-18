@@ -13,7 +13,6 @@ import { useEffect, useState, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search, AlertCircle } from "lucide-react";
-import { parseDateLocal } from "@/lib/utils/date";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DatePicker } from "@/components/ui/date-picker";
+import { FormDatePicker } from "@/components/form-fields";
 import { SelectAdvokatModal } from "@/components/modals/select-advokat-modal";
 import { tugasSchema, TugasFormData } from "@/lib/schemas/tugas.schema";
 import { TugasEntity, StatusTugas, PrioritasTugas } from "@/types";
@@ -318,24 +317,16 @@ export function TugasForm({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Tenggat Waktu</Label>
-              <DatePicker
-                disabled={isLoading}
-                date={parseDateLocal(watch("tenggat_waktu") || "")}
-                onDateChange={(date) => {
-                  if (date) {
-                    setValue("tenggat_waktu", date.toISOString().split("T")[0]);
-                  } else {
-                    setValue("tenggat_waktu", "");
-                  }
-                }}
-                placeholder="Pilih tenggal waktu"
-              />
-              {errors.tenggat_waktu && (
-                <p className="text-sm text-red-500">{errors.tenggat_waktu.message}</p>
-              )}
-            </div>
+            <FormDatePicker
+              name="tenggat_waktu"
+              label="Tenggat Waktu"
+              disabled={isLoading}
+              placeholder="Pilih tenggat waktu"
+              watch={watch}
+              setValue={setValue}
+              error={errors.tenggat_waktu}
+              className="space-y-2"
+            />
           </div>
         </CardContent>
       </Card>
