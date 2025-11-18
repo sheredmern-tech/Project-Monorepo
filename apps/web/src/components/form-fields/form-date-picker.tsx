@@ -1,15 +1,9 @@
 // ============================================================================
-// FILE: components/form-fields/form-date-picker.tsx
-// ============================================================================
-// 🎯 REUSABLE DatePicker form field wrapper with:
-// ✅ Automatic timezone-safe date parsing (parseDateLocal)
-// ✅ Consistent error display
-// ✅ Consistent styling & behavior
-// ✅ Required field indicator
-// ✅ DRY principle - single source of truth
+// FILE: components/form-fields/form-date-picker.tsx (CLEAN VERSION)
 // ============================================================================
 "use client";
 
+import { useEffect, useState } from "react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
 import { parseDateLocal, formatDateLocal } from "@/lib/utils/date";
@@ -42,24 +36,61 @@ export function FormDatePicker<T extends Record<string, any>>({
   maxDate,
   className,
 }: FormDatePickerProps<T>) {
-  // ✅ FIX RACE CONDITION: Watch field value with defensive check
-  const fieldValue = watch(name as any);
+  // ✅ LOCAL STATE
+  const [displayDate, setDisplayDate] = useState<string | null>(null);
+  const [parsedDate, setParsedDate] = useState<Date | undefined>(undefined);
 
-  // ✅ Handle undefined, null, and non-string values safely
+  // ✅ Watch field value
+  const fieldValue = watch(name as any);
   const dateValue = (fieldValue != null && typeof fieldValue === "string") ? fieldValue : "";
 
-  // ✅ Parse date safely (returns undefined if invalid)
-  const parsedDate = dateValue ? parseDateLocal(dateValue) : undefined;
+  // ✅ Sync state ketika field berubah
+  useEffect(() => {
+    if (dateValue) {
+      const parsed = parseDateLocal(dateValue);
+      if (parsed) {
+        setParsedDate(parsed);
+        setDisplayDate(
+          parsed.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        );
+      }
+    } else {
+      setParsedDate(undefined);
+      setDisplayDate(null);
+    }
+  }, [dateValue]);
 
-  // ✅ Format tanggal untuk display yang user-friendly
-  const displayDate = parsedDate
-    ? parsedDate.toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-    : null;
+  // ✅ Dynamic placeholder
+  const displayPlaceholder = displayDate
+    ? displayDate
+    : (placeholder || `Pilih ${label.toLowerCase()}`);
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      const formattedDate = formatDateLocal(date);
+      setValue(name as any, formattedDate as any);
+
+      // ✅ Update local state IMMEDIATELY
+      setParsedDate(date);
+      setDisplayDate(
+        date.toLocaleDateString('id-ID', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      );
+    } else {
+      setValue(name as any, "" as any);
+      setParsedDate(undefined);
+      setDisplayDate(null);
+    }
+  };
 
   return (
     <div className={className}>
@@ -70,29 +101,11 @@ export function FormDatePicker<T extends Record<string, any>>({
         id={name}
         disabled={disabled}
         date={parsedDate}
-        onDateChange={(date) => {
-          if (date) {
-            // Convert to YYYY-MM-DD format in LOCAL timezone (not UTC)
-            const formattedDate = formatDateLocal(date);
-            setValue(name as any, formattedDate as any);
-          } else {
-            // Clear the field
-            setValue(name as any, "" as any);
-          }
-        }}
-        placeholder={placeholder || `Pilih ${label.toLowerCase()}`}
+        onDateChange={handleDateChange}
+        placeholder={displayPlaceholder}
         minDate={minDate}
         maxDate={maxDate}
       />
-
-      {/* ✅ DISPLAY SELECTED DATE - Visual feedback for user */}
-      {displayDate && (
-        <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            ✓ Tanggal terpilih: <span className="font-semibold">{displayDate}</span>
-          </p>
-        </div>
-      )}
 
       {error && <p className="text-sm text-red-500 mt-2">{error.message}</p>}
     </div>
