@@ -9,7 +9,7 @@ type ToastVariant = "default" | "destructive";
 export interface Toast {
   id: string;
   title?: string;
-  description?: string;
+  description?: string | React.ReactNode;
   variant?: ToastVariant;
 }
 

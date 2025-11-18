@@ -700,4 +700,171 @@ export class UsersController {
   ) {
     return this.usersService.importUsersFromGoogleDrive(fileId, userId);
   }
+
+  // ============================================================================
+  // LAPORAN KINERJA (PERFORMANCE REPORT) ENDPOINTS
+  // ============================================================================
+
+  @Post('reports/kinerja/export')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Export Laporan Kinerja to CSV/Excel (local download)' })
+  @ApiResponse({ status: 200, description: 'Kinerja report exported successfully' })
+  async exportKinerjaReport(
+    @Body() dto: { format: 'csv' | 'excel' },
+    @Res() res: Response,
+  ): Promise<void> {
+    const { format } = dto;
+
+    // Get performance data
+    const statistics = await this.usersService.getTeamStatistics();
+    const workloadData = await this.usersService.getWorkloadDistribution();
+
+    if (format === 'csv') {
+      // Generate CSV with workload data
+      const csv = Papa.unparse(workloadData);
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=laporan-kinerja-${Date.now()}.csv`,
+      );
+      res.send(csv);
+      return;
+    }
+
+    // Excel export with professional styling using ExcelJS
+    const ExcelJS = require('exceljs');
+    const workbook = new ExcelJS.Workbook();
+
+    // Sheet 1: Overview/Statistics
+    const statsSheet = workbook.addWorksheet('Ringkasan Statistik', {
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
+    });
+
+    statsSheet.columns = [
+      { header: 'Metrik', key: 'metric', width: 30 },
+      { header: 'Nilai', key: 'value', width: 20 },
+    ];
+
+    // Add statistics data
+    statsSheet.addRow({ metric: 'Total User', value: statistics.total_users });
+    statsSheet.addRow({ metric: 'User Aktif', value: statistics.active_users });
+    statsSheet.addRow({ metric: 'User Tidak Aktif', value: statistics.inactive_users });
+    statsSheet.addRow({ metric: 'Penambahan Terbaru', value: statistics.recent_additions });
+
+    // Add role breakdown
+    statsSheet.addRow({ metric: '', value: '' }); // Empty row
+    statsSheet.addRow({ metric: 'Distribusi Berdasarkan Role', value: '' });
+    Object.entries(statistics.by_role).forEach(([role, count]) => {
+      statsSheet.addRow({ metric: `  ${role}`, value: count });
+    });
+
+    // Style statistics sheet
+    statsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    statsSheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF4472C4' },
+    };
+    statsSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    statsSheet.getRow(1).height = 25;
+
+    // Add borders to all cells
+    statsSheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          right: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+        };
+        if (rowNumber > 1) {
+          cell.alignment = { vertical: 'middle' };
+          if (rowNumber % 2 === 0) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF2F2F2' },
+            };
+          }
+        }
+      });
+    });
+
+    // Sheet 2: Workload Distribution
+    const workloadSheet = workbook.addWorksheet('Distribusi Beban Kerja', {
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
+    });
+
+    workloadSheet.columns = [
+      { header: 'Nama User', key: 'user_name', width: 30 },
+      { header: 'Email', key: 'email', width: 35 },
+      { header: 'Role', key: 'role', width: 18 },
+      { header: 'Perkara Aktif', key: 'active_perkara', width: 18 },
+      { header: 'Tugas Pending', key: 'pending_tugas', width: 18 },
+      { header: 'Tugas Selesai', key: 'completed_tugas', width: 18 },
+      { header: 'Total Dokumen', key: 'total_dokumen', width: 18 },
+      { header: 'Skor Beban Kerja', key: 'workload_score', width: 20 },
+    ];
+
+    workloadData.forEach((user) => {
+      workloadSheet.addRow(user);
+    });
+
+    // Style workload sheet
+    workloadSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    workloadSheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF70AD47' },
+    };
+    workloadSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    workloadSheet.getRow(1).height = 25;
+
+    // Add borders and alternate row colors
+    workloadSheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+          right: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+        };
+        if (rowNumber > 1) {
+          cell.alignment = { vertical: 'middle' };
+          if (rowNumber % 2 === 0) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF2F2F2' },
+            };
+          }
+        }
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=laporan-kinerja-${Date.now()}.xlsx`,
+    );
+    res.send(Buffer.from(buffer));
+  }
+
+  @Post('reports/kinerja/export-to-drive')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.admin)
+  @ApiOperation({ summary: 'Export Laporan Kinerja to Google Drive' })
+  @ApiResponse({
+    status: 200,
+    description: 'Kinerja report exported to Google Drive successfully',
+  })
+  async exportKinerjaToGoogleDrive(@Body() dto: { format: 'csv' | 'excel' }) {
+    return this.usersService.exportKinerjaReportToGoogleDrive(dto.format);
+  }
 }

@@ -11,10 +11,10 @@ import {
 
 export const logApi = {
   getAll: async (params?: QueryLogAktivitasDto): Promise<PaginatedResponse<LogAktivitasWithUser>> => {
-    return apiClient.get("/logs", { params });
+    return apiClient.get("/log-aktivitas", { params });
   },
 
   getMyActivity: async (params?: QueryLogAktivitasDto): Promise<PaginatedResponse<LogAktivitasWithUser>> => {
-    return apiClient.get("/logs/my-activities", { params });
+    return apiClient.get("/log-aktivitas/my-activities", { params });
   },
 };
