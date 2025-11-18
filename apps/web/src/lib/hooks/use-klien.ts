@@ -59,12 +59,12 @@ export function useKlien() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const updated = await klienApi.updateMyProfile(data);
-      
-      toast.success("Profile berhasil diperbarui");
+
+      // ✅ REMOVED: Toast handled by component
       await fetchMyProfile();
-      
+
       return updated;
     } catch (err) {
       const message = getErrorMessage(err);
@@ -126,7 +126,7 @@ export function useKlien() {
       setLoading(true);
       setError(null);
       const response = await klienApi.create(data);
-      toast.success("Klien berhasil ditambahkan");
+      // ✅ REMOVED: Toast handled by component (form)
       await fetchKlien();
       return response;
     } catch (err) {
@@ -145,7 +145,7 @@ export function useKlien() {
       setLoading(true);
       setError(null);
       const response = await klienApi.update(id, data);
-      toast.success("Klien berhasil diperbarui");
+      // ✅ REMOVED: Toast handled by component (form)
       await fetchKlien();
       return response;
     } catch (err) {
@@ -164,7 +164,7 @@ export function useKlien() {
       setLoading(true);
       setError(null);
       await klienApi.delete(id);
-      toast.success("Klien berhasil dihapus");
+      // ✅ REMOVED: Toast handled by component (table)
       await fetchKlien();
     } catch (err) {
       const message = getErrorMessage(err);

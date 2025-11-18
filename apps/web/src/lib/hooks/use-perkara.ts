@@ -85,11 +85,9 @@ export function usePerkara() {
         };
         
         const response = await perkaraApi.create(createData);
-        
-        toast.success('Perkara berhasil ditambahkan!', {
-          description: `${createData.nomor_perkara} - ${createData.judul}`,
-        });
-        
+
+        // ✅ REMOVED: Toast handled by component (page)
+
         await fetchPerkara();
         return response;
       } catch (err) {
@@ -122,11 +120,9 @@ export function usePerkara() {
         };
         
         const response = await perkaraApi.update(id, updateData);
-        
-        toast.success('Perkara berhasil diperbarui!', {
-          description: updateData.nomor_perkara || 'Data telah disimpan',
-        });
-        
+
+        // ✅ REMOVED: Toast handled by component (page)
+
         await fetchPerkara();
         return response;
       } catch (err) {
@@ -149,8 +145,8 @@ export function usePerkara() {
         setError(null);
         
         await perkaraApi.delete(id);
-        
-        toast.success('Perkara berhasil dihapus!');
+
+        // ✅ REMOVED: Toast handled by component (table)
         await fetchPerkara();
       } catch (err) {
         const message = getErrorMessage(err);

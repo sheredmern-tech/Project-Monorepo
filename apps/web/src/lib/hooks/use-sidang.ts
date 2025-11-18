@@ -4,7 +4,6 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { toast } from "sonner";
 import { sidangApi } from "@/lib/api/sidang.api";
 import { 
   CreateJadwalSidangDto, 
@@ -61,7 +60,7 @@ export function useSidang() {
       setIsLoading(true);
       setError(null);
       const response = await sidangApi.create(data);
-      toast.success("Jadwal sidang berhasil ditambahkan");
+      // ✅ REMOVED: Toast handled by component
       return response.data;
     } catch (err) {
       const message = getErrorMessage(err);
@@ -79,7 +78,7 @@ export function useSidang() {
       setIsLoading(true);
       setError(null);
       const response = await sidangApi.update(id, data);
-      toast.success("Jadwal sidang berhasil diperbarui");
+      // ✅ REMOVED: Toast handled by component
       return response.data;
     } catch (err) {
       const message = getErrorMessage(err);
@@ -97,7 +96,7 @@ export function useSidang() {
       setIsLoading(true);
       setError(null);
       await sidangApi.delete(id);
-      toast.success("Jadwal sidang berhasil dihapus");
+      // ✅ REMOVED: Toast handled by component (table)
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);

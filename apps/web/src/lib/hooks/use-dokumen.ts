@@ -86,7 +86,7 @@ export function useDokumen() {
         setUploading(true);
         setError(null);
         const response = await dokumenApi.upload(formData);
-        toast.success("Dokumen berhasil diunggah");
+        // ✅ REMOVED: Toast handled by component (form)
         await fetchDokumen();
         return response.data;
       } catch (err) {
@@ -108,7 +108,7 @@ export function useDokumen() {
         setLoading(true);
         setError(null);
         const response = await dokumenApi.update(id, data);
-        toast.success("Dokumen berhasil diperbarui");
+        // ✅ REMOVED: Toast handled by component (page)
         await fetchDokumen();
         return response.data;
       } catch (err) {
@@ -130,7 +130,7 @@ export function useDokumen() {
         setLoading(true);
         setError(null);
         await dokumenApi.delete(id);
-        toast.success("Dokumen berhasil dihapus");
+        // ✅ REMOVED: Toast handled by component (table)
         await fetchDokumen();
       } catch (err) {
         const message = getErrorMessage(err);
