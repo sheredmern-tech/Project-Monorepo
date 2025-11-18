@@ -34,6 +34,24 @@ export function parseDateLocal(dateString: string): Date | undefined {
   return isValid(date) ? date : undefined;
 }
 
+/**
+ * Format Date object to YYYY-MM-DD in LOCAL timezone (not UTC)
+ *
+ * ❌ PROBLEM: date.toISOString().split("T")[0] converts to UTC
+ *    In Indonesia (UTC+7), 2025-01-18 00:00 becomes "2025-01-17"
+ *
+ * ✅ SOLUTION: Format using local date components
+ *
+ * @param date - Date object to format
+ * @returns Date string in YYYY-MM-DD format (local timezone)
+ */
+export function formatDateLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function formatDate(date: string | Date | null | undefined, formatStr = "dd MMMM yyyy"): string {
   if (!date) return "-";
   const parsedDate = typeof date === "string" ? parseISO(date) : date;

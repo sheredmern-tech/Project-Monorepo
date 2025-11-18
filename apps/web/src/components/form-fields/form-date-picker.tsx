@@ -12,7 +12,7 @@
 
 import { DatePicker } from "@/components/ui/date-picker";
 import { Label } from "@/components/ui/label";
-import { parseDateLocal } from "@/lib/utils/date";
+import { parseDateLocal, formatDateLocal } from "@/lib/utils/date";
 import type { FieldError, UseFormSetValue, UseFormWatch } from "react-hook-form";
 
 interface FormDatePickerProps<T extends Record<string, any>> {
@@ -56,8 +56,8 @@ export function FormDatePicker<T extends Record<string, any>>({
         date={parseDateLocal(dateValue || "")}
         onDateChange={(date) => {
           if (date) {
-            // Convert to YYYY-MM-DD format for backend
-            setValue(name as any, date.toISOString().split("T")[0] as any);
+            // Convert to YYYY-MM-DD format in LOCAL timezone (not UTC)
+            setValue(name as any, formatDateLocal(date) as any);
           } else {
             setValue(name as any, "" as any);
           }

@@ -45,6 +45,12 @@ export default function PerkaraPage() {
 
   // ✅ Track if client filter has been set
   const [clientFilterSet, setClientFilterSet] = useState(false);
+  // ✅ Fix hydration: Only render user-dependent content after mount
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // ✅ CLIENT AUTO-FILTER: Set klienId filter for clients
   useEffect(() => {
@@ -79,15 +85,18 @@ export default function PerkaraPage() {
     fetchPerkara();
   }, [fetchPerkara, user, clientFilterSet]);
 
+  // ✅ Fix hydration: Show loading until mounted
+  if (!isMounted) {
+    return <div className="p-4">Loading...</div>;
+  }
+
+  const isKlien = user?.role === UserRole.KLIEN;
+
   return (
     <div>
       <PageHeader
-        title={user?.role === UserRole.KLIEN ? "Perkara Saya" : "Perkara"}
-        description={
-          user?.role === UserRole.KLIEN
-            ? "Daftar perkara hukum Anda"
-            : "Kelola semua perkara hukum"
-        }
+        title={isKlien ? "Perkara Saya" : "Perkara"}
+        description={isKlien ? "Daftar perkara hukum Anda" : "Kelola semua perkara hukum"}
         action={
           /* 🔒 Only show button if user can create */
           permissions.perkara.create ? (
@@ -133,7 +142,7 @@ export default function PerkaraPage() {
       </div>
 
       {/* Info badge for clients */}
-      {user?.role === UserRole.KLIEN && (
+      {isKlien && (
         <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-200">
             📋 Menampilkan hanya perkara yang terkait dengan Anda

@@ -36,6 +36,12 @@ export default function KlienPage() {
   } = useKlien();
 
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [isMounted, setIsMounted] = useState(false);
+
+  // ✅ Fix hydration: Only render user-dependent content after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // ✅ CLIENT REDIRECT - NO STATE UPDATE IN EFFECT
   useEffect(() => {
@@ -52,8 +58,8 @@ export default function KlienPage() {
     }
   }, [fetchKlien, user]);
 
-  // ✅ SIMPLE CHECK: Show loading during redirect
-  if (user?.role === UserRole.KLIEN) {
+  // ✅ Fix hydration: Show loading until mounted AND checked role
+  if (!isMounted || user?.role === UserRole.KLIEN) {
     return <LoadingSpinner />;
   }
 
