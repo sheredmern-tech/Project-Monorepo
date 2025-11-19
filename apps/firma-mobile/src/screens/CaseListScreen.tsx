@@ -8,9 +8,11 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useStore } from '../store';
 import dataTransformService from '../services/data-transform.service';
 import type { Case } from '../types';
+import { Colors, Typography, Spacing, Radius, Shadows, IconSize } from '../theme/design-system';
 
 export default function CaseListScreen({ navigation }: any) {
   const {
@@ -163,7 +165,7 @@ style = {
   if (isLoadingCases && cases.length === 0) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color={Colors.black} />
         <Text style={styles.loadingText}>Loading cases...</Text>
       </View>
     );
@@ -173,7 +175,7 @@ style = {
   if (casesError && cases.length === 0) {
     return (
       <View style={[styles.container, styles.centerContent]}>
-        <Text style={styles.errorIcon}>⚠️</Text>
+        <Ionicons name="alert-circle-outline" size={IconSize['4xl']} color={Colors.gray[400]} />
         <Text style={styles.errorText}>{casesError}</Text>
         <TouchableOpacity
           onPress={() => loadCases(true)}
@@ -188,11 +190,17 @@ style = {
 return (
   <View style= { styles.container } >
   <View style={ styles.header }>
-    <Text style={ styles.title }> My Cases </Text>
-      < Text style = { styles.subtitle } > { cases.length } Active Cases </Text>
+    <View style={styles.headerTop}>
+      <View>
+        <Text style={ styles.title }> Cases </Text>
+        < Text style = { styles.subtitle } > { cases.length } total </Text>
+      </View>
+      <Ionicons name="folder-open-outline" size={IconSize.lg} color={Colors.black} />
+    </View>
       {!syncStatus.isOnline && (
         <View style={styles.offlineBadge}>
-          <Text style={styles.offlineBadgeText}>📴 Offline Mode</Text>
+          <Ionicons name="cloud-offline-outline" size={IconSize.sm} color={Colors.gray[600]} />
+          <Text style={styles.offlineBadgeText}>Offline Mode</Text>
         </View>
       )}
         </View>
@@ -207,7 +215,7 @@ refreshControl = {
         }
 ListEmptyComponent = {
           < View style = { styles.empty } >
-  <Text style={ styles.emptyIcon }>📋</Text>
+  <Ionicons name="folder-open-outline" size={IconSize['4xl']} color={Colors.gray[300]} />
     < Text style = { styles.emptyText } > No cases found </Text>
       </View>
         }
@@ -219,38 +227,44 @@ ListEmptyComponent = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: Colors.background.secondary,
   },
   header: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#fff',
+    padding: Spacing.lg,
+    paddingTop: Spacing['5xl'],
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: Colors.border.light,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 4,
+    fontSize: Typography.size['3xl'],
+    fontWeight: Typography.weight.bold,
+    color: Colors.black,
+    marginBottom: Spacing.xs,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#6b7280',
+    fontSize: Typography.size.sm,
+    color: Colors.gray[500],
+    fontWeight: Typography.weight.medium,
   },
   list: {
-    padding: 20,
+    padding: Spacing.lg,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.md,
+    padding: Spacing.base,
+    marginBottom: Spacing.base,
+    borderWidth: 1,
+    borderColor: Colors.border.light,
+    ...Shadows.sm,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -259,35 +273,40 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   caseNumber: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 4,
+    fontSize: Typography.size.base,
+    fontWeight: Typography.weight.bold,
+    color: Colors.black,
+    marginBottom: Spacing.xs,
   },
   serviceName: {
-    fontSize: 14,
-    color: '#6b7280',
+    fontSize: Typography.size.sm,
+    color: Colors.gray[500],
+    fontWeight: Typography.weight.medium,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.base,
+    borderWidth: 1,
+    borderColor: Colors.gray[300],
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.semibold,
   },
   cardBody: {
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   clientName: {
-    fontSize: 14,
-    color: '#374151',
-    marginBottom: 4,
+    fontSize: Typography.size.sm,
+    color: Colors.gray[700],
+    marginBottom: Spacing.xs,
+    fontWeight: Typography.weight.medium,
   },
   lawyer: {
-    fontSize: 14,
-    color: '#374151',
+    fontSize: Typography.size.sm,
+    color: Colors.gray[700],
+    fontWeight: Typography.weight.medium,
   },
   progressContainer: {
     marginVertical: 12,
@@ -298,116 +317,123 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   progressPhase: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#e5e7eb',
+    width: 36,
+    height: 36,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.gray[200],
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.gray[300],
   },
   progressPhaseActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: Colors.black,
+    borderColor: Colors.black,
   },
   progressPhaseSkipped: {
-    backgroundColor: '#f59e0b',
+    backgroundColor: Colors.gray[500],
+    borderColor: Colors.gray[500],
   },
   progressPhaseText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#6b7280',
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.bold,
+    color: Colors.gray[500],
   },
   progressLine: {
     flex: 1,
-    height: 2,
-    backgroundColor: '#e5e7eb',
-    marginHorizontal: 4,
+    height: 1.5,
+    backgroundColor: Colors.gray[300],
+    marginHorizontal: Spacing.xs,
   },
   skipBadge: {
-    backgroundColor: '#ecfdf5',
-    borderRadius: 8,
-    padding: 8,
-    marginTop: 8,
+    backgroundColor: Colors.gray[100],
+    borderRadius: Radius.base,
+    padding: Spacing.sm,
+    marginTop: Spacing.sm,
     borderWidth: 1,
-    borderColor: '#10b981',
+    borderColor: Colors.gray[300],
   },
   skipBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#059669',
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.gray[700],
     textAlign: 'center',
   },
   meetingInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff6ff',
-    padding: 8,
-    borderRadius: 8,
-    marginTop: 8,
+    backgroundColor: Colors.gray[100],
+    padding: Spacing.sm,
+    borderRadius: Radius.base,
+    marginTop: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
   },
   meetingIcon: {
-    fontSize: 16,
-    marginRight: 8,
+    marginRight: Spacing.sm,
   },
   meetingText: {
-    fontSize: 12,
-    color: '#1e40af',
-    fontWeight: '500',
+    fontSize: Typography.size.xs,
+    color: Colors.gray[700],
+    fontWeight: Typography.weight.medium,
+    flex: 1,
   },
   empty: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+    paddingVertical: Spacing['5xl'],
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#6b7280',
+    fontSize: Typography.size.lg,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.gray[400],
+    marginTop: Spacing.base,
   },
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#6b7280',
-  },
-  errorIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+    marginTop: Spacing.md,
+    fontSize: Typography.size.base,
+    color: Colors.gray[500],
+    fontWeight: Typography.weight.medium,
   },
   errorText: {
-    fontSize: 16,
-    color: '#ef4444',
+    fontSize: Typography.size.base,
+    color: Colors.gray[600],
     textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 40,
+    marginTop: Spacing.base,
+    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing['3xl'],
   },
   retryButton: {
-    backgroundColor: '#3b82f6',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: Colors.black,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.base,
+    ...Shadows.sm,
   },
   retryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.white,
+    fontSize: Typography.size.base,
+    fontWeight: Typography.weight.semibold,
   },
   offlineBadge: {
-    backgroundColor: '#fef3c7',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: Colors.gray[100],
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.base,
+    marginTop: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.gray[300],
   },
   offlineBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#92400e',
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.gray[600],
   },
 });
