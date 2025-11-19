@@ -209,14 +209,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     // Tim
     "tim:read",
     "tim:update", // Can update team assignments (tim-perkara, NOT user management)
-    // Laporan
-    "laporan:read", // ✅ ADVOKAT can view reports & analytics
-    "laporan:export", // ✅ Can export reports for client presentations & case analysis
-    // Note: Professional lawyers NEED access to:
-    // - Performance metrics (kinerja)
-    // - Activity logs (aktivitas)
-    // - Billing reports (keuangan) for their cases
-    // - Custom reports for clients
+    // Laporan - ❌ REMOVED: Laporan contains GLOBAL firm-wide financial data
+    // ADVOKAT should NOT see total revenue, all cases fees, firm-wide metrics
+    // This is sensitive business intelligence reserved for management (ADMIN/PARTNER)
     // Pengaturan
     "pengaturan:read",
   ],

@@ -100,7 +100,7 @@ export class PerkaraController {
 
   @Post('reports/keuangan/export')
   @HttpCode(HttpStatus.OK)
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner)
   @ApiOperation({ summary: 'Export Laporan Keuangan to CSV/Excel (local download)' })
   @ApiResponse({ status: 200, description: 'Keuangan report exported successfully' })
   async exportKeuanganReport(
@@ -112,7 +112,7 @@ export class PerkaraController {
 
   @Post('reports/keuangan/export-to-drive')
   @HttpCode(HttpStatus.OK)
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner)
   @ApiOperation({ summary: 'Export Laporan Keuangan to Google Drive' })
   @ApiResponse({
     status: 200,
@@ -125,7 +125,7 @@ export class PerkaraController {
   }
 
   @Get('reports/keuangan/statistics')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner)
   @ApiOperation({ summary: 'Get statistik keuangan' })
   @ApiResponse({ status: 200, description: 'Finance statistics retrieved' })
   getFinanceStatistics() {
