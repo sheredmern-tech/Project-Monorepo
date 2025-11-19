@@ -1,5 +1,6 @@
 // ============================================
 // FILE: app/home/_components/sections/testimonials-section.tsx
+// UPDATED: B&W CONSISTENCY - Removed gradient backgrounds and colors
 // ============================================
 'use client'
 
@@ -35,8 +36,8 @@ export function TestimonialsSection() {
   emblaApi?.on('reInit', onSelect)
 
   return (
-    <section id="testimonials" className="py-24 md:py-32 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 relative overflow-hidden">
-      {/* Background Pattern */}
+    <section id="testimonials" className="py-24 md:py-32 bg-white dark:bg-slate-950 relative overflow-hidden">
+      {/* Background Pattern - B&W */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px]" />
 
       <div className="container mx-auto px-4 relative z-10">
@@ -86,7 +87,7 @@ export function TestimonialsSection() {
             </div>
           </div>
 
-          {/* Stats Summary */}
+          {/* Stats Summary - B&W */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -100,9 +101,9 @@ export function TestimonialsSection() {
               { value: '95%', label: 'Rekomendasi' },
               { value: '100%', label: 'Profesional' },
             ].map((stat, idx) => (
-              <div key={idx} className="text-center p-6 rounded-xl bg-white dark:bg-slate-800 border">
-                <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <div key={idx} className="text-center p-6 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700">
+                <div className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{stat.value}</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">{stat.label}</div>
               </div>
             ))}
           </motion.div>

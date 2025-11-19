@@ -1,5 +1,6 @@
 // ============================================
 // FILE: app/home/_components/sections/contact-section.tsx
+// UPDATED: B&W CONSISTENCY - Converted primary-colored icon boxes to B&W
 // ============================================
 'use client'
 
@@ -68,8 +69,8 @@ export function ContactSection() {
 
               <Card className="p-6 hover:shadow-xl transition-all hover:-translate-y-1">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6 text-white dark:text-slate-900" strokeWidth={2} />
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Alamat</h4>
@@ -82,8 +83,8 @@ export function ContactSection() {
 
               <Card className="p-6 hover:shadow-xl transition-all hover:-translate-y-1">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-6 h-6 text-white dark:text-slate-900" strokeWidth={2} />
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Telepon</h4>
@@ -97,8 +98,8 @@ export function ContactSection() {
 
               <Card className="p-6 hover:shadow-xl transition-all hover:-translate-y-1">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-white dark:text-slate-900" strokeWidth={2} />
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Email</h4>
@@ -111,8 +112,8 @@ export function ContactSection() {
 
               <Card className="p-6 hover:shadow-xl transition-all hover:-translate-y-1">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-6 h-6 text-primary" />
+                  <div className="w-12 h-12 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-6 h-6 text-white dark:text-slate-900" strokeWidth={2} />
                   </div>
                   <div>
                     <h4 className="font-semibold mb-1">Jam Operasional</h4>
@@ -142,7 +143,7 @@ export function ContactSection() {
               transition={{ duration: 0.6 }}
             >
               <h3 className="text-2xl font-semibold mb-6">Kirim Pesan</h3>
-              <Card className="p-6 md:p-8 border-2 hover:border-primary/20 transition-all">
+              <Card className="p-6 md:p-8 border-2 border-slate-200 dark:border-slate-800 hover:border-slate-900 dark:hover:border-white transition-all">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nama Lengkap *</Label>
