@@ -335,6 +335,7 @@ quickstart:
     @echo ""
     @echo "📧 Login Credentials:"
     @echo "   Admin:     admin@perari.id / Admin123!"
+    @echo "   Partner:   partner@perari.id / Admin123!"
     @echo "   Advokat:   advokat@perari.id / Admin123!"
     @echo "   Paralegal: paralegal@perari.id / Admin123!"
     @echo "   Staff:     staff@perari.id / Admin123!"
