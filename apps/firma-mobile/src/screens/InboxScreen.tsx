@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,61 +8,59 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import {
-  MY_NOTIFICATIONS,
-  Notification,
-  hasActiveCase,
-  MY_ACTIVE_CASE,
-} from '../mocks/my-cases.mock';
+import { Ionicons } from '@expo/vector-icons';
+import { useStore } from '../store';
+import { Colors, Typography, Spacing, Radius, IconSize, Shadows } from '../theme/design-system';
 
 export default function InboxScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
-  const [notifications, setNotifications] = useState(MY_NOTIFICATIONS);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const { notifications, loadNotifications, markNotificationAsRead, markAllNotificationsAsRead } = useStore();
 
-  const onRefresh = () => {
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setNotifications(MY_NOTIFICATIONS);
-      setRefreshing(false);
-    }, 1000);
+    await loadNotifications();
+    setRefreshing(false);
   };
 
   const getTypeColor = (type: string) => {
+    // B&W design - no colors, use gray shades
     switch (type) {
       case 'action_required':
-        return '#ef4444';
+        return Colors.black;
       case 'warning':
-        return '#f59e0b';
+        return Colors.gray[700];
       case 'success':
-        return '#10b981';
+        return Colors.gray[600];
       case 'info':
       default:
-        return '#3b82f6';
+        return Colors.gray[500];
     }
   };
 
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (type: string): any => {
     switch (type) {
       case 'action_required':
-        return '🚨';
+        return 'alert-circle';
       case 'warning':
-        return '⚠️';
+        return 'warning';
       case 'success':
-        return '✅';
+        return 'checkmark-circle';
       case 'info':
       default:
-        return 'ℹ️';
+        return 'information-circle';
     }
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const handleMarkAsRead = (id: string) => {
+    markNotificationAsRead(id);
   };
 
-  const markAllAsRead = () => {
+  const handleMarkAllAsRead = () => {
     Alert.alert(
       'Tandai Semua Dibaca?',
       'Semua notifikasi akan ditandai sebagai sudah dibaca.',
@@ -71,39 +69,28 @@ export default function InboxScreen({ navigation }: any) {
         {
           text: 'Ya',
           onPress: () => {
-            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+            markAllNotificationsAsRead();
           },
         },
       ]
     );
   };
 
-  const handleNotificationPress = (notif: Notification) => {
-    markAsRead(notif.id);
+  const handleNotificationPress = (notif: any) => {
+    handleMarkAsRead(notif.id);
 
-    // Navigate based on action_url
-    if (notif.action_url) {
+    // Navigate based on action_url and case_id from notification
+    if (notif.action_url && notif.case_id) {
       if (notif.action_url === 'Phase2Upload') {
-        // Check if still in phase 2
-        if (hasActiveCase() && MY_ACTIVE_CASE.current_phase === 2) {
-          navigation.navigate('Phase2Upload', { caseId: MY_ACTIVE_CASE.id });
-        } else {
-          Alert.alert(
-            'Info',
-            'Pengajuan sudah tidak berada di Phase 2.',
-            [{ text: 'OK' }]
-          );
-        }
+        navigation.navigate('Phase2Upload', { caseId: notif.case_id });
       } else if (notif.action_url === 'CaseDetail') {
-        navigation.navigate('CaseDetail', {
-          caseId: MY_ACTIVE_CASE.id,
-        });
+        navigation.navigate('CaseDetail', { caseId: notif.case_id });
       }
     } else {
       // Just show detail
       Alert.alert(
         notif.title,
-        `${notif.message}\n\nCase: ${notif.case_number}`,
+        `${notif.message}\n\nCase: ${notif.case_number || 'N/A'}`,
         [{ text: 'OK' }]
       );
     }
@@ -116,13 +103,14 @@ export default function InboxScreen({ navigation }: any) {
         text: 'Hapus',
         style: 'destructive',
         onPress: () => {
-          setNotifications((prev) => prev.filter((n) => n.id !== id));
+          // TODO: Implement delete in store
+          console.log('Delete notification:', id);
         },
       },
     ]);
   };
 
-  const renderNotification = ({ item }: { item: Notification }) => {
+  const renderNotification = ({ item }: { item: any }) => {
     const typeColor = getTypeColor(item.type);
     const typeIcon = getTypeIcon(item.type);
 
@@ -131,12 +119,11 @@ export default function InboxScreen({ navigation }: any) {
         style={[styles.notifCard, !item.read && styles.notifCardUnread]}
         onPress={() => handleNotificationPress(item)}
         onLongPress={() => deleteNotification(item.id)}
+        activeOpacity={0.7}
       >
         {/* Icon */}
-        <View
-          style={[styles.iconContainer, { backgroundColor: typeColor + '20' }]}
-        >
-          <Text style={styles.icon}>{typeIcon}</Text>
+        <View style={[styles.iconContainer, { backgroundColor: Colors.gray[100] }]}>
+          <Ionicons name={typeIcon} size={IconSize.base} color={typeColor} />
         </View>
 
         {/* Content */}
@@ -153,9 +140,9 @@ export default function InboxScreen({ navigation }: any) {
           </Text>
 
           <View style={styles.footer}>
-            <Text style={styles.caseNumber}>{item.case_number}</Text>
+            <Text style={styles.caseNumber}>{item.case_number || 'N/A'}</Text>
             <Text style={styles.date}>
-              {new Date(item.date).toLocaleDateString('id-ID', {
+              {new Date(item.date || item.created_at).toLocaleDateString('id-ID', {
                 day: 'numeric',
                 month: 'short',
                 hour: '2-digit',
@@ -169,11 +156,17 @@ export default function InboxScreen({ navigation }: any) {
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => handleNotificationPress(item)}
+              activeOpacity={0.8}
             >
+              <Ionicons
+                name={item.action_url === 'Phase2Upload' ? 'cloud-upload-outline' : 'eye-outline'}
+                size={IconSize.sm}
+                color={Colors.white}
+              />
               <Text style={styles.actionButtonText}>
                 {item.action_url === 'Phase2Upload'
-                  ? '📤 Upload Dokumen'
-                  : '👁️ Lihat Detail'}
+                  ? 'Upload Dokumen'
+                  : 'Lihat Detail'}
               </Text>
             </TouchableOpacity>
           )}
@@ -247,8 +240,8 @@ export default function InboxScreen({ navigation }: any) {
         {/* Action Required Banner */}
         {actionRequiredCount > 0 && (
           <View style={styles.actionBanner}>
-            <Text style={styles.actionBannerIcon}>🚨</Text>
-            <View style={{ flex: 1 }}>
+            <Ionicons name="alert-circle" size={IconSize.lg} color={Colors.black} />
+            <View style={{ flex: 1, marginLeft: Spacing.md }}>
               <Text style={styles.actionBannerTitle}>
                 {actionRequiredCount} Aksi Diperlukan
               </Text>
@@ -263,10 +256,12 @@ export default function InboxScreen({ navigation }: any) {
         {unreadCount > 0 && (
           <TouchableOpacity
             style={styles.markAllButton}
-            onPress={markAllAsRead}
+            onPress={handleMarkAllAsRead}
+            activeOpacity={0.7}
           >
+            <Ionicons name="checkmark-done" size={IconSize.sm} color={Colors.black} />
             <Text style={styles.markAllButtonText}>
-              ✓ Tandai Semua Dibaca
+              Tandai Semua Dibaca
             </Text>
           </TouchableOpacity>
         )}
@@ -282,9 +277,11 @@ export default function InboxScreen({ navigation }: any) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>
-              {filter === 'unread' ? '✅' : '📬'}
-            </Text>
+            <Ionicons
+              name={filter === 'unread' ? 'checkmark-done-circle-outline' : 'notifications-off-outline'}
+              size={IconSize['4xl']}
+              color={Colors.gray[400]}
+            />
             <Text style={styles.emptyText}>
               {filter === 'unread'
                 ? 'Semua notifikasi sudah dibaca'
@@ -294,6 +291,7 @@ export default function InboxScreen({ navigation }: any) {
               <TouchableOpacity
                 style={styles.showAllButton}
                 onPress={() => setFilter('all')}
+                activeOpacity={0.7}
               >
                 <Text style={styles.showAllButtonText}>
                   Lihat Semua Notifikasi
@@ -305,10 +303,11 @@ export default function InboxScreen({ navigation }: any) {
       />
 
       {/* Info Footer */}
-      {!hasActiveCase() && notifications.length === 0 && (
+      {notifications.length === 0 && (
         <View style={styles.infoFooter}>
+          <Ionicons name="information-circle-outline" size={IconSize.base} color={Colors.gray[500]} />
           <Text style={styles.infoFooterText}>
-            💡 Notifikasi akan muncul ketika ada update terkait pengajuan Anda
+            Notifikasi akan muncul ketika ada update terkait pengajuan Anda
           </Text>
         </View>
       )}
@@ -319,136 +318,137 @@ export default function InboxScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: Colors.background.secondary,
   },
   headerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-    paddingTop: 60,
+    borderBottomColor: Colors.border.light,
+    paddingTop: Spacing['5xl'],
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.base,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 2,
+    fontSize: Typography.size['3xl'],
+    fontWeight: Typography.weight.bold,
+    color: Colors.black,
+    marginBottom: Spacing.xs,
+    letterSpacing: -0.5,
   },
   headerSubtitle: {
-    fontSize: 13,
-    color: '#6b7280',
+    fontSize: Typography.size.xs,
+    color: Colors.gray[500],
+    fontWeight: Typography.weight.medium,
   },
   badge: {
-    backgroundColor: '#ef4444',
-    borderRadius: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: Colors.black,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
     minWidth: 28,
     alignItems: 'center',
   },
   badgeText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '700',
+    color: Colors.white,
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.bold,
   },
   filterTabs: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 8,
-    paddingBottom: 12,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.sm,
+    paddingBottom: Spacing.md,
   },
   filterTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.gray[100],
+    borderWidth: 1,
+    borderColor: Colors.border.light,
   },
   filterTabActive: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: Colors.black,
+    borderColor: Colors.black,
   },
   filterTabText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6b7280',
+    fontSize: Typography.size.xs,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.gray[600],
   },
   filterTabTextActive: {
-    color: '#fff',
+    color: Colors.white,
   },
   actionBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fee2e2',
-    padding: 12,
-    marginHorizontal: 20,
-    marginTop: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ef4444',
-  },
-  actionBannerIcon: {
-    fontSize: 24,
-    marginRight: 12,
+    backgroundColor: Colors.gray[100],
+    padding: Spacing.md,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    borderRadius: Radius.base,
+    borderWidth: 1.5,
+    borderColor: Colors.black,
   },
   actionBannerTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#dc2626',
-    marginBottom: 2,
+    fontSize: Typography.size.sm,
+    fontWeight: Typography.weight.bold,
+    color: Colors.black,
+    marginBottom: Spacing.xs,
   },
   actionBannerText: {
-    fontSize: 12,
-    color: '#dc2626',
+    fontSize: Typography.size.xs,
+    color: Colors.gray[600],
   },
   markAllButton: {
-    marginHorizontal: 20,
-    marginTop: 12,
-    marginBottom: 12,
-    padding: 10,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
+    backgroundColor: Colors.gray[100],
+    borderRadius: Radius.base,
+    borderWidth: 1,
+    borderColor: Colors.border.medium,
   },
   markAllButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
+    fontSize: Typography.size.sm,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.black,
   },
   list: {
-    padding: 16,
+    padding: Spacing.base,
   },
   notifCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.md,
+    padding: Spacing.base,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border.light,
+    ...Shadows.sm,
   },
   notifCardUnread: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
-    backgroundColor: '#eff6ff',
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.black,
+    backgroundColor: Colors.gray[50],
   },
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: Radius.base,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  icon: {
-    fontSize: 24,
+    marginRight: Spacing.md,
   },
   content: {
     flex: 1,
@@ -459,90 +459,95 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   title: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: Typography.size.base,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.black,
     flex: 1,
-    lineHeight: 20,
+    lineHeight: Typography.size.base * 1.4,
   },
   unreadDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
-    backgroundColor: '#3b82f6',
-    marginLeft: 8,
-    marginTop: 6,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.black,
+    marginLeft: Spacing.sm,
+    marginTop: Spacing.xs,
   },
   message: {
-    fontSize: 13,
-    color: '#6b7280',
-    lineHeight: 18,
-    marginBottom: 8,
+    fontSize: Typography.size.sm,
+    color: Colors.gray[600],
+    lineHeight: Typography.size.sm * 1.4,
+    marginBottom: Spacing.sm,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   caseNumber: {
-    fontSize: 12,
-    color: '#3b82f6',
-    fontWeight: '500',
+    fontSize: Typography.size.xs,
+    color: Colors.gray[700],
+    fontWeight: Typography.weight.semibold,
   },
   date: {
-    fontSize: 11,
-    color: '#9ca3af',
+    fontSize: Typography.size.xs - 1,
+    color: Colors.gray[400],
   },
   actionButton: {
-    backgroundColor: '#3b82f6',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    gap: Spacing.xs,
+    backgroundColor: Colors.black,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.base,
+    ...Shadows.sm,
   },
   actionButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: Typography.size.sm,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.white,
   },
   empty: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 80,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+    paddingVertical: Spacing['5xl'] + Spacing.base,
   },
   emptyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6b7280',
+    fontSize: Typography.size.base,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.gray[500],
     textAlign: 'center',
-    marginBottom: 16,
+    marginTop: Spacing.base,
+    marginBottom: Spacing.base,
   },
   showAllButton: {
-    backgroundColor: '#f3f4f6',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: Colors.gray[100],
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.base,
+    borderWidth: 1,
+    borderColor: Colors.border.medium,
   },
   showAllButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
+    fontSize: Typography.size.sm,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.black,
   },
   infoFooter: {
-    padding: 16,
-    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    padding: Spacing.base,
+    backgroundColor: Colors.white,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: Colors.border.light,
   },
   infoFooterText: {
-    fontSize: 12,
-    color: '#6b7280',
+    fontSize: Typography.size.xs,
+    color: Colors.gray[500],
     textAlign: 'center',
   },
 });

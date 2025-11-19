@@ -1,18 +1,23 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import MainTabNavigator from './MainTabNavigator';
 import CaseDetailScreen from '../screens/CaseDetailScreen';
 import Phase2UploadScreen from '../screens/Phase2UploadScreen';
+import { useStore } from '../store';
 
 const Stack = createStackNavigator();
 
 export default function AppNavigator() {
+  const user = useStore((state) => state.user);
+  const isAuthenticated = !!user;
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="Welcome"
         screenOptions={{
           headerShown: false,
           cardStyleInterpolator: ({ current, layouts }) => {
@@ -31,11 +36,33 @@ export default function AppNavigator() {
           },
         }}
       >
-        {/* Auth */}
-        <Stack.Screen name="Login" component={LoginScreen} />
+        {/* Public Stack - Browse without login */}
+        <Stack.Screen
+          name="Welcome"
+          component={WelcomeScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
 
-        {/* Main App (Bottom Tabs: MyHome, CreateCase, Inbox) */}
-        <Stack.Screen name="Main" component={MainTabNavigator} />
+        {/* Auth Stack - Modal presentation (contextual login) */}
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+
+        {/* Protected Stack - Requires authentication */}
+        <Stack.Screen
+          name="Main"
+          component={MainTabNavigator}
+          options={{
+            headerShown: false,
+          }}
+        />
 
         {/* Modal/Detail Screens */}
         <Stack.Screen
@@ -43,6 +70,7 @@ export default function AppNavigator() {
           component={CaseDetailScreen}
           options={{
             presentation: 'card',
+            headerShown: false,
           }}
         />
 
@@ -51,6 +79,7 @@ export default function AppNavigator() {
           component={Phase2UploadScreen}
           options={{
             presentation: 'card',
+            headerShown: false,
           }}
         />
       </Stack.Navigator>
@@ -63,6 +92,7 @@ export default function AppNavigator() {
 // ===================================================================
 
 export type RootStackParamList = {
+  Welcome: undefined;
   Login: undefined;
   Main: {
     screen?: 'MyHome' | 'CreateCase' | 'Inbox';

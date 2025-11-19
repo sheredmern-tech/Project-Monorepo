@@ -1,17 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import MyHomeScreen from '../screens/MyHomeScreen';
 import CreateCaseScreen from '../screens/CreateCaseScreen';
 import InboxScreen from '../screens/InboxScreen';
-import { MY_NOTIFICATIONS, hasActiveCase } from '../mocks/my-cases.mock';
+import { useStore } from '../store';
+import { hasActiveCase as checkHasActiveCase } from '../utils/case-helpers';
+import { Colors, Typography, Spacing, IconSize, Shadows } from '../theme/design-system';
 
 const Tab = createBottomTabNavigator();
 
 // Custom Tab Bar
 function CustomTabBar({ state, descriptors, navigation }: any) {
-  const unreadCount = MY_NOTIFICATIONS.filter((n) => !n.read).length;
-  const hasActive = hasActiveCase();
+  const { cases, notifications } = useStore();
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const hasActive = checkHasActiveCase(cases);
 
   return (
     <View style={styles.tabBar}>
@@ -31,18 +35,18 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           }
         };
 
-        // Icons & Labels
-        let icon = '●';
+        // Icons & Labels with Ionicons
+        let iconName = 'home-outline';
         let label = '';
 
         if (route.name === 'MyHome') {
-          icon = '🏠';
+          iconName = isFocused ? 'home' : 'home-outline';
           label = 'Home';
         } else if (route.name === 'CreateCase') {
-          icon = '➕';
+          iconName = isFocused ? 'add-circle' : 'add-circle-outline';
           label = 'Buat';
         } else if (route.name === 'Inbox') {
-          icon = '📬';
+          iconName = isFocused ? 'notifications' : 'notifications-outline';
           label = 'Inbox';
         }
 
@@ -58,17 +62,20 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
             onPress={onPress}
             style={styles.tabItem}
             disabled={isDisabled}
+            activeOpacity={0.7}
           >
             <View style={styles.tabIconContainer}>
-              <Text
-                style={[
-                  styles.tabIcon,
-                  isFocused && styles.tabIconFocused,
-                  isDisabled && styles.tabIconDisabled,
-                ]}
-              >
-                {icon}
-              </Text>
+              <Ionicons
+                name={iconName as any}
+                size={IconSize.base}
+                color={
+                  isDisabled
+                    ? Colors.gray[300]
+                    : isFocused
+                    ? Colors.black
+                    : Colors.gray[400]
+                }
+              />
               {showBadge && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{unreadCount}</Text>
@@ -85,9 +92,12 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
               {label}
             </Text>
             {isDisabled && (
-              <View style={styles.disabledIndicator}>
-                <Text style={styles.disabledText}>🔒</Text>
-              </View>
+              <Ionicons
+                name="lock-closed"
+                size={IconSize.xs}
+                color={Colors.gray[300]}
+                style={styles.lockIcon}
+              />
             )}
           </TouchableOpacity>
         );
@@ -132,72 +142,58 @@ export default function MainTabNavigator() {
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopColor: Colors.border.light,
     paddingBottom: 20,
-    paddingTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    paddingTop: Spacing.sm,
+    ...Shadows.base,
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: Spacing.sm,
     position: 'relative',
   },
   tabIconContainer: {
     position: 'relative',
-    marginBottom: 4,
-  },
-  tabIcon: {
-    fontSize: 24,
-    opacity: 0.5,
-  },
-  tabIconFocused: {
-    opacity: 1,
-  },
-  tabIconDisabled: {
-    opacity: 0.3,
+    marginBottom: Spacing.xs,
   },
   badge: {
     position: 'absolute',
     top: -4,
     right: -8,
-    backgroundColor: '#ef4444',
+    backgroundColor: Colors.black,
     borderRadius: 10,
     minWidth: 18,
     height: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: Spacing.xs,
+    borderWidth: 2,
+    borderColor: Colors.white,
   },
   badgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '700',
+    color: Colors.white,
+    fontSize: Typography.size.xs - 2,
+    fontWeight: Typography.weight.bold,
   },
   tabLabel: {
-    fontSize: 12,
-    color: '#6b7280',
+    fontSize: Typography.size.xs,
+    color: Colors.gray[500],
+    fontWeight: Typography.weight.medium,
   },
   tabLabelFocused: {
-    color: '#3b82f6',
-    fontWeight: '600',
+    color: Colors.black,
+    fontWeight: Typography.weight.semibold,
   },
   tabLabelDisabled: {
-    color: '#d1d5db',
+    color: Colors.gray[300],
   },
-  disabledIndicator: {
+  lockIcon: {
     position: 'absolute',
     top: 0,
     right: '25%',
-  },
-  disabledText: {
-    fontSize: 12,
   },
 });
