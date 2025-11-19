@@ -158,12 +158,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "pengaturan:read",
     "pengaturan:update",
     "pengaturan:manage",
-    // Users
-    "users:create",
-    "users:read",
-    "users:update",
-    "users:delete",
-    "users:import",
+    // Users - ADMIN ONLY (no user management permissions for PARTNER)
   ],
 
   // ADVOKAT (Lawyer): Can manage cases, clients, and documents
