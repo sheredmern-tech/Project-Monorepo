@@ -1,7 +1,7 @@
 // ============================================
 // FILE: app/home/_components/sections/hero-section.tsx
-// UPDATED: PHASE 4 FIX - Removed gradient, increased opacity to 70%
-// Fixed: No gradient overlay, just high opacity Lady Justice image
+// UPDATED: PHASE 4 FINAL - Opacity under 40% + overlay for text contrast
+// Fixed: Lower opacity, white overlay for readable text in light mode
 // ============================================
 'use client'
 
@@ -22,7 +22,7 @@ export function HeroSection() {
       {/* Layer 1: Subtle Grid Pattern - PALING BELAKANG */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:80px_80px]" />
 
-      {/* Layer 2: Lady Justice Background Image - HIGH OPACITY, NO GRADIENT! */}
+      {/* Layer 2: Lady Justice Background Image - UNDER 40% OPACITY */}
       <div className="absolute inset-0 z-[1]">
         <Image
           src="https://res.cloudinary.com/dxxds8jkx/image/upload/v1760593675/Lady_Justice_o2noc0.png"
@@ -30,10 +30,11 @@ export function HeroSection() {
           fill
           priority
           quality={90}
-          className="object-cover opacity-[0.70] dark:opacity-[0.60]"
+          className="object-cover opacity-[0.35] dark:opacity-[0.30]"
           sizes="100vw"
         />
-        {/* NO GRADIENT OVERLAY - Just clean image! */}
+        {/* White overlay for text contrast - light mode only */}
+        <div className="absolute inset-0 bg-white/70 dark:bg-transparent" />
       </div>
 
       {/* Layer 3: Content - PALING DEPAN */}
@@ -135,7 +136,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll Indicator - MOVED LOWER */}
+      {/* Scroll Indicator - PASS (good position) */}
       <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
         animate={{ y: [0, 8, 0] }}
