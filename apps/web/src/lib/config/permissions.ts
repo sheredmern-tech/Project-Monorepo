@@ -97,15 +97,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "pengaturan:read",
     "pengaturan:update",
     "pengaturan:manage",
-    // Users
-    "users:create",
-    "users:read",
-    "users:update",
-    "users:delete",
-    "users:import",
+    // Users - LIMITED compared to ADMIN
+    "users:read", // Can view users only
+    // No create/update/delete/import - ADMIN only
   ],
 
-  // PARTNER: Same as ADMIN (senior partner with full access)
+  // PARTNER: Senior partner - Full case/client access + financial visibility
+  // Note: Cannot manage system users (that's ADMIN only)
   [UserRole.PARTNER]: [
     // Klien
     "klien:create",
@@ -169,6 +167,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ],
 
   // ADVOKAT (Lawyer): Can manage cases, clients, and documents
+  // Note: Can VIEW financial data but cannot edit
   [UserRole.ADVOKAT]: [
     // Klien
     "klien:create",
@@ -217,20 +216,22 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "pengaturan:read",
   ],
 
-  // PARALEGAL: Limited to assigned cases and support tasks
+  // PARALEGAL: Can do data entry and support tasks
   [UserRole.PARALEGAL]: [
     // Klien
+    "klien:create", // Can create new clients
     "klien:read",
     "klien:update", // Can update client info
-    // No create/delete
+    // No delete
     // Perkara
     "perkara:read",
-    "perkara:update", // Can update assigned cases
-    // No create/delete
+    "perkara:update", // Can update existing cases
+    // No create/delete - cannot create NEW cases
     // Tugas
     "tugas:create", // Can create tasks
     "tugas:read",
     "tugas:update",
+    "tugas:assign", // Can assign tasks to others
     // No delete
     // Dokumen
     "dokumen:create",
@@ -245,7 +246,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "sidang:update",
     // No delete
     // Konflik
+    "konflik:create", // Can run conflict checks
     "konflik:read",
+    "konflik:update",
+    // No delete
     // Tim
     "tim:read",
     // Laporan
@@ -254,28 +258,29 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "pengaturan:read",
   ],
 
-  // STAFF: Data entry only, no deletion rights
+  // STAFF: READ ONLY + Document upload/catatan only
   [UserRole.STAFF]: [
     // Klien
-    "klien:create",
     "klien:read",
-    "klien:update",
-    // No delete
+    // No create/update/delete - READ ONLY!
     // Perkara
     "perkara:read",
-    "perkara:update", // Limited updates
-    // No create/delete
-    // Tugas
+    // No create/update/delete - READ ONLY!
+    // Tugas  
     "tugas:read",
-    "tugas:update",
-    // No create/delete
+    "tugas:update", // ONLY for tasks assigned to them (checked in backend)
+    // No create/delete/assign
     // Dokumen
     "dokumen:read",
-    "dokumen:upload",
+    "dokumen:create", // Can upload documents
+    "dokumen:upload", // Can upload documents
+    "dokumen:update", // Can edit document metadata
     "dokumen:download",
-    // No update/delete
+    // No delete
+    // Catatan (implicit in dokumen:create)
     // Sidang
     "sidang:read",
+    // No create/update/delete
     // Konflik
     "konflik:read",
     // Tim
@@ -301,12 +306,23 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
  */
 export function hasPermission(
   role: UserRole | undefined,
-  permission: Permission
+  permission: Permission,
+  context?: { userId?: string; resourceOwnerId?: string }
 ): boolean {
   if (!role) return false;
 
   // ✅ ADMIN BYPASS - Admin has ALL permissions
   if (role === UserRole.ADMIN) {
+    return true;
+  }
+
+  // Special case: STAFF can only update tasks assigned to them
+  if (role === UserRole.STAFF && permission === "tugas:update") {
+    // If context is provided, check if user is assigned
+    if (context?.userId && context?.resourceOwnerId) {
+      return context.userId === context.resourceOwnerId;
+    }
+    // Without context, allow permission check to pass (backend will validate)
     return true;
   }
 
@@ -423,6 +439,55 @@ export function hasAnyPermission(
   }
 
   return permissions.some((perm) => hasPermission(role, perm));
+}
+
+// ============================================================================
+// Special Permission Helpers
+// ============================================================================
+
+/**
+ * Check if role can view financial data (nilai_fee, nilai_perkara)
+ * Only ADMIN, PARTNER, and ADVOKAT can see financial data
+ */
+export function canViewFinancialData(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return [
+    UserRole.ADMIN,
+    UserRole.PARTNER, 
+    UserRole.ADVOKAT
+  ].includes(role);
+}
+
+/**
+ * Check if role can edit financial data
+ * Only ADMIN and PARTNER can edit financial data
+ */
+export function canEditFinancialData(role: UserRole | undefined): boolean {
+  if (!role) return false;
+  return [
+    UserRole.ADMIN,
+    UserRole.PARTNER
+  ].includes(role);
+}
+
+/**
+ * Check if STAFF can update a specific task
+ * STAFF can only update tasks assigned to them
+ */
+export function canStaffUpdateTask(
+  role: UserRole | undefined,
+  taskAssignedTo: string | undefined,
+  currentUserId: string | undefined
+): boolean {
+  if (!role || !taskAssignedTo || !currentUserId) return false;
+  
+  // Only applies to STAFF role
+  if (role !== UserRole.STAFF) {
+    return canPerformAction(role, Resource.TUGAS, Action.UPDATE);
+  }
+  
+  // STAFF can only update their own assigned tasks
+  return taskAssignedTo === currentUserId;
 }
 
 // ============================================================================
