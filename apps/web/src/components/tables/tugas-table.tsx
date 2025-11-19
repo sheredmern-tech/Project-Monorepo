@@ -62,16 +62,14 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
   // ✅ Enhanced mark complete with optimistic update
   const handleMarkComplete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    
+
     try {
       setCompletingId(id);
-      await updateTugas(id, { 
+      await updateTugas(id, {
         status: StatusTugas.SELESAI,
       });
       toast.success("Tugas berhasil diselesaikan");
-      
-      // ✅ Refresh to get updated data
-      await fetchTugas();
+      // ✅ REMOVED: fetchTugas() already called by hook (use-tugas.ts line 139)
     } catch (error) {
       handleApiError(error, "Gagal menyelesaikan tugas");
     } finally {
@@ -88,7 +86,7 @@ export function TugasTable({ data, isLoading, error, page, limit, total }: Tugas
       await deleteTugas(deleteId);
       toast.success("Tugas berhasil dihapus");
       setDeleteId(null);
-      await fetchTugas();
+      // ✅ REMOVED: fetchTugas() already called by hook (use-tugas.ts line 161)
     } catch (error) {
       handleApiError(error, "Gagal menghapus tugas");
     } finally {
