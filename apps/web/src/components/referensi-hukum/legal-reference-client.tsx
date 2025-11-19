@@ -120,21 +120,22 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     }
   }, [activeTab, visibleCounts, filteredData, isLoadingMore])
 
-  // Seamless intersection observer for true infinity scroll
+  // Aggressive intersection observer for true infinity scroll
   useEffect(() => {
     const currentRef = loadMoreRef.current
     if (!currentRef) return
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Auto-load when trigger becomes visible
-        if (entries[0].isIntersecting) {
+        // Auto-load when trigger becomes visible or near visible
+        const entry = entries[0]
+        if (entry.isIntersecting || entry.intersectionRatio > 0) {
           loadMore()
         }
       },
       {
-        threshold: 0,
-        rootMargin: '200px' // Start loading 200px before reaching the trigger
+        threshold: [0, 0.1, 0.5, 1], // Multiple thresholds for better detection
+        rootMargin: '300px 0px' // Start loading 300px before reaching the trigger
       }
     )
 
@@ -143,7 +144,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     return () => {
       observer.disconnect()
     }
-  }, [loadMore])
+  }, [loadMore, activeTab]) // Re-attach when tab changes
 
   // Reset visible count when search changes
   useEffect(() => {
@@ -443,13 +444,16 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                     })}
                   </Accordion>
 
-                  {/* Seamless Loading with White Blur Gradient */}
+                  {/* Seamless Infinity Scroll Trigger */}
                   {hasMore && (
-                    <div className="relative">
-                      {/* Intersection Observer Trigger */}
-                      <div ref={loadMoreRef} className="h-20" />
+                    <div className="relative mt-8">
+                      {/* Spacer to ensure scrollability */}
+                      <div className="h-40" />
 
-                      {/* Minimalist White Blur Fade Effect */}
+                      {/* Intersection Observer Trigger - positioned for optimal detection */}
+                      <div ref={loadMoreRef} className="absolute top-0 left-0 right-0 h-1" />
+
+                      {/* Loading State */}
                       <AnimatePresence>
                         {isLoadingMore && (
                           <motion.div
@@ -457,21 +461,44 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.4 }}
-                            className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-                            style={{
-                              background:
-                                'linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)'
-                            }}
+                            className="absolute top-0 left-0 right-0 h-full flex items-center justify-center"
                           >
-                            <div className="absolute inset-0 flex items-end justify-center pb-8">
-                              <div className="flex items-center gap-3 text-muted-foreground backdrop-blur-sm bg-background/80 px-6 py-3 rounded-full border">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                <span className="text-sm font-medium">Memuat...</span>
-                              </div>
+                            {/* Minimalist White Blur Fade Effect */}
+                            <div
+                              className="absolute inset-0 pointer-events-none"
+                              style={{
+                                background:
+                                  'linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)'
+                              }}
+                            />
+                            {/* Loading Indicator */}
+                            <div className="relative flex items-center gap-3 text-muted-foreground backdrop-blur-sm bg-background/80 px-6 py-3 rounded-full border shadow-lg">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <span className="text-sm font-medium">Memuat...</span>
                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
+
+                      {/* Fallback Manual Button (appears if auto-loading seems stuck) */}
+                      {!isLoadingMore && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 1.5 }}
+                          className="absolute top-0 left-0 right-0 flex items-center justify-center h-full"
+                        >
+                          <Button
+                            variant="outline"
+                            onClick={loadMore}
+                            className="gap-2 shadow-md"
+                          >
+                            <Loader2 className="h-4 w-4" />
+                            Muat {Math.min(ITEMS_PER_BATCH, items.length - visibleCounts[category.id])}{' '}
+                            Item Lagi
+                          </Button>
+                        </motion.div>
+                      )}
                     </div>
                   )}
 
