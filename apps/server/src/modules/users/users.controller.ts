@@ -49,8 +49,8 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(UserRole.admin)
-  @ApiOperation({ summary: 'Get semua users dengan pagination' })
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @ApiOperation({ summary: 'Get semua users dengan pagination (for assignment purposes)' })
   @ApiResponse({ status: 200, description: 'Data users berhasil diambil' })
   findAll(@Query() query: QueryUserDto) {
     return this.usersService.findAll(query);
