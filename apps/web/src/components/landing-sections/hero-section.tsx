@@ -1,7 +1,7 @@
 // ============================================
 // FILE: app/home/_components/sections/hero-section.tsx
-// UPDATED: PHASE 4 FIX - Increased opacity + radial gradient for visibility
-// Fixed: Lady Justice NOW VISIBLE with radial gradient overlay
+// UPDATED: PHASE 4 FIX - Removed gradient, increased opacity to 70%
+// Fixed: No gradient overlay, just high opacity Lady Justice image
 // ============================================
 'use client'
 
@@ -22,7 +22,7 @@ export function HeroSection() {
       {/* Layer 1: Subtle Grid Pattern - PALING BELAKANG */}
       <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:80px_80px]" />
 
-      {/* Layer 2: Lady Justice Background Image - DI DEPAN GRID - NOW VISIBLE! */}
+      {/* Layer 2: Lady Justice Background Image - HIGH OPACITY, NO GRADIENT! */}
       <div className="absolute inset-0 z-[1]">
         <Image
           src="https://res.cloudinary.com/dxxds8jkx/image/upload/v1760593675/Lady_Justice_o2noc0.png"
@@ -30,11 +30,10 @@ export function HeroSection() {
           fill
           priority
           quality={90}
-          className="object-cover opacity-[0.25] dark:opacity-[0.20]"
+          className="object-cover opacity-[0.70] dark:opacity-[0.60]"
           sizes="100vw"
         />
-        {/* Radial gradient overlay - Center visible, edges fade for text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-white/30 to-white/60 dark:from-slate-950/40 dark:via-slate-950/30 dark:to-slate-950/60" />
+        {/* NO GRADIENT OVERLAY - Just clean image! */}
       </div>
 
       {/* Layer 3: Content - PALING DEPAN */}
@@ -136,9 +135,9 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll Indicator - MOVED HIGHER, NOW VISIBLE IN VIEWPORT */}
+      {/* Scroll Indicator - MOVED LOWER */}
       <motion.div
-        className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
         animate={{ y: [0, 8, 0] }}
         transition={{
           duration: 2,
