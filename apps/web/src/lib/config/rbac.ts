@@ -74,7 +74,7 @@ const ALL_NAVIGATION: NavItem[] = [
     title: "Tim",
     href: "/dashboard/tim",
     icon: UserCog,
-    requiredResource: Resource.TIM
+    requiredResource: Resource.USERS // ✅ User management requires USERS permissions, not TIM
   },
   {
     title: "Laporan",
@@ -178,7 +178,7 @@ export function getRouteResource(pathname: string): Resource | null {
   if (pathname.includes('/dokumen')) return Resource.DOKUMEN;
   if (pathname.includes('/sidang')) return Resource.SIDANG;
   if (pathname.includes('/konflik')) return Resource.KONFLIK;
-  if (pathname.includes('/tim')) return Resource.TIM;
+  if (pathname.includes('/tim')) return Resource.USERS; // ✅ /dashboard/tim is user management, requires USERS permissions
   if (pathname.includes('/laporan')) return Resource.LAPORAN;
   if (pathname.includes('/pengaturan')) return Resource.PENGATURAN;
   return null;
