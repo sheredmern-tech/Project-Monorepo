@@ -146,11 +146,7 @@ export function TugasForm({
       };
 
       await onSubmit(submitData);
-      toast.success(
-        mode === "create"
-          ? "Tugas berhasil ditambahkan"
-          : "Tugas berhasil diperbarui"
-      );
+      // ✅ REMOVED: Toast handled by page component to prevent double notification
     } catch (error) {
       const validationErrors = formatValidationErrors(error);
       if (validationErrors) {
