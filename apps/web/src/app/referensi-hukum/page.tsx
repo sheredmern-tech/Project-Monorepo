@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { Suspense } from 'react'
-import { Scale, BookOpen, Gavel } from 'lucide-react'
+import { Scale, BookOpen, Library, Sparkles } from 'lucide-react'
 import { LegalReferenceClient } from '@/components/referensi-hukum/legal-reference-client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -115,18 +115,22 @@ async function fetchAllLegalData() {
 function LoadingSkeleton() {
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="border-2">
         <CardContent className="pt-6">
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-12 w-full rounded-xl" />
         </CardContent>
       </Card>
       <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Card>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-24 w-full rounded-xl" />
+          ))}
+        </div>
+        <Card className="border-2">
           <CardContent className="pt-6">
             <div className="space-y-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <Skeleton key={i} className="h-16 w-full" />
+                <Skeleton key={i} className="h-20 w-full rounded-xl" />
               ))}
             </div>
           </CardContent>
@@ -143,40 +147,41 @@ export default async function ReferensiHukumPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+      <header className="border-b-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                  <Scale className="h-6 w-6 text-primary" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border-2 border-primary/20">
+                  <Scale className="h-7 w-7 text-primary" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold tracking-tight">
+                  <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
                     Referensi Hukum
+                    <Sparkles className="h-5 w-5 text-primary" />
                   </h1>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground font-medium">
                     Database Perundang-undangan Indonesia
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-4 py-2">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 px-5 py-3">
+                <BookOpen className="h-5 w-5 text-primary" strokeWidth={2} />
                 <div className="text-sm">
-                  <p className="font-medium">
+                  <p className="font-bold text-lg text-foreground">
                     {Object.values(data).reduce((acc, items) => acc + items.length, 0)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Total Item</p>
+                  <p className="text-xs text-muted-foreground font-medium">Total Item</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-4 py-2">
-                <Gavel className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-muted/80 to-muted/40 border-2 px-5 py-3">
+                <Library className="h-5 w-5 text-muted-foreground" strokeWidth={2} />
                 <div className="text-sm">
-                  <p className="font-medium">6 Kategori</p>
-                  <p className="text-xs text-muted-foreground">Perundangan</p>
+                  <p className="font-bold text-lg text-foreground">6 Kategori</p>
+                  <p className="text-xs text-muted-foreground font-medium">Perundangan</p>
                 </div>
               </div>
             </div>
@@ -192,19 +197,24 @@ export default async function ReferensiHukumPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-16">
+      <footer className="border-t-2 mt-16 bg-muted/30">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Scale className="h-5 w-5" />
-              <p className="text-sm">
-                Referensi Hukum Indonesia - Data dari API External Data
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                <Scale className="h-5 w-5 text-primary" strokeWidth={2} />
+              </div>
+              <p className="text-sm font-medium text-foreground">
+                Referensi Hukum Indonesia
               </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Gunakan fitur pencarian untuk menemukan pasal, ayat, atau konten
-              yang Anda butuhkan
+            <p className="text-xs text-muted-foreground max-w-md">
+              Database lengkap perundang-undangan Indonesia. Gunakan fitur pencarian untuk menemukan pasal, ayat, bab, atau konten yang Anda butuhkan dengan mudah dan cepat.
             </p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>Data dari API External Data</span>
+            </div>
           </div>
         </div>
       </footer>
