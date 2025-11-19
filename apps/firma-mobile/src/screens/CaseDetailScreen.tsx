@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,24 +6,30 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import {
-  MY_ACTIVE_CASE,
-  MY_CASE_HISTORY,
-  MyCase,
-  CaseDocument,
-  TimelineEvent,
-} from '../mocks/my-cases.mock';
+import { useStore } from '../store';
+import dataTransformService from '../services/data-transform.service';
+import type { Case, DokumenHukum } from '../types';
 
 export default function CaseDetailScreen({ route, navigation }: any) {
   const { caseId } = route.params;
+  const { currentCase, documents, loadCaseById, loadDocuments, isLoading } = useStore();
 
-  // Find case from active or history
-  let caseData: MyCase | undefined;
-  if (MY_ACTIVE_CASE.id === caseId) {
-    caseData = MY_ACTIVE_CASE;
-  } else {
-    caseData = MY_CASE_HISTORY.find((c) => c.id === caseId);
+  useEffect(() => {
+    loadCaseById(caseId);
+    loadDocuments(caseId);
+  }, [caseId]);
+
+  const caseData = currentCase;
+
+  if (isLoading && !caseData) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text style={{ marginTop: 12, color: '#6b7280' }}>Loading case details...</Text>
+      </View>
+    );
   }
 
   if (!caseData) {
@@ -42,8 +48,8 @@ export default function CaseDetailScreen({ route, navigation }: any) {
     );
   }
 
-  const isActive = caseData.status === 'active';
-  const isCompleted = caseData.status === 'completed';
+  const isActive = caseData.current_phase < 3 && caseData.status !== 'completed';
+  const isCompleted = caseData.current_phase === 3 || caseData.status === 'completed';
   const isCancelled = caseData.status === 'cancelled';
 
   const handleNavigateToPhase2 = () => {
