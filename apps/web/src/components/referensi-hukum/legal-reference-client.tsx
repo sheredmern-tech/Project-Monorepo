@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
   Copy,
@@ -99,7 +100,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     return filtered
   }, [data, searchQuery])
 
-  // Load more items when scrolling (wrapped with useCallback)
+  // Seamless auto-loading (wrapped with useCallback)
   const loadMore = useCallback(() => {
     if (isLoadingMore) return
 
@@ -108,32 +109,32 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
 
     if (currentCount < totalItems) {
       setIsLoadingMore(true)
-      // Small delay for smooth UX
+      // Smooth delay for animation
       setTimeout(() => {
         setVisibleCounts((prev) => ({
           ...prev,
           [activeTab]: Math.min(prev[activeTab] + ITEMS_PER_BATCH, totalItems)
         }))
         setIsLoadingMore(false)
-      }, 300)
+      }, 400)
     }
   }, [activeTab, visibleCounts, filteredData, isLoadingMore])
 
-  // Setup intersection observer for infinite scroll
+  // Seamless intersection observer for true infinity scroll
   useEffect(() => {
     const currentRef = loadMoreRef.current
     if (!currentRef) return
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // When the load more trigger is visible, load more items
+        // Auto-load when trigger becomes visible
         if (entries[0].isIntersecting) {
           loadMore()
         }
       },
       {
-        threshold: 0.1,
-        rootMargin: '100px' // Start loading 100px before reaching the trigger
+        threshold: 0,
+        rootMargin: '200px' // Start loading 200px before reaching the trigger
       }
     )
 
@@ -144,7 +145,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     }
   }, [loadMore])
 
-  // Reset visible count when search changes or tab changes
+  // Reset visible count when search changes
   useEffect(() => {
     setVisibleCounts({
       pancasila: 30,
@@ -235,7 +236,12 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
       <div className="sticky top-0 z-30 bg-background border-b">
         <div className="space-y-4 py-4">
           {/* Search Bar */}
-          <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="relative"
+          >
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Cari pasal, ayat, sila, atau konten..."
@@ -243,17 +249,26 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-10 h-11"
             />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearSearch}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+            <AnimatePresence>
+              {searchQuery && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearSearch}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
           {/* Tab Navigation */}
           <Tabs
@@ -262,23 +277,31 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 h-auto gap-2 bg-transparent p-0">
-              {LEGAL_CATEGORIES.map((category) => {
+              {LEGAL_CATEGORIES.map((category, idx) => {
                 const count = getResultCount(category.id)
                 const IconComponent = getIconComponent(category.iconName)
                 return (
-                  <TabsTrigger
+                  <motion.div
                     key={category.id}
-                    value={category.id}
-                    className="flex items-center gap-2 h-10 px-3 data-[state=active]:bg-foreground data-[state=active]:text-background"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: idx * 0.05 }}
                   >
-                    <IconComponent className="h-4 w-4" />
-                    <span className="text-sm font-medium hidden sm:inline">{category.label}</span>
-                    {searchQuery && (
-                      <Badge variant="secondary" className="ml-1 text-xs">
-                        {count}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
+                    <TabsTrigger
+                      value={category.id}
+                      className="flex items-center gap-2 h-10 px-3 data-[state=active]:bg-foreground data-[state=active]:text-background transition-all duration-200"
+                    >
+                      <IconComponent className="h-4 w-4" />
+                      <span className="text-sm font-medium hidden sm:inline">
+                        {category.label}
+                      </span>
+                      {searchQuery && (
+                        <Badge variant="secondary" className="ml-1 text-xs">
+                          {count}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  </motion.div>
                 )
               })}
             </TabsList>
@@ -293,11 +316,17 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
           const items = processedData?.items || []
           const metadata = processedData?.metadata
           const visibleItems = items.slice(0, visibleCounts[category.id])
+          const hasMore = visibleCounts[category.id] < items.length
 
           return (
             <TabsContent key={category.id} value={category.id} className="mt-6">
               {/* Category Header */}
-              <div className="mb-6 pb-4 border-b">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="mb-6 pb-4 border-b"
+              >
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <h2 className="text-2xl font-bold">{category.label}</h2>
@@ -310,11 +339,16 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                     {items.length} Items
                   </Badge>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Items List */}
               {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col items-center justify-center py-16 text-center"
+                >
                   <Search className="h-12 w-12 text-muted-foreground/30 mb-4" />
                   <p className="text-lg font-medium text-muted-foreground">
                     Tidak ada hasil ditemukan
@@ -322,9 +356,9 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                   <p className="text-sm text-muted-foreground mt-1">
                     Coba ubah kata kunci pencarian Anda
                   </p>
-                </div>
+                </motion.div>
               ) : (
-                <>
+                <div className="relative">
                   <Accordion type="single" collapsible className="w-full space-y-2">
                     {visibleItems.map((item, index) => {
                       const itemId = `${category.id}-${index}`
@@ -334,106 +368,126 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                       const isPancasila = 'butir' in item
 
                       return (
-                        <AccordionItem
+                        <motion.div
                           key={itemId}
-                          value={itemId}
-                          className="border rounded-lg px-4 hover:bg-muted/50 transition-colors"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            duration: 0.3,
+                            delay: Math.min(index * 0.02, 0.5)
+                          }}
                         >
-                          <AccordionTrigger className="hover:no-underline py-4">
-                            <div className="flex items-start gap-3 text-left w-full">
-                              <Badge variant="outline" className="mt-0.5 shrink-0 font-mono text-xs">
-                                {index + 1}
-                              </Badge>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-base">{title}</p>
-                                {isPancasila && (
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {(item as PancasilaItem).isi}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-4 pl-10 pr-4 pb-4">
-                              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                                {content}
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="flex gap-2 pt-2">
-                                <Button
+                          <AccordionItem
+                            value={itemId}
+                            className="border rounded-lg px-4 hover:bg-muted/50 transition-colors"
+                          >
+                            <AccordionTrigger className="hover:no-underline py-4">
+                              <div className="flex items-start gap-3 text-left w-full">
+                                <Badge
                                   variant="outline"
-                                  size="sm"
-                                  onClick={() => handleCopy(content, itemId)}
-                                  className="gap-2"
+                                  className="mt-0.5 shrink-0 font-mono text-xs"
                                 >
-                                  {isCopied ? (
-                                    <>
-                                      <Check className="h-4 w-4" />
-                                      Tersalin
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Copy className="h-4 w-4" />
-                                      Salin
-                                    </>
+                                  {index + 1}
+                                </Badge>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-semibold text-base">{title}</p>
+                                  {isPancasila && (
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                      {(item as PancasilaItem).isi}
+                                    </p>
                                   )}
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleShare(title, content)}
-                                  className="gap-2"
-                                >
-                                  <Share2 className="h-4 w-4" />
-                                  Bagikan
-                                </Button>
+                                </div>
                               </div>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="space-y-4 pl-10 pr-4 pb-4">
+                                <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                                  {content}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-2 pt-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleCopy(content, itemId)}
+                                    className="gap-2"
+                                  >
+                                    {isCopied ? (
+                                      <>
+                                        <Check className="h-4 w-4" />
+                                        Tersalin
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Copy className="h-4 w-4" />
+                                        Salin
+                                      </>
+                                    )}
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleShare(title, content)}
+                                    className="gap-2"
+                                  >
+                                    <Share2 className="h-4 w-4" />
+                                    Bagikan
+                                  </Button>
+                                </div>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </motion.div>
                       )
                     })}
                   </Accordion>
 
-                  {/* Infinite Scroll Trigger & Loading Indicator */}
-                  {visibleCounts[category.id] < items.length && (
-                    <div className="mt-8 space-y-4">
+                  {/* Seamless Loading with White Blur Gradient */}
+                  {hasMore && (
+                    <div className="relative">
                       {/* Intersection Observer Trigger */}
-                      <div ref={loadMoreRef} className="h-1" />
+                      <div ref={loadMoreRef} className="h-20" />
 
-                      <div className="flex flex-col items-center justify-center gap-4 py-6 border-t">
-                        {isLoadingMore ? (
-                          <div className="flex items-center gap-3 text-muted-foreground">
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                            <span className="text-sm">Memuat lebih banyak...</span>
-                          </div>
-                        ) : (
-                          <>
-                            <p className="text-sm text-muted-foreground">
-                              Menampilkan {visibleCounts[category.id]} dari {items.length} item
-                            </p>
-                            {/* Manual Load More Button (fallback) */}
-                            <Button variant="outline" onClick={loadMore} disabled={isLoadingMore}>
-                              Muat{' '}
-                              {Math.min(ITEMS_PER_BATCH, items.length - visibleCounts[category.id])}{' '}
-                              Item Lagi
-                            </Button>
-                          </>
+                      {/* Minimalist White Blur Fade Effect */}
+                      <AnimatePresence>
+                        {isLoadingMore && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+                            style={{
+                              background:
+                                'linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)'
+                            }}
+                          >
+                            <div className="absolute inset-0 flex items-end justify-center pb-8">
+                              <div className="flex items-center gap-3 text-muted-foreground backdrop-blur-sm bg-background/80 px-6 py-3 rounded-full border">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span className="text-sm font-medium">Memuat...</span>
+                              </div>
+                            </div>
+                          </motion.div>
                         )}
-                      </div>
+                      </AnimatePresence>
                     </div>
                   )}
 
                   {/* All items loaded */}
-                  {visibleCounts[category.id] >= items.length && items.length > 0 && (
-                    <div className="flex items-center justify-center gap-2 py-8 mt-6 text-sm text-muted-foreground border-t">
+                  {!hasMore && items.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="flex items-center justify-center gap-2 py-8 mt-6 text-sm text-muted-foreground border-t"
+                    >
                       <Check className="h-4 w-4" />
                       <span>Semua data telah dimuat ({items.length} item)</span>
-                    </div>
+                    </motion.div>
                   )}
-                </>
+                </div>
               )}
             </TabsContent>
           )
