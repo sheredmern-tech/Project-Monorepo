@@ -50,7 +50,8 @@ export function TabNavigation({
 
   return (
     <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as LegalCategory)} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 h-auto gap-2 bg-transparent p-0">
+      {/* Desktop: Grid Layout */}
+      <TabsList className="hidden lg:grid w-full grid-cols-6 h-auto gap-2 bg-transparent p-0">
         {LEGAL_CATEGORIES.map((category, idx) => {
           const count = getResultCount(category.id)
           const IconComponent = getIconComponent(category.iconName)
@@ -63,10 +64,10 @@ export function TabNavigation({
             >
               <TabsTrigger
                 value={category.id}
-                className="flex items-center gap-2 h-10 px-3 data-[state=active]:bg-foreground data-[state=active]:text-background transition-all duration-200"
+                className="flex items-center gap-2 h-10 px-4 data-[state=active]:bg-foreground data-[state=active]:text-background transition-all duration-200"
               >
                 <IconComponent className="h-4 w-4" />
-                <span className="text-sm font-medium hidden sm:inline">{category.label}</span>
+                <span className="text-sm font-medium">{category.label}</span>
                 {searchQuery && (
                   <Badge variant="secondary" className="ml-1 text-xs">
                     {count}
@@ -77,6 +78,37 @@ export function TabNavigation({
           )
         })}
       </TabsList>
+
+      {/* Mobile & Tablet: Horizontal Scroll */}
+      <div className="lg:hidden w-full overflow-x-auto scrollbar-hide">
+        <TabsList className="inline-flex h-auto gap-2 bg-transparent p-0 w-max">
+          {LEGAL_CATEGORIES.map((category, idx) => {
+            const count = getResultCount(category.id)
+            const IconComponent = getIconComponent(category.iconName)
+            return (
+              <motion.div
+                key={category.id}
+                initial={mounted ? { opacity: 0, x: -20 } : false}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: mounted ? idx * 0.05 : 0 }}
+              >
+                <TabsTrigger
+                  value={category.id}
+                  className="flex items-center gap-2 h-10 px-4 whitespace-nowrap data-[state=active]:bg-foreground data-[state=active]:text-background transition-all duration-200"
+                >
+                  <IconComponent className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm font-medium">{category.label}</span>
+                  {searchQuery && (
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {count}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              </motion.div>
+            )
+          })}
+        </TabsList>
+      </div>
     </Tabs>
   )
 }
