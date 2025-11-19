@@ -3,19 +3,18 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import MyHomeScreen from '../screens/MyHomeScreen';
-import CreateCaseScreen from '../screens/CreateCaseScreen';
+import CaseListScreen from '../screens/CaseListScreen';
 import InboxScreen from '../screens/InboxScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import { useStore } from '../store';
-import { hasActiveCase as checkHasActiveCase } from '../utils/case-helpers';
 import { Colors, Typography, Spacing, IconSize, Shadows } from '../theme/design-system';
 
 const Tab = createBottomTabNavigator();
 
 // Custom Tab Bar
 function CustomTabBar({ state, descriptors, navigation }: any) {
-  const { cases, notifications } = useStore();
+  const { notifications } = useStore();
   const unreadCount = notifications.filter((n) => !n.read).length;
-  const hasActive = checkHasActiveCase(cases);
 
   return (
     <View style={styles.tabBar}>
@@ -35,46 +34,39 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           }
         };
 
-        // Icons & Labels with Ionicons
+        // Icons & Labels with Ionicons (Bahasa Indonesia)
         let iconName = 'home-outline';
         let label = '';
 
-        if (route.name === 'MyHome') {
+        if (route.name === 'Beranda') {
           iconName = isFocused ? 'home' : 'home-outline';
-          label = 'Home';
-        } else if (route.name === 'CreateCase') {
-          iconName = isFocused ? 'add-circle' : 'add-circle-outline';
-          label = 'Buat';
-        } else if (route.name === 'Inbox') {
+          label = 'Beranda';
+        } else if (route.name === 'CaseList') {
+          iconName = isFocused ? 'folder-open' : 'folder-open-outline';
+          label = 'Kasus Saya';
+        } else if (route.name === 'Notifikasi') {
           iconName = isFocused ? 'notifications' : 'notifications-outline';
-          label = 'Inbox';
+          label = 'Notifikasi';
+        } else if (route.name === 'Profil') {
+          iconName = isFocused ? 'person' : 'person-outline';
+          label = 'Profil';
         }
 
-        // Badge for inbox
-        const showBadge = route.name === 'Inbox' && unreadCount > 0;
-
-        // Disabled state for CreateCase if has active case
-        const isDisabled = route.name === 'CreateCase' && hasActive;
+        // Badge for notifications
+        const showBadge = route.name === 'Notifikasi' && unreadCount > 0;
 
         return (
           <TouchableOpacity
             key={route.key}
             onPress={onPress}
             style={styles.tabItem}
-            disabled={isDisabled}
             activeOpacity={0.7}
           >
             <View style={styles.tabIconContainer}>
               <Ionicons
                 name={iconName as any}
                 size={IconSize.base}
-                color={
-                  isDisabled
-                    ? Colors.gray[300]
-                    : isFocused
-                    ? Colors.black
-                    : Colors.gray[400]
-                }
+                color={isFocused ? Colors.black : Colors.gray[400]}
               />
               {showBadge && (
                 <View style={styles.badge}>
@@ -86,19 +78,10 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
               style={[
                 styles.tabLabel,
                 isFocused && styles.tabLabelFocused,
-                isDisabled && styles.tabLabelDisabled,
               ]}
             >
               {label}
             </Text>
-            {isDisabled && (
-              <Ionicons
-                name="lock-closed"
-                size={IconSize.xs}
-                color={Colors.gray[300]}
-                style={styles.lockIcon}
-              />
-            )}
           </TouchableOpacity>
         );
       })}
@@ -114,25 +97,39 @@ export default function MainTabNavigator() {
         headerShown: false,
       }}
     >
+      {/* Tab 1: Beranda */}
       <Tab.Screen
-        name="MyHome"
+        name="Beranda"
         component={MyHomeScreen}
         options={{
-          title: 'Home',
+          title: 'Beranda',
         }}
       />
+
+      {/* Tab 2: Kasus Saya */}
       <Tab.Screen
-        name="CreateCase"
-        component={CreateCaseScreen}
+        name="CaseList"
+        component={CaseListScreen}
         options={{
-          title: 'Buat Pengajuan',
+          title: 'Kasus Saya',
         }}
       />
+
+      {/* Tab 3: Notifikasi (Tengah) */}
       <Tab.Screen
-        name="Inbox"
+        name="Notifikasi"
         component={InboxScreen}
         options={{
-          title: 'Inbox',
+          title: 'Notifikasi',
+        }}
+      />
+
+      {/* Tab 4: Profil (Paling Kanan) */}
+      <Tab.Screen
+        name="Profil"
+        component={ProfileScreen}
+        options={{
+          title: 'Profil',
         }}
       />
     </Tab.Navigator>
@@ -187,13 +184,5 @@ const styles = StyleSheet.create({
   tabLabelFocused: {
     color: Colors.black,
     fontWeight: Typography.weight.semibold,
-  },
-  tabLabelDisabled: {
-    color: Colors.gray[300],
-  },
-  lockIcon: {
-    position: 'absolute',
-    top: 0,
-    right: '25%',
   },
 });

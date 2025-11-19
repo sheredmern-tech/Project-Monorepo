@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import LoginScreen from '../screens/LoginScreen';
 import MainTabNavigator from './MainTabNavigator';
+import CreateCaseScreen from '../screens/CreateCaseScreen';
 import CaseDetailScreen from '../screens/CaseDetailScreen';
 import Phase2UploadScreen from '../screens/Phase2UploadScreen';
 import { useStore } from '../store';
@@ -66,6 +67,15 @@ export default function AppNavigator() {
 
         {/* Modal/Detail Screens */}
         <Stack.Screen
+          name="CreateCase"
+          component={CreateCaseScreen}
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
           name="CaseDetail"
           component={CaseDetailScreen}
           options={{
@@ -95,8 +105,9 @@ export type RootStackParamList = {
   Welcome: undefined;
   Login: undefined;
   Main: {
-    screen?: 'MyHome' | 'CreateCase' | 'Inbox';
+    screen?: 'Beranda' | 'CaseList' | 'Notifikasi' | 'Profil';
   };
+  CreateCase: undefined;
   CaseDetail: {
     caseId: string;
   };
