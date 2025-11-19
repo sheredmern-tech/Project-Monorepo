@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Eye, Trash2, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -102,7 +102,7 @@ export function KonflikTable({
           <TableBody>
             {data.map((konflik) => {
               // 🎯 Check if user has ANY action permission
-              const hasAnyAction = permissions.konflik.read || permissions.konflik.delete;
+              const hasAnyAction = permissions.konflik.read || permissions.konflik.update || permissions.konflik.delete;
 
               return (
                 <TableRow
@@ -195,6 +195,16 @@ export function KonflikTable({
                             >
                               <Eye className="mr-2 h-4 w-4" />
                               Lihat Detail
+                            </DropdownMenuItem>
+                          )}
+
+                          {/* 🔒 Edit - requires konflik:update permission */}
+                          {permissions.konflik.update && (
+                            <DropdownMenuItem
+                              onClick={() => router.push(`/dashboard/konflik/${konflik.id}/edit`)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
                             </DropdownMenuItem>
                           )}
 
