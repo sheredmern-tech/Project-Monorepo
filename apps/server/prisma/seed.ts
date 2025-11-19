@@ -1,5 +1,5 @@
 // ============================================================
-// PRISMA SEED - SAMPLE DATA GENERATOR (IDEMPOTENT VERSION)
+// PRISMA SEED - COMPREHENSIVE LAW FIRM DATA (IMPROVED)
 // ============================================================
 
 import {
@@ -7,13 +7,14 @@ import {
   UserRole,
   JenisPerkara,
   StatusPerkara,
+  StatusTugas,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seed...\n');
+  console.log('🌱 Starting comprehensive database seed...\n');
 
   // ============================================================
   // STEP 1: CLEANUP EXISTING SEED DATA (SAFE MODE)
@@ -24,6 +25,14 @@ async function main() {
     const userIds = await getUserIds();
 
     if (userIds.length > 0) {
+      await prisma.pemeriksaanKonflik.deleteMany({
+        where: { diperiksa_oleh: { in: userIds } },
+      });
+
+      await prisma.dokumenHukum.deleteMany({
+        where: { diunggah_oleh: { in: userIds } },
+      });
+
       await prisma.jadwalSidang.deleteMany({
         where: { dibuat_oleh: { in: userIds } },
       });
@@ -42,8 +51,9 @@ async function main() {
     await prisma.klien.deleteMany({
       where: {
         OR: [
-          { email: 'contact@teknologi.co.id' },
-          { email: 'ahmad.wijaya@email.com' },
+          { email: { contains: '@teknologi.co.id' } },
+          { email: { contains: '@wijaya' } },
+          { email: { contains: '@maju' } },
         ],
       },
     });
@@ -54,10 +64,11 @@ async function main() {
   }
 
   // ============================================================
-  // STEP 2: CREATE USERS
+  // STEP 2: CREATE USERS (ALL ROLES!)
   // ============================================================
   const hashedPassword = await bcrypt.hash('Admin123!', 10);
 
+  // 1. ADMIN
   const admin = await prisma.user.upsert({
     where: { email: 'admin@perari.id' },
     update: {
@@ -78,6 +89,34 @@ async function main() {
   });
   console.log('✅ Admin user created:', admin.email);
 
+  // 2. PARTNER (CRITICAL - SENIOR MANAGEMENT!)
+  const partner = await prisma.user.upsert({
+    where: { email: 'partner@perari.id' },
+    update: {
+      password: hashedPassword,
+      nama_lengkap: 'Prof. Dr. Haryanto Saputra, S.H., M.H., LL.M.',
+      role: UserRole.partner,
+      jabatan: 'Senior Partner',
+      nomor_kta: 'ADV-2015-001',
+      nomor_berita_acara: 'BA-001/2015/PN-JKT',
+      spesialisasi: 'Corporate Law, Merger & Acquisition, Litigation',
+      telepon: '081234567895',
+    },
+    create: {
+      email: 'partner@perari.id',
+      password: hashedPassword,
+      nama_lengkap: 'Prof. Dr. Haryanto Saputra, S.H., M.H., LL.M.',
+      role: UserRole.partner,
+      jabatan: 'Senior Partner',
+      nomor_kta: 'ADV-2015-001',
+      nomor_berita_acara: 'BA-001/2015/PN-JKT',
+      spesialisasi: 'Corporate Law, Merger & Acquisition, Litigation',
+      telepon: '081234567895',
+    },
+  });
+  console.log('✅ Partner user created:', partner.email);
+
+  // 3. ADVOKAT (Multiple lawyers)
   const advokat1 = await prisma.user.upsert({
     where: { email: 'advokat@perari.id' },
     update: {
@@ -102,8 +141,35 @@ async function main() {
       telepon: '081234567891',
     },
   });
-  console.log('✅ Advokat created:', advokat1.email);
+  console.log('✅ Advokat 1 created:', advokat1.email);
 
+  const advokat2 = await prisma.user.upsert({
+    where: { email: 'advokat2@perari.id' },
+    update: {
+      password: hashedPassword,
+      nama_lengkap: 'Dewi Lestari, S.H., M.H.',
+      role: UserRole.advokat,
+      jabatan: 'Advokat',
+      nomor_kta: 'ADV-2021-045',
+      nomor_berita_acara: 'BA-045/2021/PN-JKT',
+      spesialisasi: 'Hukum Tata Negara, Hukum HAM',
+      telepon: '081234567896',
+    },
+    create: {
+      email: 'advokat2@perari.id',
+      password: hashedPassword,
+      nama_lengkap: 'Dewi Lestari, S.H., M.H.',
+      role: UserRole.advokat,
+      jabatan: 'Advokat',
+      nomor_kta: 'ADV-2021-045',
+      nomor_berita_acara: 'BA-045/2021/PN-JKT',
+      spesialisasi: 'Hukum Tata Negara, Hukum HAM',
+      telepon: '081234567896',
+    },
+  });
+  console.log('✅ Advokat 2 created:', advokat2.email);
+
+  // 4. PARALEGAL
   const paralegal = await prisma.user.upsert({
     where: { email: 'paralegal@perari.id' },
     update: {
@@ -124,6 +190,7 @@ async function main() {
   });
   console.log('✅ Paralegal created:', paralegal.email);
 
+  // 5. STAFF
   const staff = await prisma.user.upsert({
     where: { email: 'staff@perari.id' },
     update: {
@@ -144,6 +211,7 @@ async function main() {
   });
   console.log('✅ Staff created:', staff.email);
 
+  // 6. KLIEN
   const klienUser = await prisma.user.upsert({
     where: { email: 'klien@perari.id' },
     update: {
@@ -165,7 +233,7 @@ async function main() {
   console.log('✅ Klien user created:', klienUser.email);
 
   // ============================================================
-  // STEP 3: CREATE CLIENTS
+  // STEP 3: CREATE CLIENTS (Multiple types)
   // ============================================================
   const klien1 = await prisma.klien.create({
     data: {
@@ -175,7 +243,7 @@ async function main() {
       npwp: '01.234.567.8-901.000',
       email: 'contact@teknologi.co.id',
       telepon: '0212345678',
-      alamat: 'Jl. Sudirman No. 123',
+      alamat: 'Jl. Sudirman No. 123, Gedung Sudirman Tower Lt. 25',
       kelurahan: 'Menteng',
       kecamatan: 'Menteng',
       kota: 'Jakarta Pusat',
@@ -184,10 +252,10 @@ async function main() {
       nama_perusahaan: 'PT. Teknologi Nusantara',
       bentuk_badan_usaha: 'PT',
       nomor_akta: 'AHU-0012345.AH.01.01.Tahun 2020',
-      dibuat_oleh: admin.id,
+      dibuat_oleh: partner.id,
     },
   });
-  console.log('✅ Sample client created:', klien1.nama);
+  console.log('✅ Client 1 created:', klien1.nama);
 
   const klien2 = await prisma.klien.create({
     data: {
@@ -196,23 +264,49 @@ async function main() {
       nomor_identitas: '3174020202850001',
       email: 'ahmad.wijaya@email.com',
       telepon: '081298765432',
-      alamat: 'Jl. Gatot Subroto No. 45',
+      alamat: 'Jl. Gatot Subroto No. 45, Apartemen Senayan Residence Tower A/1203',
+      kelurahan: 'Senayan',
+      kecamatan: 'Kebayoran Baru',
       kota: 'Jakarta Selatan',
       provinsi: 'DKI Jakarta',
+      kode_pos: '12190',
       dibuat_oleh: advokat1.id,
     },
   });
-  console.log('✅ Sample client 2 created:', klien2.nama);
+  console.log('✅ Client 2 created:', klien2.nama);
+
+  const klien3 = await prisma.klien.create({
+    data: {
+      nama: 'CV. Maju Bersama',
+      jenis_klien: 'perusahaan',
+      nomor_identitas: '3171051234567890',
+      npwp: '02.345.678.9-012.000',
+      email: 'info@majubersama.co.id',
+      telepon: '0218765432',
+      alamat: 'Jl. Thamrin No. 88',
+      kelurahan: 'Gondangdia',
+      kecamatan: 'Menteng',
+      kota: 'Jakarta Pusat',
+      provinsi: 'DKI Jakarta',
+      kode_pos: '10350',
+      nama_perusahaan: 'CV. Maju Bersama',
+      bentuk_badan_usaha: 'CV',
+      nomor_akta: 'AHU-0056789.AH.01.01.Tahun 2021',
+      dibuat_oleh: paralegal.id,
+    },
+  });
+  console.log('✅ Client 3 created:', klien3.nama);
 
   // ============================================================
-  // STEP 4: CREATE CASES
+  // STEP 4: CREATE CASES (Multiple types)
   // ============================================================
   const perkara1 = await prisma.perkara.create({
     data: {
       nomor_perkara: 'PKR/2024/001',
       nomor_perkara_pengadilan: '123/Pdt.G/2024/PN.Jkt.Sel',
       judul: 'Gugatan Wanprestasi PT. Teknologi vs PT. ABC',
-      deskripsi: 'Gugatan wanprestasi terkait perjanjian kerja sama bisnis',
+      deskripsi:
+        'Gugatan wanprestasi terkait perjanjian kerja sama bisnis senilai 5 Miliar. Klien sebagai penggugat menuntut ganti rugi akibat pelanggaran kontrak.',
       klien_id: klien1.id,
       jenis_perkara: JenisPerkara.perdata,
       status: StatusPerkara.aktif,
@@ -227,17 +321,18 @@ async function main() {
       tanggal_sidang_pertama: new Date('2024-02-01'),
       nilai_fee: 150000000,
       status_pembayaran: 'Sebagian',
-      dibuat_oleh: advokat1.id,
+      dibuat_oleh: partner.id,
     },
   });
-  console.log('✅ Sample case created:', perkara1.nomor_perkara);
+  console.log('✅ Case 1 created:', perkara1.nomor_perkara);
 
   const perkara2 = await prisma.perkara.create({
     data: {
       nomor_perkara: 'PKR/2024/002',
       nomor_perkara_pengadilan: '456/Pid.B/2024/PN.Jkt.Pst',
       judul: 'Perkara Pidana Penggelapan',
-      deskripsi: 'Kasus penggelapan dana perusahaan',
+      deskripsi:
+        'Kasus penggelapan dana perusahaan senilai 2.5 Miliar. Klien sebagai terdakwa membutuhkan pembelaan hukum.',
       klien_id: klien2.id,
       jenis_perkara: JenisPerkara.pidana,
       status: StatusPerkara.aktif,
@@ -254,23 +349,56 @@ async function main() {
       dibuat_oleh: advokat1.id,
     },
   });
-  console.log('✅ Sample case 2 created:', perkara2.nomor_perkara);
+  console.log('✅ Case 2 created:', perkara2.nomor_perkara);
+
+  const perkara3 = await prisma.perkara.create({
+    data: {
+      nomor_perkara: 'PKR/2024/003',
+      nomor_perkara_pengadilan: '789/Pdt.G/2024/PN.Jkt.Pst',
+      judul: 'Sengketa Tanah CV. Maju Bersama',
+      deskripsi:
+        'Sengketa kepemilikan tanah seluas 2000m2 di Jakarta Pusat antara klien dengan pihak ketiga.',
+      klien_id: klien3.id,
+      jenis_perkara: JenisPerkara.perdata,
+      status: StatusPerkara.aktif,
+      prioritas: 'sedang',
+      tingkat_pengadilan: 'PN',
+      nama_pengadilan: 'Pengadilan Negeri Jakarta Pusat',
+      posisi_klien: 'Tergugat',
+      pihak_lawan: 'Yayasan Pembangunan Indonesia',
+      kuasa_hukum_lawan: 'Associates Law Office',
+      nilai_perkara: 10000000000,
+      tanggal_register: new Date('2024-03-01'),
+      tanggal_sidang_pertama: new Date('2024-04-15'),
+      nilai_fee: 200000000,
+      status_pembayaran: 'Pending',
+      dibuat_oleh: advokat2.id,
+    },
+  });
+  console.log('✅ Case 3 created:', perkara3.nomor_perkara);
 
   // ============================================================
-  // STEP 5: CREATE CASE TEAM
+  // STEP 5: CREATE CASE TEAMS
   // ============================================================
   await prisma.timPerkara.createMany({
     data: [
+      // Perkara 1 Team (Partner leads)
+      {
+        perkara_id: perkara1.id,
+        user_id: partner.id,
+        peran: 'Senior Partner / Lead Counsel',
+      },
       {
         perkara_id: perkara1.id,
         user_id: advokat1.id,
-        peran: 'Lead Counsel',
+        peran: 'Co-Counsel',
       },
       {
         perkara_id: perkara1.id,
         user_id: paralegal.id,
         peran: 'Legal Assistant',
       },
+      // Perkara 2 Team
       {
         perkara_id: perkara2.id,
         user_id: advokat1.id,
@@ -281,6 +409,17 @@ async function main() {
         user_id: staff.id,
         peran: 'Administrative Support',
       },
+      // Perkara 3 Team
+      {
+        perkara_id: perkara3.id,
+        user_id: advokat2.id,
+        peran: 'Lead Counsel',
+      },
+      {
+        perkara_id: perkara3.id,
+        user_id: paralegal.id,
+        peran: 'Legal Research',
+      },
     ],
   });
   console.log('✅ Case teams created');
@@ -290,39 +429,42 @@ async function main() {
   // ============================================================
   await prisma.tugas.createMany({
     data: [
+      // Perkara 1 Tasks
       {
         perkara_id: perkara1.id,
         judul: 'Draft Surat Gugatan',
-        deskripsi: 'Membuat draft surat gugatan lengkap dengan bukti-bukti',
+        deskripsi:
+          'Membuat draft surat gugatan lengkap dengan bukti-bukti dan legal basis',
         ditugaskan_ke: advokat1.id,
-        status: 'sedang_berjalan',
+        status: StatusTugas.sedang_berjalan,
         prioritas: 'tinggi',
         tenggat_waktu: new Date('2024-01-25'),
         dapat_ditagih: true,
         jam_kerja: 8.5,
         tarif_per_jam: 500000,
-        dibuat_oleh: advokat1.id,
+        dibuat_oleh: partner.id,
       },
       {
         perkara_id: perkara1.id,
         judul: 'Riset Hukum Wanprestasi',
-        deskripsi: 'Melakukan riset putusan-putusan serupa',
+        deskripsi: 'Melakukan riset putusan-putusan serupa dan yurisprudensi',
         ditugaskan_ke: paralegal.id,
-        status: 'selesai',
+        status: StatusTugas.selesai,
         prioritas: 'sedang',
         tenggat_waktu: new Date('2024-01-20'),
         tanggal_selesai: new Date('2024-01-19'),
         dapat_ditagih: true,
         jam_kerja: 4,
         tarif_per_jam: 300000,
-        dibuat_oleh: advokat1.id,
+        dibuat_oleh: partner.id,
       },
+      // Perkara 2 Tasks
       {
         perkara_id: perkara2.id,
         judul: 'Persiapan Pembelaan',
-        deskripsi: 'Menyusun strategi pembelaan dan mengumpulkan bukti',
+        deskripsi: 'Menyusun strategi pembelaan dan mengumpulkan bukti alibi',
         ditugaskan_ke: advokat1.id,
-        status: 'sedang_berjalan',
+        status: StatusTugas.sedang_berjalan,
         prioritas: 'mendesak',
         tenggat_waktu: new Date('2024-02-28'),
         dapat_ditagih: true,
@@ -333,13 +475,41 @@ async function main() {
       {
         perkara_id: perkara2.id,
         judul: 'Administrasi Berkas Perkara',
-        deskripsi: 'Mengorganisir dan mengelola berkas perkara',
+        deskripsi: 'Mengorganisir dan mengelola berkas perkara pidana',
         ditugaskan_ke: staff.id,
-        status: 'belum_mulai',
+        status: StatusTugas.belum_mulai,
         prioritas: 'sedang',
         tenggat_waktu: new Date('2024-02-25'),
         dapat_ditagih: false,
         dibuat_oleh: admin.id,
+      },
+      // Perkara 3 Tasks
+      {
+        perkara_id: perkara3.id,
+        judul: 'Verifikasi Dokumen Tanah',
+        deskripsi:
+          'Melakukan verifikasi sertifikat tanah dan dokumen pendukung di BPN',
+        ditugaskan_ke: paralegal.id,
+        status: StatusTugas.sedang_berjalan,
+        prioritas: 'tinggi',
+        tenggat_waktu: new Date('2024-03-20'),
+        dapat_ditagih: true,
+        jam_kerja: 6,
+        tarif_per_jam: 350000,
+        dibuat_oleh: advokat2.id,
+      },
+      {
+        perkara_id: perkara3.id,
+        judul: 'Penyusunan Eksepsi',
+        deskripsi: 'Membuat draft eksepsi untuk dibacakan di sidang pertama',
+        ditugaskan_ke: advokat2.id,
+        status: StatusTugas.belum_mulai,
+        prioritas: 'tinggi',
+        tenggat_waktu: new Date('2024-04-10'),
+        dapat_ditagih: true,
+        jam_kerja: 5,
+        tarif_per_jam: 550000,
+        dibuat_oleh: advokat2.id,
       },
     ],
   });
@@ -350,6 +520,7 @@ async function main() {
   // ============================================================
   await prisma.jadwalSidang.createMany({
     data: [
+      // Perkara 1 Schedules
       {
         perkara_id: perkara1.id,
         jenis_sidang: 'sidang_pertama',
@@ -360,7 +531,8 @@ async function main() {
         nomor_ruang_sidang: 'Ruang 101',
         nama_hakim: 'Dr. Ahmad Yani, S.H., M.H.',
         agenda_sidang: 'Pembacaan gugatan dan jawaban',
-        dibuat_oleh: advokat1.id,
+        catatan: 'Harap membawa bukti asli perjanjian',
+        dibuat_oleh: partner.id,
       },
       {
         perkara_id: perkara1.id,
@@ -372,8 +544,9 @@ async function main() {
         nomor_ruang_sidang: 'Ruang 101',
         nama_hakim: 'Dr. Ahmad Yani, S.H., M.H.',
         agenda_sidang: 'Pembuktian saksi dan dokumen',
-        dibuat_oleh: advokat1.id,
+        dibuat_oleh: partner.id,
       },
+      // Perkara 2 Schedules
       {
         perkara_id: perkara2.id,
         jenis_sidang: 'sidang_pertama',
@@ -384,14 +557,177 @@ async function main() {
         nomor_ruang_sidang: 'Ruang 203',
         nama_hakim: 'Dra. Siti Nurhaliza, S.H., M.H.',
         agenda_sidang: 'Pembacaan dakwaan',
+        catatan: 'Klien wajib hadir',
         dibuat_oleh: advokat1.id,
+      },
+      {
+        perkara_id: perkara2.id,
+        jenis_sidang: 'sidang_pembuktian',
+        tanggal_sidang: new Date('2024-04-05'),
+        waktu_mulai: '09:00',
+        waktu_selesai: '12:00',
+        nama_pengadilan: 'Pengadilan Negeri Jakarta Pusat',
+        nomor_ruang_sidang: 'Ruang 203',
+        nama_hakim: 'Dra. Siti Nurhaliza, S.H., M.H.',
+        agenda_sidang: 'Pemeriksaan saksi dan bukti',
+        dibuat_oleh: advokat1.id,
+      },
+      // Perkara 3 Schedules
+      {
+        perkara_id: perkara3.id,
+        jenis_sidang: 'sidang_pertama',
+        tanggal_sidang: new Date('2024-04-15'),
+        waktu_mulai: '10:30',
+        waktu_selesai: '12:30',
+        nama_pengadilan: 'Pengadilan Negeri Jakarta Pusat',
+        nomor_ruang_sidang: 'Ruang 105',
+        nama_hakim: 'H. Bambang Supriyanto, S.H., M.H.',
+        agenda_sidang: 'Pembacaan gugatan dan eksepsi',
+        catatan: 'Siapkan sertifikat asli tanah',
+        dibuat_oleh: advokat2.id,
       },
     ],
   });
   console.log('✅ Sample hearing schedules created');
 
   // ============================================================
-  // STEP 8: CREATE CLIENT PORTAL ACCESS
+  // STEP 8: CREATE CONFLICT CHECKS (NEW!)
+  // ============================================================
+  await prisma.pemeriksaanKonflik.createMany({
+    data: [
+      {
+        nama_klien: 'PT. Teknologi Nusantara',
+        pihak_lawan: 'PT. ABC Corporation',
+        deskripsi_kasus:
+          'Gugatan wanprestasi terkait perjanjian kerja sama bisnis',
+        ada_konflik: false,
+        catatan:
+          'Tidak ditemukan konflik kepentingan. PT. ABC belum pernah menjadi klien.',
+        diperiksa_oleh: partner.id,
+        perkara_id: perkara1.id,
+        tanggal_periksa: new Date('2024-01-10'),
+      },
+      {
+        nama_klien: 'Ahmad Wijaya',
+        pihak_lawan: 'Jaksa Penuntut Umum',
+        deskripsi_kasus: 'Perkara pidana penggelapan',
+        ada_konflik: false,
+        catatan: 'Tidak ada konflik. Kasus pidana dapat diterima.',
+        diperiksa_oleh: paralegal.id,
+        perkara_id: perkara2.id,
+        tanggal_periksa: new Date('2024-02-05'),
+      },
+      {
+        nama_klien: 'CV. Maju Bersama',
+        pihak_lawan: 'Yayasan Pembangunan Indonesia',
+        deskripsi_kasus: 'Sengketa kepemilikan tanah',
+        ada_konflik: false,
+        catatan:
+          'Dilakukan pengecekan menyeluruh. Tidak ada konflik kepentingan.',
+        diperiksa_oleh: advokat2.id,
+        perkara_id: perkara3.id,
+        tanggal_periksa: new Date('2024-02-25'),
+      },
+      {
+        nama_klien: 'PT. XYZ Industries',
+        pihak_lawan: 'PT. Teknologi Nusantara',
+        deskripsi_kasus: 'Sengketa kontrak pengadaan barang',
+        ada_konflik: true,
+        catatan:
+          'KONFLIK TERDETEKSI! PT. Teknologi Nusantara adalah klien aktif kami (Perkara PKR/2024/001). Tidak dapat menerima kasus ini.',
+        diperiksa_oleh: partner.id,
+        tanggal_periksa: new Date('2024-03-10'),
+      },
+    ],
+  });
+  console.log('✅ Conflict checks created');
+
+  // ============================================================
+  // STEP 9: CREATE DOCUMENTS (NEW!)
+  // ============================================================
+  await prisma.dokumenHukum.createMany({
+    data: [
+      // Perkara 1 Documents
+      {
+        perkara_id: perkara1.id,
+        nama_dokumen: 'Surat Gugatan Wanprestasi.pdf',
+        jenis_dokumen: 'gugatan',
+        kategori: 'Dokumen Perkara',
+        ukuran_file: 524288, // 512 KB
+        format_file: 'pdf',
+        nomor_dokumen: 'DOC/001/2024',
+        tanggal_dokumen: new Date('2024-01-20'),
+        keterangan: 'Surat gugatan lengkap dengan bukti-bukti',
+        url_file: '/storage/dokumen/gugatan-perkara-001.pdf',
+        diunggah_oleh: advokat1.id,
+      },
+      {
+        perkara_id: perkara1.id,
+        nama_dokumen: 'Perjanjian Kerjasama Asli.pdf',
+        jenis_dokumen: 'kontrak',
+        kategori: 'Bukti',
+        ukuran_file: 1048576, // 1 MB
+        format_file: 'pdf',
+        keterangan: 'Scan perjanjian asli yang dilanggar',
+        url_file: '/storage/dokumen/kontrak-kerjasama.pdf',
+        diunggah_oleh: paralegal.id,
+      },
+      // Perkara 2 Documents
+      {
+        perkara_id: perkara2.id,
+        nama_dokumen: 'Pleidoi Pembelaan.docx',
+        jenis_dokumen: 'pleidoi',
+        kategori: 'Dokumen Perkara',
+        ukuran_file: 204800, // 200 KB
+        format_file: 'docx',
+        tanggal_dokumen: new Date('2024-02-20'),
+        keterangan: 'Draft pleidoi untuk sidang pembelaan',
+        url_file: '/storage/dokumen/pleidoi-perkara-002.docx',
+        diunggah_oleh: advokat1.id,
+      },
+      {
+        perkara_id: perkara2.id,
+        nama_dokumen: 'Bukti Alibi - Foto CCTV.jpg',
+        jenis_dokumen: 'bukti',
+        kategori: 'Bukti',
+        ukuran_file: 2097152, // 2 MB
+        format_file: 'jpg',
+        keterangan: 'Screenshot CCTV menunjukkan klien di lokasi lain',
+        url_file: '/storage/dokumen/cctv-alibi.jpg',
+        diunggah_oleh: staff.id,
+      },
+      // Perkara 3 Documents
+      {
+        perkara_id: perkara3.id,
+        nama_dokumen: 'Sertifikat Hak Milik Tanah.pdf',
+        jenis_dokumen: 'sertifikat',
+        kategori: 'Bukti',
+        ukuran_file: 3145728, // 3 MB
+        format_file: 'pdf',
+        nomor_dokumen: 'SHM-12345/2020',
+        tanggal_dokumen: new Date('2020-05-15'),
+        keterangan: 'Scan sertifikat asli atas nama CV. Maju Bersama',
+        url_file: '/storage/dokumen/shm-tanah.pdf',
+        diunggah_oleh: paralegal.id,
+      },
+      {
+        perkara_id: perkara3.id,
+        nama_dokumen: 'Eksepsi Kompetensi Absolut.pdf',
+        jenis_dokumen: 'eksepsi',
+        kategori: 'Dokumen Perkara',
+        ukuran_file: 409600, // 400 KB
+        format_file: 'pdf',
+        tanggal_dokumen: new Date('2024-03-25'),
+        keterangan: 'Eksepsi terkait kewenangan pengadilan',
+        url_file: '/storage/dokumen/eksepsi-perkara-003.pdf',
+        diunggah_oleh: advokat2.id,
+      },
+    ],
+  });
+  console.log('✅ Legal documents created');
+
+  // ============================================================
+  // STEP 10: CREATE CLIENT PORTAL ACCESS
   // ============================================================
   await prisma.aksesPortalKlien.create({
     data: {
@@ -405,26 +741,38 @@ async function main() {
   // ============================================================
   // SUMMARY
   // ============================================================
-  console.log('\n' + '='.repeat(60));
-  console.log('🎉 DATABASE SEEDED SUCCESSFULLY!');
-  console.log('='.repeat(60));
-  console.log('\n📧 Login Credentials:');
-  console.log('   ┌─────────────────────────────────────────────┐');
-  console.log('   │ Admin:     admin@perari.id / Admin123!      │');
-  console.log('   │ Advokat:   advokat@perari.id / Admin123!    │');
-  console.log('   │ Paralegal: paralegal@perari.id / Admin123!  │');
-  console.log('   │ Staff:     staff@perari.id / Admin123!      │');
-  console.log('   │ Klien:     klien@perari.id / Admin123!      │');
-  console.log('   └─────────────────────────────────────────────┘');
+  console.log('\n' + '='.repeat(70));
+  console.log('🎉 COMPREHENSIVE DATABASE SEEDING COMPLETED!');
+  console.log('='.repeat(70));
+  console.log('\n📧 Login Credentials (Password: Admin123!):');
+  console.log('   ┌───────────────────────────────────────────────────────────┐');
+  console.log('   │ 👑 Admin:     admin@perari.id     (System Admin)          │');
+  console.log('   │ 💼 Partner:   partner@perari.id   (Senior Partner) ⭐NEW! │');
+  console.log('   │ ⚖️  Advokat 1: advokat@perari.id   (Senior Lawyer)         │');
+  console.log('   │ ⚖️  Advokat 2: advokat2@perari.id  (Lawyer)                │');
+  console.log('   │ 📝 Paralegal: paralegal@perari.id (Legal Assistant)       │');
+  console.log('   │ 📄 Staff:     staff@perari.id     (Admin Staff)           │');
+  console.log('   │ 👤 Klien:     klien@perari.id     (Client Portal)         │');
+  console.log('   └───────────────────────────────────────────────────────────┘');
   console.log('\n📊 Data Created:');
-  console.log('   • 5 Users (Admin, Advokat, Paralegal, Staff, Klien)');
-  console.log('   • 2 Clients (1 Company, 1 Individual)');
-  console.log('   • 2 Cases (1 Civil, 1 Criminal)');
-  console.log('   • 4 Case Team Members');
-  console.log('   • 4 Tasks (2 Active, 1 Completed, 1 Pending)');
-  console.log('   • 3 Hearing Schedules');
+  console.log('   • 7 Users (Admin, Partner, 2 Advokat, Paralegal, Staff, Klien)');
+  console.log('   • 3 Clients (2 Companies, 1 Individual)');
+  console.log('   • 3 Cases (2 Civil, 1 Criminal)');
+  console.log('   • 7 Case Team Members (across 3 cases)');
+  console.log('   • 6 Tasks (2 Active, 1 Completed, 3 Pending)');
+  console.log('   • 5 Hearing Schedules (across 3 cases)');
+  console.log('   • 4 Conflict Checks (3 Clear, 1 Conflict Detected) ⭐NEW!');
+  console.log('   • 6 Legal Documents (PDF, DOCX, JPG) ⭐NEW!');
   console.log('   • 1 Client Portal Access');
-  console.log('\n✨ You can now run the application!\n');
+  console.log('\n🎯 Test Scenarios Available:');
+  console.log('   ✓ Full CRUD operations for all roles');
+  console.log('   ✓ PARTNER role testing (senior management access)');
+  console.log('   ✓ Multiple case types (civil, criminal)');
+  console.log('   ✓ Conflict of interest detection');
+  console.log('   ✓ Document management');
+  console.log('   ✓ Team collaboration workflows');
+  console.log('   ✓ Financial tracking (fees, billing)');
+  console.log('\n✨ Database is ready for comprehensive testing!\n');
 }
 
 // Helper function to get user IDs
@@ -434,7 +782,9 @@ async function getUserIds(): Promise<string[]> {
       email: {
         in: [
           'admin@perari.id',
+          'partner@perari.id',
           'advokat@perari.id',
+          'advokat2@perari.id',
           'paralegal@perari.id',
           'staff@perari.id',
           'klien@perari.id',
@@ -449,9 +799,9 @@ async function getUserIds(): Promise<string[]> {
 main()
   .catch((e) => {
     console.error('\n❌ ERROR SEEDING DATABASE:');
-    console.error('─'.repeat(60));
+    console.error('─'.repeat(70));
     console.error(e);
-    console.error('─'.repeat(60));
+    console.error('─'.repeat(70));
     process.exit(1);
   })
   .finally(async () => {
