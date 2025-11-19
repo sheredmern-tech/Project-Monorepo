@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Search, Copy, Share2, Check, ExternalLink } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { Search, Copy, Share2, Check, Loader2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Accordion,
@@ -15,80 +15,161 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import {
-  LegalReferenceItem,
   LegalCategory,
-  LEGAL_CATEGORIES
+  LEGAL_CATEGORIES,
+  ProcessedLegalData,
+  PancasilaItem,
+  LegalDataItem
 } from '@/types/external-data'
 
 interface LegalReferenceClientProps {
-  data: Record<LegalCategory, LegalReferenceItem[]>
+  data: Record<LegalCategory, ProcessedLegalData>
 }
 
 export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<LegalCategory>('pancasila')
+  const [displayCounts, setDisplayCounts] = useState<Record<LegalCategory, number>>({
+    pancasila: 20,
+    uud1945: 20,
+    kuhp: 20,
+    kuhperdata: 20,
+    kuhd: 20,
+    kuhap: 20
+  })
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
-  // Filter data based on search query
+  const ITEMS_PER_PAGE = 20
+
+  // ========== PINDAHIN filteredData KE SINI (SEBELUM dipake) ==========
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return data
 
     const query = searchQuery.toLowerCase()
-    const filtered: Record<LegalCategory, LegalReferenceItem[]> = {} as any
+    const filtered: Record<LegalCategory, ProcessedLegalData> = {} as any
 
-    Object.entries(data).forEach(([category, items]) => {
-      const filteredItems = items.filter((item) => {
-        const searchableText = [
-          item.title,
-          item.judul,
-          item.content,
-          item.isi,
-          item.description,
-          item.deskripsi,
-          item.pasal,
-          item.ayat,
-          item.bab,
-          item.bagian
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
+    Object.entries(data).forEach(([category, processedData]) => {
+      const filteredItems = processedData.items.filter((item) => {
+        const isPancasila = 'butir' in item
 
-        return searchableText.includes(query)
+        if (isPancasila) {
+          const pancasilaItem = item as PancasilaItem
+          const searchText = [
+            pancasilaItem.nama,
+            pancasilaItem.isi,
+            ...pancasilaItem.butir
+          ].join(' ').toLowerCase()
+          return searchText.includes(query)
+        } else {
+          const legalItem = item as LegalDataItem
+          const searchText = [
+            legalItem.nama,
+            legalItem.isi
+          ].join(' ').toLowerCase()
+          return searchText.includes(query)
+        }
       })
 
-      filtered[category as LegalCategory] = filteredItems
+      filtered[category as LegalCategory] = {
+        ...processedData,
+        items: filteredItems
+      }
     })
 
     return filtered
   }, [data, searchQuery])
 
-  // Get display text for item
-  const getItemTitle = (item: LegalReferenceItem) => {
-    return (
-      item.title ||
-      item.judul ||
-      item.pasal ||
-      item.bab ||
-      item.article ||
-      `Item ${item.id}`
-    )
+
+  // Load more items when scrolling
+  const loadMore = () => {
+    const currentCount = displayCounts[activeTab]
+    const totalItems = filteredData[activeTab]?.items.length || 0
+
+    if (currentCount < totalItems) {
+      setIsLoadingMore(true)
+      setTimeout(() => {
+        setDisplayCounts(prev => ({
+          ...prev,
+          [activeTab]: Math.min(currentCount + ITEMS_PER_PAGE, totalItems)
+        }))
+        setIsLoadingMore(false)
+      }, 300)
+    }
   }
 
-  const getItemContent = (item: LegalReferenceItem) => {
-    return (
-      item.content ||
-      item.isi ||
-      item.description ||
-      item.deskripsi ||
-      'Konten tidak tersedia'
+  // Setup intersection observer
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMore) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
     )
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
+    }
+  }, [activeTab, isLoadingMore, displayCounts])
+
+  // Attach observer to load more trigger
+  useEffect(() => {
+    const currentRef = loadMoreRef.current
+    const currentObserver = observerRef.current
+
+    if (currentRef && currentObserver) {
+      currentObserver.observe(currentRef)
+    }
+
+    return () => {
+      if (currentRef && currentObserver) {
+        currentObserver.unobserve(currentRef)
+      }
+    }
+  }, [activeTab, filteredData])
+
+  // Reset display count when search changes
+  useEffect(() => {
+    setDisplayCounts({
+      pancasila: 20,
+      uud1945: 20,
+      kuhp: 20,
+      kuhperdata: 20,
+      kuhd: 20,
+      kuhap: 20
+    })
+  }, [searchQuery])
+
+  // Filter data based on search query
+
+
+  // Get item display text
+  const getItemTitle = (item: PancasilaItem | LegalDataItem) => {
+    return item.nama || 'Untitled'
   }
 
-  // Copy text to clipboard
-  const handleCopy = async (text: string, id: string | number) => {
+  const getItemContent = (item: PancasilaItem | LegalDataItem) => {
+    const isPancasila = 'butir' in item
+
+    if (isPancasila) {
+      const pancasilaItem = item as PancasilaItem
+      return `${pancasilaItem.isi}\n\nButir-butir:\n${pancasilaItem.butir.map((b, i) => `${i + 1}. ${b}`).join('\n')}`
+    }
+
+    return (item as LegalDataItem).isi || 'Konten tidak tersedia'
+  }
+
+  // Copy to clipboard
+  const handleCopy = async (text: string, id: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      setCopiedId(String(id))
+      setCopiedId(id)
       toast.success('Teks berhasil disalin')
       setTimeout(() => setCopiedId(null), 2000)
     } catch (error) {
@@ -98,7 +179,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
 
   // Share functionality
   const handleShare = async (title: string, content: string) => {
-    const shareText = `${title}\n\n${content}\n\nSumber: Referensi Hukum`
+    const shareText = `${title}\n\n${content}\n\nSumber: Referensi Hukum - Firma App`
 
     if (navigator.share) {
       try {
@@ -108,7 +189,6 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
         })
         toast.success('Berhasil dibagikan')
       } catch (error) {
-        // User cancelled or error occurred
         if ((error as Error).name !== 'AbortError') {
           fallbackShare(shareText)
         }
@@ -127,9 +207,9 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     }
   }
 
-  // Get result count for each category
+  // Get result count
   const getResultCount = (category: LegalCategory) => {
-    return filteredData[category]?.length || 0
+    return filteredData[category]?.items.length || 0
   }
 
   return (
@@ -140,7 +220,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Cari pasal, ayat, atau konten..."
+              placeholder="Cari sila, pasal, ayat, atau konten..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -155,7 +235,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
       </Card>
 
       {/* Tabs for Categories */}
-      <Tabs defaultValue="pancasila" className="w-full">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as LegalCategory)} className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto gap-2 bg-transparent p-0">
           {LEGAL_CATEGORIES.map((category) => {
             const count = getResultCount(category.id)
@@ -178,7 +258,9 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
         </TabsList>
 
         {LEGAL_CATEGORIES.map((category) => {
-          const items = filteredData[category.id] || []
+          const processedData = filteredData[category.id]
+          const items = processedData?.items || []
+          const metadata = processedData?.metadata
 
           return (
             <TabsContent key={category.id} value={category.id} className="mt-6">
@@ -191,6 +273,16 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                         {category.label}
                       </CardTitle>
                       <CardDescription>{category.description}</CardDescription>
+                      {metadata?.uu && (
+                        <p className="text-sm text-muted-foreground">
+                          {metadata.uu}
+                        </p>
+                      )}
+                      {metadata?.keterangan && (
+                        <p className="text-xs text-muted-foreground">
+                          {metadata.keterangan}
+                        </p>
+                      )}
                     </div>
                     <Badge className={category.color} variant="secondary">
                       {items.length} Item
@@ -209,81 +301,103 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                       </p>
                     </div>
                   ) : (
-                    <Accordion type="single" collapsible className="w-full">
-                      {items.map((item, index) => {
-                        const itemId = String(item.id || index)
-                        const title = getItemTitle(item)
-                        const content = getItemContent(item)
-                        const isCopied = copiedId === itemId
+                    <>
+                      <Accordion type="single" collapsible className="w-full">
+                        {items.slice(0, displayCounts[category.id]).map((item, index) => {
+                          const itemId = `${category.id}-${index}`
+                          const title = getItemTitle(item)
+                          const content = getItemContent(item)
+                          const isCopied = copiedId === itemId
+                          const isPancasila = 'butir' in item
 
-                        return (
-                          <AccordionItem key={itemId} value={itemId}>
-                            <AccordionTrigger className="hover:no-underline">
-                              <div className="flex items-start gap-3 text-left">
-                                <Badge variant="outline" className="mt-0.5">
-                                  {index + 1}
-                                </Badge>
-                                <div className="flex-1">
-                                  <p className="font-semibold">{title}</p>
-                                  {item.pasal && (
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Pasal {item.pasal}
-                                      {item.ayat && ` Ayat ${item.ayat}`}
-                                    </p>
-                                  )}
-                                  {item.bab && (
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Bab {item.bab}
-                                      {item.bagian && ` - ${item.bagian}`}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="space-y-4 pl-12">
-                                <div className="prose prose-sm dark:prose-invert max-w-none">
-                                  <p className="text-foreground/90 whitespace-pre-wrap">
-                                    {content}
-                                  </p>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex flex-wrap gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleCopy(content, itemId)}
-                                    className="gap-2"
-                                  >
-                                    {isCopied ? (
-                                      <>
-                                        <Check className="h-3.5 w-3.5" />
-                                        Tersalin
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Copy className="h-3.5 w-3.5" />
-                                        Salin
-                                      </>
+                          return (
+                            <AccordionItem key={itemId} value={itemId}>
+                              <AccordionTrigger className="hover:no-underline">
+                                <div className="flex items-start gap-3 text-left w-full">
+                                  <Badge variant="outline" className="mt-0.5 shrink-0">
+                                    {index + 1}
+                                  </Badge>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold">{title}</p>
+                                    {isPancasila && (
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {(item as PancasilaItem).isi}
+                                      </p>
                                     )}
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleShare(title, content)}
-                                    className="gap-2"
-                                  >
-                                    <Share2 className="h-3.5 w-3.5" />
-                                    Bagikan
-                                  </Button>
+                                  </div>
                                 </div>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        )
-                      })}
-                    </Accordion>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-4 pl-12">
+                                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                                    <div className="text-foreground/90 whitespace-pre-wrap">
+                                      {content}
+                                    </div>
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex flex-wrap gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleCopy(content, itemId)}
+                                      className="gap-2"
+                                    >
+                                      {isCopied ? (
+                                        <>
+                                          <Check className="h-3.5 w-3.5" />
+                                          Tersalin
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Copy className="h-3.5 w-3.5" />
+                                          Salin
+                                        </>
+                                      )}
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleShare(title, content)}
+                                      className="gap-2"
+                                    >
+                                      <Share2 className="h-3.5 w-3.5" />
+                                      Bagikan
+                                    </Button>
+                                  </div>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          )
+                        })}
+                      </Accordion>
+
+                      {/* Infinite Scroll Trigger & Status */}
+                      {displayCounts[category.id] < items.length && (
+                        <div
+                          ref={loadMoreRef}
+                          className="flex items-center justify-center py-8"
+                        >
+                          {isLoadingMore ? (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                              <span>Memuat lebih banyak...</span>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-muted-foreground">
+                              Menampilkan {displayCounts[category.id]} dari {items.length} item
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* All items loaded */}
+                      {displayCounts[category.id] >= items.length && items.length > 0 && (
+                        <div className="flex items-center justify-center py-8 text-sm text-muted-foreground border-t">
+                          ✓ Semua data telah dimuat ({items.length} item)
+                        </div>
+                      )}
+                    </>
                   )}
                 </CardContent>
               </Card>

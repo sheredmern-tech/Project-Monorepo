@@ -9,7 +9,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("access_token")?.value;
   const userRole = request.cookies.get("user_role")?.value as UserRole;
-  
+
   // ✅ DETAILED DEBUG
   console.log('🔄 ===== MIDDLEWARE DEBUG =====');
   console.log('📍 Pathname:', pathname);
@@ -18,11 +18,11 @@ export function proxy(request: NextRequest) {
   console.log('👤 User Role:', userRole || 'NONE');
   console.log('🍪 All Cookies:', request.cookies.getAll().map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' })));
   console.log('================================');
-  
+
   // ========================================
   // 1. SKIP: Static files, API, /home
   // ========================================
-  const skipPaths = ['/api', '/_next', '/favicon', '/home', '/layanan'];
+  const skipPaths = ['/api', '/_next', '/favicon', '/home', '/layanan', '/referensi-hukum'];
   if (
     skipPaths.some(path => pathname.startsWith(path)) ||
     pathname.match(/\.(ico|png|jpg|jpeg|svg|css|js|woff|woff2|ttf)$/)
@@ -30,7 +30,7 @@ export function proxy(request: NextRequest) {
     console.log('⏭️  Skipping middleware for:', pathname);
     return NextResponse.next();
   }
-  
+
   // ========================================
   // 2. ALLOW: Error pages
   // ========================================
@@ -39,13 +39,13 @@ export function proxy(request: NextRequest) {
     console.log('🚨 Allowing error page:', pathname);
     return NextResponse.next();
   }
-  
+
   // ========================================
   // 3. AUTH ROUTES: /login, /register
   // ========================================
   const authRoutes = ["/login", "/register"];
   const isAuthRoute = authRoutes.includes(pathname);
-  
+
   if (isAuthRoute) {
     if (token && userRole) {
       console.log('✅ Already logged in, redirecting from auth page');
@@ -64,11 +64,11 @@ export function proxy(request: NextRequest) {
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
-    
+
     console.log('👤 User not logged in, showing auth page');
     return NextResponse.next();
   }
-  
+
   // ========================================
   // 4. ROOT "/" - LANDING PAGE (PUBLIC)
   // ========================================
@@ -76,11 +76,11 @@ export function proxy(request: NextRequest) {
     console.log('🏠 Root path, showing landing page');
     return NextResponse.next();
   }
-  
+
   // ========================================
   // 5. PROTECTED ROUTES (/dashboard/*)
   // ========================================
-  
+
   if (!token) {
     console.log('❌ No token, redirecting to login');
     console.log('   From path:', pathname);
@@ -89,7 +89,7 @@ export function proxy(request: NextRequest) {
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
   }
-  
+
   if (!userRole) {
     console.log('❌ No role, clearing cookies and redirecting to login');
     const response = NextResponse.redirect(new URL("/login", request.url));
@@ -97,7 +97,7 @@ export function proxy(request: NextRequest) {
     response.cookies.delete("user_role");
     return response;
   }
-  
+
   // ========================================
   // 6. KLIEN ROLE - BLOCKED FROM WEB ADMIN
   // ========================================

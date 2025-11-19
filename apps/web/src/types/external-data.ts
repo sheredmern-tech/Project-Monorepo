@@ -1,29 +1,32 @@
-// Types for External Legal Reference Data
+// types/external-data.ts
 
-export interface LegalReferenceItem {
-  id: string | number
-  title?: string
-  judul?: string
-  content?: string
-  isi?: string
-  deskripsi?: string
-  description?: string
-  pasal?: string
-  ayat?: string
-  bab?: string
-  bagian?: string
-  chapter?: string
-  article?: string
-  [key: string]: any // Allow for flexible API responses
+// ========== PANCASILA ==========
+export interface PancasilaItem {
+  isi: string
+  nama: string
+  butir: string[]
 }
 
-export interface LegalReferenceResponse {
+// ========== UUD, KUHP, KUHPERDATA, KUHD, KUHAP ==========
+export interface LegalDataItem {
+  isi: string
+  nama: string
+}
+
+export interface LegalData {
+  uu: string
+  keterangan: string
+  data: LegalDataItem[]
+}
+
+// ========== API RESPONSE ==========
+export interface LegalReferenceResponse<T = any> {
   success: boolean
-  data: LegalReferenceItem[]
-  timestamp?: string
-  message?: string
+  data: T
+  timestamp: string
 }
 
+// ========== CATEGORY ==========
 export type LegalCategory =
   | 'pancasila'
   | 'uud1945'
@@ -44,14 +47,14 @@ export const LEGAL_CATEGORIES: LegalCategoryConfig[] = [
   {
     id: 'pancasila',
     label: 'Pancasila',
-    description: 'Dasar Negara Indonesia',
+    description: 'Dasar Negara Indonesia - 5 Sila',
     icon: '🇮🇩',
     color: 'bg-red-500/10 text-red-700 dark:text-red-400'
   },
   {
     id: 'uud1945',
     label: 'UUD 1945',
-    description: 'Undang-Undang Dasar 1945',
+    description: 'Undang-Undang Dasar Negara Republik Indonesia Tahun 1945',
     icon: '📜',
     color: 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
   },
@@ -84,3 +87,15 @@ export const LEGAL_CATEGORIES: LegalCategoryConfig[] = [
     color: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
   }
 ]
+
+// ========== UNIFIED DATA TYPE ==========
+export type UnifiedLegalItem = PancasilaItem | LegalDataItem
+
+export interface ProcessedLegalData {
+  category: LegalCategory
+  items: UnifiedLegalItem[]
+  metadata?: {
+    uu?: string
+    keterangan?: string
+  }
+}

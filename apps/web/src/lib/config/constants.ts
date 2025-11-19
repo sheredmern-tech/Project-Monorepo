@@ -10,58 +10,63 @@ export const ROUTES = {
   HOME: "/",
   LOGIN: "/login",
   REGISTER: "/register",
-  
+
   // Dashboard
   DASHBOARD: "/dashboard",
-  
+
   // Klien
   KLIEN: "/dashboard/klien",
   KLIEN_NEW: "/dashboard/klien/baru",
   KLIEN_DETAIL: (id: string) => `/dashboard/klien/${id}`,
   KLIEN_EDIT: (id: string) => `/dashboard/klien/${id}/edit`,
   KLIEN_PROFILE: "/dashboard/klien/profile",
-  
+
   // Perkara
   PERKARA: "/dashboard/perkara",
   PERKARA_NEW: "/dashboard/perkara/baru",
   PERKARA_DETAIL: (id: string) => `/dashboard/perkara/${id}`,
   PERKARA_EDIT: (id: string) => `/dashboard/perkara/${id}/edit`,
-  
+
   // Tugas
   TUGAS: "/dashboard/tugas",
   TUGAS_NEW: "/dashboard/tugas/baru",
   TUGAS_DETAIL: (id: string) => `/dashboard/tugas/${id}`,
   TUGAS_EDIT: (id: string) => `/dashboard/tugas/${id}/edit`,
-  
+
   // Dokumen
   DOKUMEN: "/dashboard/dokumen",
   DOKUMEN_UPLOAD: "/dashboard/dokumen/upload",
   DOKUMEN_DETAIL: (id: string) => `/dashboard/dokumen/${id}`,
   DOKUMEN_EDIT: (id: string) => `/dashboard/dokumen/${id}/edit`,
-  
+
   // Sidang
   SIDANG: "/dashboard/sidang",
   SIDANG_NEW: "/dashboard/sidang/baru",
   SIDANG_DETAIL: (id: string) => `/dashboard/sidang/${id}`,
-  
+
   // Konflik
   KONFLIK: "/dashboard/konflik",
   KONFLIK_NEW: "/dashboard/konflik/baru",
-  
+
   // Tim
   TIM: "/dashboard/tim",
   TIM_DETAIL: (id: string) => `/dashboard/tim/${id}`,
-  
+
   // Laporan
   LAPORAN: "/dashboard/laporan",
   LAPORAN_AKTIVITAS: "/dashboard/laporan/aktivitas",
   LAPORAN_KINERJA: "/dashboard/laporan/kinerja",
-  
+
   // Pengaturan
   PENGATURAN: "/dashboard/pengaturan",
   PENGATURAN_AKUN: "/dashboard/pengaturan/akun",
   PENGATURAN_NOTIFIKASI: "/dashboard/pengaturan/notifikasi",
+
+  // Referensi Hukum
+  REFERENSI_HUKUM: "/referensi-hukum",
 } as const;
+
+export const EXTERNAL_DATA_API = `${API_URL}/external-data`;
 
 export const STATUS_COLORS = {
   aktif: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
