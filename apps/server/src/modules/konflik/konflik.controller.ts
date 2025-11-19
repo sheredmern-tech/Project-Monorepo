@@ -33,7 +33,7 @@ export class KonflikController {
   constructor(private readonly konflikService: KonflikService) {}
 
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
   @ApiOperation({ summary: 'Buat pemeriksaan konflik baru' })
   @ApiResponse({
     status: 201,
@@ -44,7 +44,7 @@ export class KonflikController {
   }
 
   @Get()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get semua pemeriksaan konflik dengan pagination' })
   @ApiResponse({
     status: 200,
@@ -55,7 +55,7 @@ export class KonflikController {
   }
 
   @Get(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail pemeriksaan konflik by ID' })
   @ApiResponse({
     status: 200,
@@ -66,7 +66,7 @@ export class KonflikController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
   @ApiOperation({ summary: 'Update pemeriksaan konflik by ID' })
   @ApiResponse({
     status: 200,

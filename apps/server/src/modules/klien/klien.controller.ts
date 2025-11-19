@@ -64,7 +64,7 @@ export class KlienController {
 
   // 🔒 EXISTING: List semua klien (TIDAK untuk client)
   @Get()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.staff) // ❌ REMOVED: klien
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get semua klien dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data klien berhasil diambil' })
   findAll(
@@ -77,7 +77,7 @@ export class KlienController {
 
   // 🔒 EXISTING: Detail klien by ID (TIDAK untuk client)
   @Get(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.staff) // ❌ REMOVED: klien
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail klien by ID' })
   @ApiResponse({ status: 200, description: 'Detail klien berhasil diambil' })
   @ApiResponse({ status: 404, description: 'Klien tidak ditemukan' })

@@ -75,7 +75,7 @@ export class PerkaraController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Update perkara by ID' })
   @ApiResponse({ status: 200, description: 'Perkara berhasil diupdate' })
   update(
