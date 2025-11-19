@@ -1,7 +1,8 @@
 // API Configuration
+// Backend uses 'api/v1' prefix (check apps/server/src/main.ts line 45)
 export const API_URL = __DEV__
-  ? 'http://192.168.1.2:3000/api' // ← GANTI dengan IP laptop lo + /api prefix!
-  : 'https://api.firma.com/api';
+  ? 'http://192.168.1.2:3000/api/v1' // ← FIXED: api/v1 not api!
+  : 'https://api.firma.com/api/v1';
 
 // Document Categories
 export const DOCUMENT_CATEGORIES = [
