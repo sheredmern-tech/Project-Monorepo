@@ -138,13 +138,7 @@ export class KlienService {
       );
     }
 
-    if (userRole === UserRole.paralegal) {
-      throw new ForbiddenException(
-        'Paralegal tidak dapat mengakses data klien',
-      );
-    }
-
-    // ADMIN, ADVOKAT, STAFF: Full access allowed
+    // ADMIN, PARTNER, ADVOKAT, PARALEGAL, STAFF: Full access allowed
     const {
       page = 1,
       limit = 10,
