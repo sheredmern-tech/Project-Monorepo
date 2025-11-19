@@ -598,11 +598,9 @@ async function main() {
       {
         nama_klien: 'PT. Teknologi Nusantara',
         pihak_lawan: 'PT. ABC Corporation',
-        deskripsi_kasus:
-          'Gugatan wanprestasi terkait perjanjian kerja sama bisnis',
         ada_konflik: false,
-        catatan:
-          'Tidak ditemukan konflik kepentingan. PT. ABC belum pernah menjadi klien.',
+        detail_konflik:
+          'Tidak ditemukan konflik kepentingan. PT. ABC belum pernah menjadi klien. Gugatan wanprestasi terkait perjanjian kerja sama bisnis.',
         diperiksa_oleh: partner.id,
         perkara_id: perkara1.id,
         tanggal_periksa: new Date('2024-01-10'),
@@ -610,9 +608,8 @@ async function main() {
       {
         nama_klien: 'Ahmad Wijaya',
         pihak_lawan: 'Jaksa Penuntut Umum',
-        deskripsi_kasus: 'Perkara pidana penggelapan',
         ada_konflik: false,
-        catatan: 'Tidak ada konflik. Kasus pidana dapat diterima.',
+        detail_konflik: 'Tidak ada konflik. Kasus pidana dapat diterima. Perkara pidana penggelapan.',
         diperiksa_oleh: paralegal.id,
         perkara_id: perkara2.id,
         tanggal_periksa: new Date('2024-02-05'),
@@ -620,10 +617,9 @@ async function main() {
       {
         nama_klien: 'CV. Maju Bersama',
         pihak_lawan: 'Yayasan Pembangunan Indonesia',
-        deskripsi_kasus: 'Sengketa kepemilikan tanah',
         ada_konflik: false,
-        catatan:
-          'Dilakukan pengecekan menyeluruh. Tidak ada konflik kepentingan.',
+        detail_konflik:
+          'Dilakukan pengecekan menyeluruh. Tidak ada konflik kepentingan. Sengketa kepemilikan tanah.',
         diperiksa_oleh: advokat2.id,
         perkara_id: perkara3.id,
         tanggal_periksa: new Date('2024-02-25'),
@@ -631,10 +627,9 @@ async function main() {
       {
         nama_klien: 'PT. XYZ Industries',
         pihak_lawan: 'PT. Teknologi Nusantara',
-        deskripsi_kasus: 'Sengketa kontrak pengadaan barang',
         ada_konflik: true,
-        catatan:
-          'KONFLIK TERDETEKSI! PT. Teknologi Nusantara adalah klien aktif kami (Perkara PKR/2024/001). Tidak dapat menerima kasus ini.',
+        detail_konflik:
+          'KONFLIK TERDETEKSI! PT. Teknologi Nusantara adalah klien aktif kami (Perkara PKR/2024/001). Tidak dapat menerima kasus ini. Sengketa kontrak pengadaan barang.',
         diperiksa_oleh: partner.id,
         tanggal_periksa: new Date('2024-03-10'),
       },
@@ -651,75 +646,69 @@ async function main() {
       {
         perkara_id: perkara1.id,
         nama_dokumen: 'Surat Gugatan Wanprestasi.pdf',
-        jenis_dokumen: 'gugatan',
-        kategori: 'Dokumen Perkara',
+        kategori: 'gugatan',
         ukuran_file: 524288, // 512 KB
-        format_file: 'pdf',
-        nomor_dokumen: 'DOC/001/2024',
+        tipe_file: 'application/pdf',
+        nomor_bukti: 'DOC/001/2024',
         tanggal_dokumen: new Date('2024-01-20'),
-        keterangan: 'Surat gugatan lengkap dengan bukti-bukti',
-        url_file: '/storage/dokumen/gugatan-perkara-001.pdf',
+        catatan: 'Surat gugatan lengkap dengan bukti-bukti',
+        file_path: '/storage/dokumen/gugatan-perkara-001.pdf',
         diunggah_oleh: advokat1.id,
       },
       {
         perkara_id: perkara1.id,
         nama_dokumen: 'Perjanjian Kerjasama Asli.pdf',
-        jenis_dokumen: 'kontrak',
-        kategori: 'Bukti',
+        kategori: 'kontrak',
         ukuran_file: 1048576, // 1 MB
-        format_file: 'pdf',
-        keterangan: 'Scan perjanjian asli yang dilanggar',
-        url_file: '/storage/dokumen/kontrak-kerjasama.pdf',
+        tipe_file: 'application/pdf',
+        catatan: 'Scan perjanjian asli yang dilanggar',
+        file_path: '/storage/dokumen/kontrak-kerjasama.pdf',
         diunggah_oleh: paralegal.id,
       },
       // Perkara 2 Documents
       {
         perkara_id: perkara2.id,
         nama_dokumen: 'Pleidoi Pembelaan.docx',
-        jenis_dokumen: 'pleidoi',
-        kategori: 'Dokumen Perkara',
+        kategori: 'lainnya',
         ukuran_file: 204800, // 200 KB
-        format_file: 'docx',
+        tipe_file: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         tanggal_dokumen: new Date('2024-02-20'),
-        keterangan: 'Draft pleidoi untuk sidang pembelaan',
-        url_file: '/storage/dokumen/pleidoi-perkara-002.docx',
+        catatan: 'Draft pleidoi untuk sidang pembelaan',
+        file_path: '/storage/dokumen/pleidoi-perkara-002.docx',
         diunggah_oleh: advokat1.id,
       },
       {
         perkara_id: perkara2.id,
         nama_dokumen: 'Bukti Alibi - Foto CCTV.jpg',
-        jenis_dokumen: 'bukti',
-        kategori: 'Bukti',
+        kategori: 'bukti',
         ukuran_file: 2097152, // 2 MB
-        format_file: 'jpg',
-        keterangan: 'Screenshot CCTV menunjukkan klien di lokasi lain',
-        url_file: '/storage/dokumen/cctv-alibi.jpg',
+        tipe_file: 'image/jpeg',
+        catatan: 'Screenshot CCTV menunjukkan klien di lokasi lain',
+        file_path: '/storage/dokumen/cctv-alibi.jpg',
         diunggah_oleh: staff.id,
       },
       // Perkara 3 Documents
       {
         perkara_id: perkara3.id,
         nama_dokumen: 'Sertifikat Hak Milik Tanah.pdf',
-        jenis_dokumen: 'sertifikat',
-        kategori: 'Bukti',
+        kategori: 'bukti',
         ukuran_file: 3145728, // 3 MB
-        format_file: 'pdf',
-        nomor_dokumen: 'SHM-12345/2020',
+        tipe_file: 'application/pdf',
+        nomor_bukti: 'SHM-12345/2020',
         tanggal_dokumen: new Date('2020-05-15'),
-        keterangan: 'Scan sertifikat asli atas nama CV. Maju Bersama',
-        url_file: '/storage/dokumen/shm-tanah.pdf',
+        catatan: 'Scan sertifikat asli atas nama CV. Maju Bersama',
+        file_path: '/storage/dokumen/shm-tanah.pdf',
         diunggah_oleh: paralegal.id,
       },
       {
         perkara_id: perkara3.id,
         nama_dokumen: 'Eksepsi Kompetensi Absolut.pdf',
-        jenis_dokumen: 'eksepsi',
-        kategori: 'Dokumen Perkara',
+        kategori: 'lainnya',
         ukuran_file: 409600, // 400 KB
-        format_file: 'pdf',
+        tipe_file: 'application/pdf',
         tanggal_dokumen: new Date('2024-03-25'),
-        keterangan: 'Eksepsi terkait kewenangan pengadilan',
-        url_file: '/storage/dokumen/eksepsi-perkara-003.pdf',
+        catatan: 'Eksepsi terkait kewenangan pengadilan',
+        file_path: '/storage/dokumen/eksepsi-perkara-003.pdf',
         diunggah_oleh: advokat2.id,
       },
     ],
