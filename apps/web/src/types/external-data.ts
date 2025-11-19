@@ -1,4 +1,5 @@
 // types/external-data.ts
+import { LucideIcon } from 'lucide-react'
 
 // ========== PANCASILA ==========
 export interface PancasilaItem {
@@ -39,8 +40,12 @@ export interface LegalCategoryConfig {
   id: LegalCategory
   label: string
   description: string
-  icon: string
-  color: string
+  iconName: string
+  color: {
+    bg: string
+    text: string
+    border: string
+  }
 }
 
 export const LEGAL_CATEGORIES: LegalCategoryConfig[] = [
@@ -48,43 +53,67 @@ export const LEGAL_CATEGORIES: LegalCategoryConfig[] = [
     id: 'pancasila',
     label: 'Pancasila',
     description: 'Dasar Negara Indonesia - 5 Sila',
-    icon: '🇮🇩',
-    color: 'bg-red-500/10 text-red-700 dark:text-red-400'
+    iconName: 'Flag',
+    color: {
+      bg: 'bg-gradient-to-br from-red-500/10 to-red-600/5',
+      text: 'text-red-700 dark:text-red-400',
+      border: 'border-2 border-red-500/20 hover:border-red-500/40'
+    }
   },
   {
     id: 'uud1945',
     label: 'UUD 1945',
     description: 'Undang-Undang Dasar Negara Republik Indonesia Tahun 1945',
-    icon: '📜',
-    color: 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
+    iconName: 'ScrollText',
+    color: {
+      bg: 'bg-gradient-to-br from-blue-500/10 to-blue-600/5',
+      text: 'text-blue-700 dark:text-blue-400',
+      border: 'border-2 border-blue-500/20 hover:border-blue-500/40'
+    }
   },
   {
     id: 'kuhp',
     label: 'KUHP',
     description: 'Kitab Undang-Undang Hukum Pidana',
-    icon: '⚖️',
-    color: 'bg-purple-500/10 text-purple-700 dark:text-purple-400'
+    iconName: 'Scale',
+    color: {
+      bg: 'bg-gradient-to-br from-purple-500/10 to-purple-600/5',
+      text: 'text-purple-700 dark:text-purple-400',
+      border: 'border-2 border-purple-500/20 hover:border-purple-500/40'
+    }
   },
   {
     id: 'kuhperdata',
     label: 'KUH Perdata',
     description: 'Kitab Undang-Undang Hukum Perdata',
-    icon: '📋',
-    color: 'bg-green-500/10 text-green-700 dark:text-green-400'
+    iconName: 'FileText',
+    color: {
+      bg: 'bg-gradient-to-br from-green-500/10 to-green-600/5',
+      text: 'text-green-700 dark:text-green-400',
+      border: 'border-2 border-green-500/20 hover:border-green-500/40'
+    }
   },
   {
     id: 'kuhd',
     label: 'KUHD',
     description: 'Kitab Undang-Undang Hukum Dagang',
-    icon: '💼',
-    color: 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+    iconName: 'Briefcase',
+    color: {
+      bg: 'bg-gradient-to-br from-amber-500/10 to-amber-600/5',
+      text: 'text-amber-700 dark:text-amber-400',
+      border: 'border-2 border-amber-500/20 hover:border-amber-500/40'
+    }
   },
   {
     id: 'kuhap',
     label: 'KUHAP',
     description: 'Kitab Undang-Undang Hukum Acara Pidana',
-    icon: '🏛️',
-    color: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
+    iconName: 'Landmark',
+    color: {
+      bg: 'bg-gradient-to-br from-indigo-500/10 to-indigo-600/5',
+      text: 'text-indigo-700 dark:text-indigo-400',
+      border: 'border-2 border-indigo-500/20 hover:border-indigo-500/40'
+    }
   }
 ]
 
