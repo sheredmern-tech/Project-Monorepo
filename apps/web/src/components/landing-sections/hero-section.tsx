@@ -1,8 +1,7 @@
 // ============================================
 // FILE: app/home/_components/sections/hero-section.tsx
-// UPDATED: PHASE 2 - B&W Clean Minimalist Design
-// Removed: Particles, gradient blobs, complex decorations
-// Focus: Clean, professional, readable
+// UPDATED: PHASE 4 - Hero Section Refinement
+// Fixed: Scroll indicator overlap, added Lady Justice bg, removed gradients
 // ============================================
 'use client'
 
@@ -12,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Scale, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { heroContent } from '@/lib/data/hero-content'
 import { scrollToSection } from '@/lib/utils/scroll-utils'
+import Image from 'next/image'
 
 export function HeroSection() {
   return (
@@ -19,14 +19,26 @@ export function HeroSection() {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-slate-950"
     >
-      {/* Simple Clean Background - No Images, No Particles */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
+      {/* Lady Justice Background Image - Cloudinary */}
+      <div className="absolute inset-0">
+        <Image
+          src="https://res.cloudinary.com/dxxds8jkx/image/upload/v1760593675/Lady_Justice_o2noc0.png"
+          alt="Lady Justice - Firma Hukum PERARI"
+          fill
+          priority
+          quality={90}
+          className="object-cover opacity-[0.08] dark:opacity-[0.05]"
+          sizes="100vw"
+        />
+        {/* Subtle overlay for better text contrast */}
+        <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60" />
+      </div>
 
       {/* Subtle Grid Pattern - B&W Only */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:80px_80px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:80px_80px]" />
 
       {/* Content */}
-      <div className="container mx-auto px-4 relative z-10 pt-20">
+      <div className="container mx-auto px-4 relative z-10 pt-20 pb-32">
         <div className="max-w-5xl mx-auto text-center space-y-8">
 
           {/* Badge - Clean B&W */}
@@ -107,9 +119,9 @@ export function HeroSection() {
             </Button>
           </motion.div>
 
-          {/* Trust Indicators - Clean B&W */}
+          {/* Trust Indicators - Clean B&W - Added bottom margin */}
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-6 pt-12 text-slate-600 dark:text-slate-400 text-sm"
+            className="flex flex-wrap items-center justify-center gap-6 pt-12 pb-16 text-slate-600 dark:text-slate-400 text-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 1.1 }}
@@ -124,9 +136,9 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll Indicator - B&W Clean */}
+      {/* Scroll Indicator - Moved lower, won't overlap */}
       <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20"
         animate={{ y: [0, 8, 0] }}
         transition={{
           duration: 2,
@@ -134,9 +146,9 @@ export function HeroSection() {
           ease: 'easeInOut'
         }}
       >
-        <div className="w-6 h-10 border-2 border-slate-300 dark:border-slate-600 rounded-full flex justify-center p-2">
+        <div className="w-6 h-10 border-2 border-slate-400 dark:border-slate-500 rounded-full flex justify-center p-2">
           <motion.div
-            className="w-1 h-3 bg-slate-400 dark:bg-slate-500 rounded-full"
+            className="w-1 h-3 bg-slate-600 dark:bg-slate-400 rounded-full"
             animate={{ y: [0, 12, 0] }}
             transition={{
               duration: 2,
