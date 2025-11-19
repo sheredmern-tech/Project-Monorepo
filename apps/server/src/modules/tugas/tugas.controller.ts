@@ -68,6 +68,20 @@ export class TugasController {
     return this.tugasService.getMyTasks(userId, query);
   }
 
+  @Get('assignable-users')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal)
+  @ApiOperation({ summary: 'Get daftar user yang bisa ditugaskan (role hierarchy)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daftar user berhasil diambil berdasarkan role hierarchy'
+  })
+  getAssignableUsers(
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.tugasService.getAssignableUsers(userId, userRole);
+  }
+
   @Get(':id')
   @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff) // ❌ REMOVED: klien
   @ApiOperation({ summary: 'Get detail tugas by ID' })
@@ -86,20 +100,6 @@ export class TugasController {
     @CurrentUser('id') userId: string,
   ) {
     return this.tugasService.update(id, dto, userId);
-  }
-
-  @Get('assignable-users')
-  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal)
-  @ApiOperation({ summary: 'Get daftar user yang bisa ditugaskan (role hierarchy)' })
-  @ApiResponse({
-    status: 200,
-    description: 'Daftar user berhasil diambil berdasarkan role hierarchy'
-  })
-  getAssignableUsers(
-    @CurrentUser('id') userId: string,
-    @CurrentUser('role') userRole: UserRole,
-  ) {
-    return this.tugasService.getAssignableUsers(userId, userRole);
   }
 
   @Delete(':id')
