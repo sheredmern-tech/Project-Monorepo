@@ -33,7 +33,7 @@ export class TimPerkaraController {
   constructor(private readonly timPerkaraService: TimPerkaraService) {}
 
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat)
   @ApiOperation({ summary: 'Tambah anggota tim perkara' })
   @ApiResponse({ status: 201, description: 'Anggota tim berhasil ditambahkan' })
   create(@Body() dto: CreateTimPerkaraDto, @CurrentUser('id') userId: string) {
@@ -85,7 +85,7 @@ export class TimPerkaraController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat)
   @ApiOperation({ summary: 'Update anggota tim perkara (edit peran)' })
   @ApiResponse({ status: 200, description: 'Anggota tim berhasil diupdate' })
   @ApiResponse({ status: 404, description: 'Tim perkara tidak ditemukan' })
@@ -98,7 +98,7 @@ export class TimPerkaraController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat)
   @ApiOperation({ summary: 'Hapus anggota tim perkara' })
   @ApiResponse({ status: 200, description: 'Anggota tim berhasil dihapus' })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
