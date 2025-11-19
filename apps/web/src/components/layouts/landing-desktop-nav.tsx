@@ -1,5 +1,6 @@
 // ============================================
 // FILE: app/home/_components/layout/desktop-nav.tsx
+// UPDATED: PHASE 3 - Fixed white-on-white hover bug
 // ============================================
 'use client'
 
@@ -25,9 +26,9 @@ export function DesktopNav({ isScrolled }: DesktopNavProps) {
   const linkClass = (isActive?: boolean) => cn(
     'cursor-pointer transition-colors',
     isScrolled
-      ? 'text-slate-700 dark:text-slate-300 hover:text-primary hover:bg-primary/5'
-      : 'text-white/90 hover:text-white hover:bg-white/10',
-    isActive && 'text-primary'
+      ? 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+      : 'text-slate-900 dark:text-white hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
+    isActive && 'text-slate-900 dark:text-white font-semibold'
   )
 
   return (
@@ -57,13 +58,13 @@ export function DesktopNav({ isScrolled }: DesktopNavProps) {
                       e.preventDefault()
                       scrollToSection('#tentang')
                     }}
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/50 to-primary p-6 no-underline outline-none focus:shadow-md cursor-pointer hover:from-primary/60 hover:to-primary transition-all"
+                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-slate-900 dark:bg-white p-6 no-underline outline-none focus:shadow-md cursor-pointer hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
                   >
-                    <Scale className="h-8 w-8 text-white" />
-                    <div className="mb-2 mt-4 text-lg font-medium text-white">
+                    <Scale className="h-8 w-8 text-white dark:text-slate-900" />
+                    <div className="mb-2 mt-4 text-lg font-medium text-white dark:text-slate-900">
                       Firma Hukum PERARI
                     </div>
-                    <p className="text-sm leading-tight text-white/90">
+                    <p className="text-sm leading-tight text-slate-200 dark:text-slate-700">
                       Partner terpercaya untuk solusi hukum Anda dengan pengalaman dan integritas.
                     </p>
                   </a>
@@ -142,15 +143,15 @@ function ListItem({ title, children, href, icon: Icon, isLink }: ListItemProps) 
         <Component
           href={isLink ? href : undefined}
           onClick={handleClick}
-          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground cursor-pointer group"
+          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus:bg-slate-100 dark:focus:bg-slate-800 cursor-pointer group"
         >
           <div className="flex items-center gap-2">
             {Icon && (
-              <Icon className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <Icon className="w-4 h-4 text-slate-900 dark:text-white group-hover:scale-110 transition-transform" />
             )}
-            <div className="text-sm font-medium leading-none">{title}</div>
+            <div className="text-sm font-medium leading-none text-slate-900 dark:text-white">{title}</div>
           </div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+          <p className="line-clamp-2 text-sm leading-snug text-slate-600 dark:text-slate-400">
             {children}
           </p>
         </Component>
