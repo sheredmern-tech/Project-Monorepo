@@ -1,5 +1,7 @@
 // ============================================
 // FILE: app/home/_components/sections/stats-section.tsx
+// UPDATED: PHASE 2 - B&W Clean Design
+// Removed: Gradient orbs, colored decorations
 // ============================================
 'use client'
 
@@ -10,13 +12,9 @@ import * as LucideIcons from 'lucide-react'
 
 export function StatsSection() {
   return (
-    <section id="stats" className="py-24 md:py-32 bg-gradient-to-b from-slate-950 to-slate-900 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px]" />
-
-      {/* Gradient Orbs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+    <section id="stats" className="py-24 md:py-32 bg-slate-50 dark:bg-slate-900 relative overflow-hidden">
+      {/* Subtle Grid Pattern - B&W */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:60px_60px]" />
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-7xl mx-auto">
