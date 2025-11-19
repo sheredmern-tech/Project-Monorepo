@@ -45,6 +45,8 @@ interface SidangTableProps {
   limit: number;
   total: number;
   onPageChange: (page: number) => void;
+  onDelete?: () => void | Promise<void>; // Callback after successful delete
+  onRetry?: () => void | Promise<void>; // Callback for retry after error
 }
 
 export function SidangTable({
@@ -54,10 +56,12 @@ export function SidangTable({
   page,
   limit,
   total,
-  onPageChange
+  onPageChange,
+  onDelete,
+  onRetry
 }: SidangTableProps) {
   const router = useRouter();
-  const { deleteSidang, fetchSidang } = useSidang();
+  const { deleteSidang } = useSidang();
 
   // 🔒 RBAC: Get user permissions
   const permissions = usePermission();
@@ -83,7 +87,8 @@ export function SidangTable({
       await deleteSidang(deleteId);
       toast.success("Jadwal sidang berhasil dihapus");
       setDeleteId(null);
-      await fetchSidang();
+      // ✅ Call parent's refresh callback instead of using separate hook instance
+      if (onDelete) await onDelete();
     } catch (error) {
       handleApiError(error, "Gagal menghapus jadwal sidang");
     } finally {
@@ -113,13 +118,15 @@ export function SidangTable({
         <AlertCircle className="h-4 w-4" />
         <AlertDescription className="flex items-center justify-between">
           <span>{error}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fetchSidang()}
-          >
-            Coba Lagi
-          </Button>
+          {onRetry && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRetry}
+            >
+              Coba Lagi
+            </Button>
+          )}
         </AlertDescription>
       </Alert>
     );

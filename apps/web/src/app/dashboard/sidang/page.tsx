@@ -23,18 +23,19 @@ export default function SidangPage() {
   const [total, setTotal] = useState(0);
   const limit = 10;
 
+  const loadSidang = async () => {
+    const response = await fetchSidang({
+      page,
+      limit,
+      sortBy: "tanggal_sidang",
+      sortOrder: "asc"
+    });
+    if (response) {
+      setTotal(response.meta.total);
+    }
+  };
+
   useEffect(() => {
-    const loadSidang = async () => {
-      const response = await fetchSidang({
-        page,
-        limit,
-        sortBy: "tanggal_sidang",
-        sortOrder: "asc"
-      });
-      if (response) {
-        setTotal(response.meta.total);
-      }
-    };
     loadSidang();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
@@ -65,6 +66,8 @@ export default function SidangPage() {
         limit={limit}
         total={total}
         onPageChange={setPage}
+        onDelete={loadSidang}
+        onRetry={loadSidang}
       />
     </div>
   );
