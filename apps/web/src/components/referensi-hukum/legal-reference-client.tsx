@@ -1,32 +1,11 @@
 'use client'
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Search,
-  Copy,
-  Share2,
-  Check,
-  Loader2,
-  X,
-  Flag,
-  ScrollText,
-  Scale,
-  FileText,
-  Briefcase,
-  Landmark,
-  LucideIcon
-} from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from '@/components/ui/accordion'
-import { Input } from '@/components/ui/input'
+import { motion } from 'framer-motion'
+import { Search, Check } from 'lucide-react'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { Accordion } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import {
   LegalCategory,
@@ -35,44 +14,41 @@ import {
   PancasilaItem,
   LegalDataItem
 } from '@/types/external-data'
-
-// Icon mapping for categories
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  Flag,
-  ScrollText,
-  Scale,
-  FileText,
-  Briefcase,
-  Landmark
-}
+import { SearchBar } from './search-bar'
+import { TabNavigation } from './tab-navigation'
+import { LegalItem } from './legal-item'
+import { InfinityScrollTrigger } from './infinity-scroll-trigger'
 
 interface LegalReferenceClientProps {
   data: Record<LegalCategory, ProcessedLegalData>
 }
+
+const ITEMS_PER_BATCH = 30
 
 export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<LegalCategory>('pancasila')
   const [visibleCounts, setVisibleCounts] = useState<Record<LegalCategory, number>>({
-    pancasila: 30,
-    uud1945: 30,
-    kuhp: 30,
-    kuhperdata: 30,
-    kuhd: 30,
-    kuhap: 30
+    pancasila: ITEMS_PER_BATCH,
+    uud1945: ITEMS_PER_BATCH,
+    kuhp: ITEMS_PER_BATCH,
+    kuhperdata: ITEMS_PER_BATCH,
+    kuhd: ITEMS_PER_BATCH,
+    kuhap: ITEMS_PER_BATCH
   })
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
-  const ITEMS_PER_BATCH = 30
-
-  // Filtered data based on search
+  // Filter data based on search query
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return data
 
     const query = searchQuery.toLowerCase()
-    const filtered: Record<LegalCategory, ProcessedLegalData> = {} as any
+    const filtered: Record<LegalCategory, ProcessedLegalData> = {} as Record<
+      LegalCategory,
+      ProcessedLegalData
+    >
 
     Object.entries(data).forEach(([category, processedData]) => {
       const filteredItems = processedData.items.filter((item) => {
@@ -100,7 +76,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     return filtered
   }, [data, searchQuery])
 
-  // Seamless auto-loading (wrapped with useCallback)
+  // Load more items when scrolling
   const loadMore = useCallback(() => {
     if (isLoadingMore) return
 
@@ -109,7 +85,6 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
 
     if (currentCount < totalItems) {
       setIsLoadingMore(true)
-      // Smooth delay for animation
       setTimeout(() => {
         setVisibleCounts((prev) => ({
           ...prev,
@@ -120,22 +95,21 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     }
   }, [activeTab, visibleCounts, filteredData, isLoadingMore])
 
-  // Aggressive intersection observer for true infinity scroll
+  // Intersection observer for infinite scroll
   useEffect(() => {
     const currentRef = loadMoreRef.current
     if (!currentRef) return
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Auto-load when trigger becomes visible or near visible
         const entry = entries[0]
         if (entry.isIntersecting || entry.intersectionRatio > 0) {
           loadMore()
         }
       },
       {
-        threshold: [0, 0.1, 0.5, 1], // Multiple thresholds for better detection
-        rootMargin: '300px 0px' // Start loading 300px before reaching the trigger
+        threshold: [0, 0.1, 0.5, 1],
+        rootMargin: '300px 0px'
       }
     )
 
@@ -144,38 +118,22 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     return () => {
       observer.disconnect()
     }
-  }, [loadMore, activeTab]) // Re-attach when tab changes
+  }, [loadMore, activeTab])
 
   // Reset visible count when search changes
   useEffect(() => {
     setVisibleCounts({
-      pancasila: 30,
-      uud1945: 30,
-      kuhp: 30,
-      kuhperdata: 30,
-      kuhd: 30,
-      kuhap: 30
+      pancasila: ITEMS_PER_BATCH,
+      uud1945: ITEMS_PER_BATCH,
+      kuhp: ITEMS_PER_BATCH,
+      kuhperdata: ITEMS_PER_BATCH,
+      kuhd: ITEMS_PER_BATCH,
+      kuhap: ITEMS_PER_BATCH
     })
   }, [searchQuery])
 
-  // Get item display text
-  const getItemTitle = (item: PancasilaItem | LegalDataItem) => {
-    return item.nama || 'Untitled'
-  }
-
-  const getItemContent = (item: PancasilaItem | LegalDataItem) => {
-    const isPancasila = 'butir' in item
-
-    if (isPancasila) {
-      const pancasilaItem = item as PancasilaItem
-      return `${pancasilaItem.isi}\n\nButir-butir:\n${pancasilaItem.butir.map((b, i) => `${i + 1}. ${b}`).join('\n')}`
-    }
-
-    return (item as LegalDataItem).isi || 'Konten tidak tersedia'
-  }
-
   // Copy to clipboard
-  const handleCopy = async (text: string, id: string) => {
+  const handleCopy = useCallback(async (text: string, id: string) => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedId(id)
@@ -184,129 +142,60 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     } catch (error) {
       toast.error('Gagal menyalin teks')
     }
-  }
+  }, [])
 
   // Share functionality
-  const handleShare = async (title: string, content: string) => {
+  const handleShare = useCallback(async (title: string, content: string) => {
     const shareText = `${title}\n\n${content}\n\nSumber: Referensi Hukum - Firma App`
 
     if (navigator.share) {
       try {
-        await navigator.share({
-          title,
-          text: shareText
-        })
+        await navigator.share({ title, text: shareText })
         toast.success('Berhasil dibagikan')
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
-          fallbackShare(shareText)
+          try {
+            await navigator.clipboard.writeText(shareText)
+            toast.success('Teks disalin ke clipboard')
+          } catch {
+            toast.error('Gagal membagikan')
+          }
         }
       }
     } else {
-      fallbackShare(shareText)
+      try {
+        await navigator.clipboard.writeText(shareText)
+        toast.success('Teks disalin ke clipboard')
+      } catch {
+        toast.error('Gagal membagikan')
+      }
     }
-  }
+  }, [])
 
-  const fallbackShare = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success('Teks disalin ke clipboard')
-    } catch (error) {
-      toast.error('Gagal membagikan')
-    }
-  }
-
-  // Get result count
-  const getResultCount = (category: LegalCategory) => {
-    return filteredData[category]?.items.length || 0
-  }
-
-  // Clear search
-  const clearSearch = () => {
-    setSearchQuery('')
-  }
-
-  // Get icon component
-  const getIconComponent = (iconName: string) => {
-    return CATEGORY_ICONS[iconName] || FileText
-  }
+  // Get result count for category
+  const getResultCount = useCallback(
+    (category: LegalCategory): number => {
+      return filteredData[category]?.items.length || 0
+    },
+    [filteredData]
+  )
 
   return (
     <div className="space-y-0">
       {/* Sticky Search & Navigation Bar */}
       <div className="sticky top-0 z-30 bg-background border-b">
         <div className="space-y-4 py-4">
-          {/* Search Bar */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="relative"
-          >
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Cari pasal, ayat, sila, atau konten..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-10 h-11"
-            />
-            <AnimatePresence>
-              {searchQuery && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute right-1 top-1/2 -translate-y-1/2"
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearSearch}
-                    className="h-8 w-8 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Tab Navigation */}
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as LegalCategory)}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 h-auto gap-2 bg-transparent p-0">
-              {LEGAL_CATEGORIES.map((category, idx) => {
-                const count = getResultCount(category.id)
-                const IconComponent = getIconComponent(category.iconName)
-                return (
-                  <motion.div
-                    key={category.id}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
-                  >
-                    <TabsTrigger
-                      value={category.id}
-                      className="flex items-center gap-2 h-10 px-3 data-[state=active]:bg-foreground data-[state=active]:text-background transition-all duration-200"
-                    >
-                      <IconComponent className="h-4 w-4" />
-                      <span className="text-sm font-medium hidden sm:inline">
-                        {category.label}
-                      </span>
-                      {searchQuery && (
-                        <Badge variant="secondary" className="ml-1 text-xs">
-                          {count}
-                        </Badge>
-                      )}
-                    </TabsTrigger>
-                  </motion.div>
-                )
-              })}
-            </TabsList>
-          </Tabs>
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onClear={() => setSearchQuery('')}
+          />
+          <TabNavigation
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            searchQuery={searchQuery}
+            getResultCount={getResultCount}
+          />
         </div>
       </div>
 
@@ -361,145 +250,30 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
               ) : (
                 <div className="relative">
                   <Accordion type="single" collapsible className="w-full space-y-2">
-                    {visibleItems.map((item, index) => {
-                      const itemId = `${category.id}-${index}`
-                      const title = getItemTitle(item)
-                      const content = getItemContent(item)
-                      const isCopied = copiedId === itemId
-                      const isPancasila = 'butir' in item
-
-                      return (
-                        <motion.div
-                          key={itemId}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{
-                            duration: 0.3,
-                            delay: Math.min(index * 0.02, 0.5)
-                          }}
-                        >
-                          <AccordionItem
-                            value={itemId}
-                            className="border rounded-lg px-4 hover:bg-muted/50 transition-colors"
-                          >
-                            <AccordionTrigger className="hover:no-underline py-4">
-                              <div className="flex items-start gap-3 text-left w-full">
-                                <Badge
-                                  variant="outline"
-                                  className="mt-0.5 shrink-0 font-mono text-xs"
-                                >
-                                  {index + 1}
-                                </Badge>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-semibold text-base">{title}</p>
-                                  {isPancasila && (
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      {(item as PancasilaItem).isi}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="space-y-4 pl-10 pr-4 pb-4">
-                                <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                                  {content}
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex gap-2 pt-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleCopy(content, itemId)}
-                                    className="gap-2"
-                                  >
-                                    {isCopied ? (
-                                      <>
-                                        <Check className="h-4 w-4" />
-                                        Tersalin
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Copy className="h-4 w-4" />
-                                        Salin
-                                      </>
-                                    )}
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleShare(title, content)}
-                                    className="gap-2"
-                                  >
-                                    <Share2 className="h-4 w-4" />
-                                    Bagikan
-                                  </Button>
-                                </div>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        </motion.div>
-                      )
-                    })}
+                    {visibleItems.map((item, index) => (
+                      <LegalItem
+                        key={`${category.id}-${index}`}
+                        item={item}
+                        itemId={`${category.id}-${index}`}
+                        index={index}
+                        isCopied={copiedId === `${category.id}-${index}`}
+                        onCopy={handleCopy}
+                        onShare={handleShare}
+                      />
+                    ))}
                   </Accordion>
 
-                  {/* Seamless Infinity Scroll Trigger */}
+                  {/* Infinity Scroll Trigger */}
                   {hasMore && (
-                    <div className="relative mt-8">
-                      {/* Spacer to ensure scrollability */}
-                      <div className="h-40" />
-
-                      {/* Intersection Observer Trigger - positioned for optimal detection */}
-                      <div ref={loadMoreRef} className="absolute top-0 left-0 right-0 h-1" />
-
-                      {/* Loading State */}
-                      <AnimatePresence>
-                        {isLoadingMore && (
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="absolute top-0 left-0 right-0 h-full flex items-center justify-center"
-                          >
-                            {/* Minimalist White Blur Fade Effect */}
-                            <div
-                              className="absolute inset-0 pointer-events-none"
-                              style={{
-                                background:
-                                  'linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)'
-                              }}
-                            />
-                            {/* Loading Indicator */}
-                            <div className="relative flex items-center gap-3 text-muted-foreground backdrop-blur-sm bg-background/80 px-6 py-3 rounded-full border shadow-lg">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              <span className="text-sm font-medium">Memuat...</span>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-
-                      {/* Fallback Manual Button (appears if auto-loading seems stuck) */}
-                      {!isLoadingMore && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 1.5 }}
-                          className="absolute top-0 left-0 right-0 flex items-center justify-center h-full"
-                        >
-                          <Button
-                            variant="outline"
-                            onClick={loadMore}
-                            className="gap-2 shadow-md"
-                          >
-                            <Loader2 className="h-4 w-4" />
-                            Muat {Math.min(ITEMS_PER_BATCH, items.length - visibleCounts[category.id])}{' '}
-                            Item Lagi
-                          </Button>
-                        </motion.div>
-                      )}
-                    </div>
+                    <InfinityScrollTrigger
+                      loadMoreRef={loadMoreRef}
+                      isLoadingMore={isLoadingMore}
+                      itemsPerBatch={ITEMS_PER_BATCH}
+                      totalItems={items.length}
+                      visibleCount={visibleCounts[category.id]}
+                      categoryId={category.id}
+                      onLoadMore={loadMore}
+                    />
                   )}
 
                   {/* All items loaded */}
