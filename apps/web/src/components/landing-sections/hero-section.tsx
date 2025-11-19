@@ -32,7 +32,7 @@ const StaggeredText = dynamic(
   {
     ssr: false,
     loading: () => (
-      <p className="text-xl md:text-2xl lg:text-3xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+      <p className="text-xl md:text-2xl lg:text-3xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
         {heroContent.subheadline}
       </p>
     )
@@ -43,7 +43,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-slate-950"
     >
       {/* Background Image */}
       <div className="absolute inset-0">
@@ -110,7 +110,7 @@ export function HeroSection() {
           >
             <Badge
               variant="secondary"
-              className="text-sm px-4 py-1.5 bg-white/10 text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
+              className="text-sm px-4 py-1.5 bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white border-slate-200 dark:border-white/20 hover:bg-slate-200 dark:hover:bg-white/20 backdrop-blur-sm"
             >
               {heroContent.badge}
             </Badge>
@@ -137,7 +137,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-tight">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
               <span className="block mb-2">
                 {heroContent.headline.line1}
               </span>
@@ -154,13 +154,13 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.8 }}
           >
             <Suspense fallback={
-              <p className="text-xl md:text-2xl lg:text-3xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl lg:text-3xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
                 {heroContent.subheadline}
               </p>
             }>
               <StaggeredText
                 text={heroContent.subheadline}
-                className="text-xl md:text-2xl lg:text-3xl text-slate-300 max-w-3xl mx-auto leading-relaxed"
+                className="text-xl md:text-2xl lg:text-3xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed"
                 delay={1}
               />
             </Suspense>
