@@ -69,6 +69,7 @@ import { TimPerkaraModule } from './modules/tim-perkara/tim-perkara.module';
 import { KonflikModule } from './modules/konflik/konflik.module';
 import { LogAktivitasModule } from './modules/log-aktivitas/log-aktivitas.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ExternalDataModule } from './modules/external-data/external-data.module';
 
 @Module({
   imports: [
@@ -117,6 +118,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     KonflikModule,
     LogAktivitasModule,
     DashboardModule,
+    ExternalDataModule,
   ],
 
   controllers: [AppController],
