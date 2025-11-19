@@ -429,9 +429,9 @@ export function TugasForm({
           setValue("ditugaskan_ke", user.id);
           setSelectedUserName(user.nama_lengkap || user.email);
         }}
-        roleFilter="all"
+        useAssignableUsers={true}
         title="Pilih Petugas"
-        description="Pilih petugas yang akan ditugaskan"
+        description="Pilih petugas yang akan ditugaskan (berdasarkan role hierarchy)"
       />
     </form>
   );

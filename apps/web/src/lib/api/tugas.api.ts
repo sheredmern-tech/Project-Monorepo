@@ -166,6 +166,43 @@ export const tugasApi = {
     throw new Error("Invalid response format from API");
   },
 
+  getAssignableUsers: async (): Promise<Array<{
+    id: string;
+    email: string;
+    nama_lengkap: string | null;
+    role: string;
+    avatar_url: string | null;
+  }>> => {
+    const response = await apiClient.get("/tugas/assignable-users");
+
+    // Handle direct array response
+    if (Array.isArray(response)) {
+      return response as unknown as Array<{
+        id: string;
+        email: string;
+        nama_lengkap: string | null;
+        role: string;
+        avatar_url: string | null;
+      }>;
+    }
+
+    // Handle wrapped response
+    if (response && typeof response === 'object' && 'data' in response) {
+      const wrappedResponse = response as unknown as {
+        data: Array<{
+          id: string;
+          email: string;
+          nama_lengkap: string | null;
+          role: string;
+          avatar_url: string | null;
+        }>
+      };
+      return wrappedResponse.data;
+    }
+
+    throw new Error("Invalid response format from API");
+  },
+
   create: async (data: CreateTugasDto): Promise<TugasEntity> => {
     const response = await apiClient.post<TugasEntity>("/tugas", data);
     

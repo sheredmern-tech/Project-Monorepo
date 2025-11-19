@@ -40,8 +40,12 @@ export class TugasController {
   @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
   @ApiOperation({ summary: 'Buat tugas baru' })
   @ApiResponse({ status: 201, description: 'Tugas berhasil dibuat' })
-  create(@Body() dto: CreateTugasDto, @CurrentUser('id') userId: string) {
-    return this.tugasService.create(dto, userId);
+  create(
+    @Body() dto: CreateTugasDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.tugasService.create(dto, userId, userRole);
   }
 
   @Get()
@@ -82,6 +86,20 @@ export class TugasController {
     @CurrentUser('id') userId: string,
   ) {
     return this.tugasService.update(id, dto, userId);
+  }
+
+  @Get('assignable-users')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal)
+  @ApiOperation({ summary: 'Get daftar user yang bisa ditugaskan (role hierarchy)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daftar user berhasil diambil berdasarkan role hierarchy'
+  })
+  getAssignableUsers(
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.tugasService.getAssignableUsers(userId, userRole);
   }
 
   @Delete(':id')

@@ -6,6 +6,7 @@ import { SearchableSelectModal } from "./searchable-select-modal"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { timApi } from "@/lib/api/tim.api"
+import { tugasApi } from "@/lib/api/tugas.api"
 import { UserBasic } from "@/types/entities/user"
 import { UserRole } from "@/types/enums"
 import { cn } from "@/lib/utils/cn"
@@ -45,6 +46,12 @@ export interface SelectAdvokatModalProps {
    * Optional list of users to display (if not provided, will fetch from API)
    */
   userList?: UserBasic[]
+
+  /**
+   * Use role-based assignable users from tugas API (recommended for task assignment)
+   * This respects role hierarchy: ADVOKAT can only assign to STAFF, PARALEGAL, other ADVOKAT
+   */
+  useAssignableUsers?: boolean
 }
 
 /**
@@ -79,6 +86,7 @@ export function SelectAdvokatModal({
   description = "Pilih advokat dari daftar di bawah ini",
   roleFilter = UserRole.ADVOKAT,
   userList,
+  useAssignableUsers = false,
 }: SelectAdvokatModalProps) {
   const [users, setUsers] = React.useState<UserBasic[]>([])
   const [isLoading, setIsLoading] = React.useState(false)
@@ -88,31 +96,47 @@ export function SelectAdvokatModal({
     if (open && !userList) {
       fetchUsers()
     }
-  }, [open, userList])
+  }, [open, userList, useAssignableUsers])
 
   const fetchUsers = React.useCallback(async () => {
     try {
       setIsLoading(true)
-      const response = await timApi.getAllUsers({
-        role: roleFilter === "all" ? undefined : roleFilter,
-        limit: 1000, // Get all users
-      })
-      // Map to UserBasic
-      const basicUsers: UserBasic[] = response.data.map((user) => ({
-        id: user.id,
-        email: user.email,
-        nama_lengkap: user.nama_lengkap,
-        role: user.role,
-        avatar_url: user.avatar_url,
-      }))
-      setUsers(basicUsers)
+
+      // ✅ FIX: Use tugas API for role-based assignable users
+      if (useAssignableUsers) {
+        const response = await tugasApi.getAssignableUsers()
+        // Response is already in UserBasic format
+        const basicUsers: UserBasic[] = response.map((user) => ({
+          id: user.id,
+          email: user.email,
+          nama_lengkap: user.nama_lengkap,
+          role: user.role as UserRole,
+          avatar_url: user.avatar_url,
+        }))
+        setUsers(basicUsers)
+      } else {
+        // Original behavior: use tim API
+        const response = await timApi.getAllUsers({
+          role: roleFilter === "all" ? undefined : roleFilter,
+          limit: 1000, // Get all users
+        })
+        // Map to UserBasic
+        const basicUsers: UserBasic[] = response.data.map((user) => ({
+          id: user.id,
+          email: user.email,
+          nama_lengkap: user.nama_lengkap,
+          role: user.role,
+          avatar_url: user.avatar_url,
+        }))
+        setUsers(basicUsers)
+      }
     } catch (error) {
       console.error("Failed to fetch users:", error)
       setUsers([])
     } finally {
       setIsLoading(false)
     }
-  }, [roleFilter])
+  }, [roleFilter, useAssignableUsers])
 
   const items = userList || users
 

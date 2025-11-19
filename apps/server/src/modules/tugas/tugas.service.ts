@@ -28,6 +28,7 @@ export class TugasService {
   async create(
     dto: CreateTugasDto,
     userId: string,
+    userRole?: UserRole,
   ): Promise<TugasWithRelations> {
     const perkara = await this.prisma.perkara.findUnique({
       where: { id: dto.perkara_id },
@@ -38,12 +39,27 @@ export class TugasService {
     }
 
     if (dto.ditugaskan_ke) {
-      const user = await this.prisma.user.findUnique({
+      const assignedUser = await this.prisma.user.findUnique({
         where: { id: dto.ditugaskan_ke },
+        select: { id: true, role: true, nama_lengkap: true },
       });
 
-      if (!user) {
+      if (!assignedUser) {
         throw new BadRequestException('User yang ditugaskan tidak ditemukan');
+      }
+
+      // ✅ VALIDATION: Check role hierarchy for task assignment
+      if (userRole) {
+        const canAssign = await this.canAssignToUser(
+          userRole,
+          assignedUser.role,
+        );
+        if (!canAssign) {
+          throw new ForbiddenException(
+            `Role ${userRole} tidak dapat menugaskan ke role ${assignedUser.role}. ` +
+              `Silakan pilih user dengan role yang sesuai.`,
+          );
+        }
       }
     }
 
@@ -407,5 +423,109 @@ export class TugasService {
       userId,
       UserRole.paralegal,
     );
+  }
+
+  /**
+   * Helper method to check if a role can assign tasks to another role
+   * Based on role hierarchy rules
+   */
+  private async canAssignToUser(
+    creatorRole: UserRole,
+    targetRole: UserRole,
+  ): Promise<boolean> {
+    // KLIEN should never be assigned tasks
+    if (targetRole === UserRole.klien) {
+      return false;
+    }
+
+    switch (creatorRole) {
+      case UserRole.admin:
+      case UserRole.partner:
+        // Can assign to anyone except KLIEN
+        return targetRole !== UserRole.klien;
+
+      case UserRole.advokat:
+        // Can only assign to subordinates and peers
+        return [UserRole.advokat, UserRole.paralegal, UserRole.staff].includes(
+          targetRole,
+        );
+
+      case UserRole.paralegal:
+        // Can only assign to STAFF and other PARALEGAL
+        return [UserRole.paralegal, UserRole.staff].includes(targetRole);
+
+      case UserRole.staff:
+        // STAFF cannot assign tasks
+        return false;
+
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Get list of users that can be assigned tasks based on role hierarchy
+   * ROLE HIERARCHY FOR TASK ASSIGNMENT:
+   * - ADMIN/PARTNER: Can assign to anyone except KLIEN
+   * - ADVOKAT: Can assign to STAFF, PARALEGAL, other ADVOKAT (subordinates + peers)
+   * - PARALEGAL: Can assign to STAFF, other PARALEGAL
+   * - STAFF: Cannot assign tasks
+   */
+  async getAssignableUsers(userId: string, userRole: UserRole) {
+    let allowedRoles: UserRole[] = [];
+
+    switch (userRole) {
+      case UserRole.admin:
+      case UserRole.partner:
+        // Can assign to anyone except KLIEN
+        allowedRoles = [
+          UserRole.admin,
+          UserRole.partner,
+          UserRole.advokat,
+          UserRole.paralegal,
+          UserRole.staff,
+        ];
+        break;
+
+      case UserRole.advokat:
+        // Can only assign to subordinates (STAFF, PARALEGAL) and peers (other ADVOKAT)
+        allowedRoles = [UserRole.advokat, UserRole.paralegal, UserRole.staff];
+        break;
+
+      case UserRole.paralegal:
+        // Can only assign to STAFF and other PARALEGAL
+        allowedRoles = [UserRole.paralegal, UserRole.staff];
+        break;
+
+      case UserRole.staff:
+        // STAFF typically cannot assign tasks (empty list)
+        allowedRoles = [];
+        break;
+
+      default:
+        allowedRoles = [];
+    }
+
+    if (allowedRoles.length === 0) {
+      return [];
+    }
+
+    return this.prisma.user.findMany({
+      where: {
+        role: { in: allowedRoles },
+        is_aktif: true, // Only active users
+      },
+      select: {
+        id: true,
+        email: true,
+        nama_lengkap: true,
+        role: true,
+        avatar_url: true,
+      },
+      orderBy: [
+        { role: 'asc' }, // Group by role first
+        { nama_lengkap: 'asc' }, // Then alphabetically
+      ],
+    });
   }
 }
