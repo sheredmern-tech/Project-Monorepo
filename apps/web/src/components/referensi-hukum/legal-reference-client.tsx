@@ -2,10 +2,12 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Check } from 'lucide-react'
+import { Search, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import useEmblaCarousel from 'embla-carousel-react'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Accordion } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import {
   LegalCategory,
@@ -41,10 +43,38 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
+  // Embla Carousel for mobile
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: 'start',
+    skipSnaps: false,
+    dragFree: true
+  })
+  const [canScrollPrev, setCanScrollPrev] = useState(false)
+  const [canScrollNext, setCanScrollNext] = useState(true)
+
   // Handle hydration
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Carousel navigation handlers
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
+
+  // Update carousel button states
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setCanScrollPrev(emblaApi.canScrollPrev())
+    setCanScrollNext(emblaApi.canScrollNext())
+  }, [emblaApi])
+
+  useEffect(() => {
+    if (!emblaApi) return
+    onSelect()
+    emblaApi.on('select', onSelect)
+    emblaApi.on('reInit', onSelect)
+  }, [emblaApi, onSelect])
 
   // Filter data based on search query
   const filteredData = useMemo(() => {
@@ -254,47 +284,124 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                   </p>
                 </motion.div>
               ) : (
-                <div className="relative">
-                  <Accordion type="single" collapsible className="w-full space-y-4">
-                    {visibleItems.map((item, index) => (
-                      <LegalItem
-                        key={`${category.id}-${index}`}
-                        item={item}
-                        itemId={`${category.id}-${index}`}
-                        index={index}
-                        isCopied={copiedId === `${category.id}-${index}`}
-                        onCopy={handleCopy}
-                        onShare={handleShare}
+                <>
+                  {/* Desktop: Vertical Accordion */}
+                  <div className="hidden md:block relative">
+                    <Accordion type="single" collapsible className="w-full space-y-4">
+                      {visibleItems.map((item, index) => (
+                        <LegalItem
+                          key={`${category.id}-${index}`}
+                          item={item}
+                          itemId={`${category.id}-${index}`}
+                          index={index}
+                          isCopied={copiedId === `${category.id}-${index}`}
+                          onCopy={handleCopy}
+                          onShare={handleShare}
+                        />
+                      ))}
+                    </Accordion>
+
+                    {/* Infinity Scroll Trigger */}
+                    {hasMore && (
+                      <InfinityScrollTrigger
+                        loadMoreRef={loadMoreRef}
+                        isLoadingMore={isLoadingMore}
+                        itemsPerBatch={ITEMS_PER_BATCH}
+                        totalItems={items.length}
+                        visibleCount={visibleCounts[category.id]}
+                        categoryId={category.id}
+                        onLoadMore={loadMore}
                       />
-                    ))}
-                  </Accordion>
+                    )}
 
-                  {/* Infinity Scroll Trigger */}
-                  {hasMore && (
-                    <InfinityScrollTrigger
-                      loadMoreRef={loadMoreRef}
-                      isLoadingMore={isLoadingMore}
-                      itemsPerBatch={ITEMS_PER_BATCH}
-                      totalItems={items.length}
-                      visibleCount={visibleCounts[category.id]}
-                      categoryId={category.id}
-                      onLoadMore={loadMore}
-                    />
-                  )}
+                    {/* All items loaded */}
+                    {!hasMore && items.length > 0 && (
+                      <motion.div
+                        initial={mounted ? { opacity: 0, y: 20 } : false}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex items-center justify-center gap-2 py-8 mt-6 text-sm text-muted-foreground border-t"
+                      >
+                        <Check className="h-4 w-4" />
+                        <span>Semua data telah dimuat ({items.length} item)</span>
+                      </motion.div>
+                    )}
+                  </div>
 
-                  {/* All items loaded */}
-                  {!hasMore && items.length > 0 && (
-                    <motion.div
-                      initial={mounted ? { opacity: 0, y: 20 } : false}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className="flex items-center justify-center gap-2 py-8 mt-6 text-sm text-muted-foreground border-t"
-                    >
-                      <Check className="h-4 w-4" />
-                      <span>Semua data telah dimuat ({items.length} item)</span>
-                    </motion.div>
-                  )}
-                </div>
+                  {/* Mobile: Horizontal Carousel */}
+                  <div className="md:hidden">
+                    <div className="overflow-hidden" ref={emblaRef}>
+                      <div className="flex gap-4">
+                        {visibleItems.map((item, index) => (
+                          <div
+                            key={`${category.id}-${index}`}
+                            className="flex-[0_0_85%] min-w-0"
+                          >
+                            <Accordion type="single" collapsible className="w-full">
+                              <LegalItem
+                                item={item}
+                                itemId={`${category.id}-${index}`}
+                                index={index}
+                                isCopied={copiedId === `${category.id}-${index}`}
+                                onCopy={handleCopy}
+                                onShare={handleShare}
+                              />
+                            </Accordion>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Navigation Buttons for Mobile */}
+                    <div className="flex justify-center gap-4 mt-6">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={scrollPrev}
+                        disabled={!canScrollPrev}
+                        className="rounded-full"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={scrollNext}
+                        disabled={!canScrollNext}
+                        className="rounded-full"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </Button>
+                    </div>
+
+                    {/* Load More for Mobile */}
+                    {hasMore && (
+                      <div className="mt-6 text-center">
+                        <Button
+                          onClick={loadMore}
+                          disabled={isLoadingMore}
+                          variant="outline"
+                          className="w-full"
+                        >
+                          {isLoadingMore ? 'Memuat...' : `Muat 30 Item Lagi`}
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* All items loaded for Mobile */}
+                    {!hasMore && items.length > 0 && (
+                      <motion.div
+                        initial={mounted ? { opacity: 0, y: 20 } : false}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex items-center justify-center gap-2 py-6 mt-6 text-sm text-muted-foreground border-t"
+                      >
+                        <Check className="h-4 w-4" />
+                        <span>Semua data ({items.length} item)</span>
+                      </motion.div>
+                    )}
+                  </div>
+                </>
               )}
             </TabsContent>
           )
