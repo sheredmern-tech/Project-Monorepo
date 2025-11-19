@@ -64,7 +64,7 @@ export function DesktopNav({ isScrolled }: DesktopNavProps) {
                     <div className="mb-2 mt-4 text-lg font-medium text-white dark:text-slate-900">
                       Firma Hukum PERARI
                     </div>
-                    <p className="text-sm leading-tight text-slate-200 dark:text-slate-700">
+                    <p className="text-sm leading-tight text-white dark:text-slate-900">
                       Partner terpercaya untuk solusi hukum Anda dengan pengalaman dan integritas.
                     </p>
                   </a>

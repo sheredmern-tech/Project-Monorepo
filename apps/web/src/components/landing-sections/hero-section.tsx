@@ -77,7 +77,7 @@ export function HeroSection() {
               <span className="block mb-2">
                 {heroContent.headline.line1}
               </span>
-              <span className="block text-slate-700 dark:text-slate-300">
+              <span className="block text-slate-900 dark:text-white">
                 {heroContent.headline.line2}
               </span>
             </h1>
