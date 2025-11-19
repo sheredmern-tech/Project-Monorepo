@@ -49,9 +49,10 @@ export function LegalItem({ item, itemId, index, isCopied, onCopy, onShare }: Le
         duration: 0.3,
         delay: mounted ? Math.min(index * 0.02, 0.5) : 0
       }}
+      style={{ scrollMarginTop: '100px' }}
     >
-      <AccordionItem value={itemId} className="border rounded-lg px-4 hover:bg-muted/50 transition-colors">
-        <AccordionTrigger className="hover:no-underline py-4">
+      <AccordionItem value={itemId} className="border rounded-lg px-6 hover:bg-muted/50 transition-colors">
+        <AccordionTrigger className="hover:no-underline py-6">
           <div className="flex items-start gap-3 text-left w-full">
             <Badge variant="outline" className="mt-0.5 shrink-0 font-mono text-xs">
               {index + 1}
@@ -67,7 +68,7 @@ export function LegalItem({ item, itemId, index, isCopied, onCopy, onShare }: Le
           </div>
         </AccordionTrigger>
         <AccordionContent>
-          <div className="space-y-4 pl-10 pr-4 pb-4">
+          <div className="space-y-4 pl-12 pr-6 pb-6 pt-2">
             <div className="text-sm leading-relaxed whitespace-pre-wrap">{content}</div>
 
             {/* Action Buttons */}

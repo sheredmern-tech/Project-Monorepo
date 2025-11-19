@@ -187,7 +187,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
   )
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-0" style={{ scrollBehavior: 'auto' }}>
       {/* Sticky Search & Navigation Bar */}
       <div className="sticky top-0 z-30 bg-background border-b">
         <div className="space-y-4 py-4">
@@ -221,7 +221,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                 initial={mounted ? { opacity: 0, y: 20 } : false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="mb-6 pb-4 border-b"
+                className="mb-8 pb-6 border-b"
               >
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
@@ -255,7 +255,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                 </motion.div>
               ) : (
                 <div className="relative">
-                  <Accordion type="single" collapsible className="w-full space-y-2">
+                  <Accordion type="single" collapsible className="w-full space-y-4">
                     {visibleItems.map((item, index) => (
                       <LegalItem
                         key={`${category.id}-${index}`}
