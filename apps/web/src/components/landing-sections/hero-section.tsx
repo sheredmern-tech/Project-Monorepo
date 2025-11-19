@@ -1,7 +1,7 @@
 // ============================================
 // FILE: app/home/_components/sections/hero-section.tsx
-// UPDATED: PHASE 4 - Hero Section Refinement
-// Fixed: Scroll indicator overlap, added Lady Justice bg, removed gradients
+// UPDATED: PHASE 4 FIX - Layer order, visibility, scroll position
+// Fixed: Grid behind image, Lady Justice visible, scroll indicator in viewport
 // ============================================
 'use client'
 
@@ -19,26 +19,26 @@ export function HeroSection() {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-slate-950"
     >
-      {/* Lady Justice Background Image - Cloudinary */}
-      <div className="absolute inset-0">
+      {/* Layer 1: Subtle Grid Pattern - PALING BELAKANG */}
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:80px_80px]" />
+
+      {/* Layer 2: Lady Justice Background Image - DI DEPAN GRID */}
+      <div className="absolute inset-0 z-[1]">
         <Image
           src="https://res.cloudinary.com/dxxds8jkx/image/upload/v1760593675/Lady_Justice_o2noc0.png"
           alt="Lady Justice - Firma Hukum PERARI"
           fill
           priority
           quality={90}
-          className="object-cover opacity-[0.08] dark:opacity-[0.05]"
+          className="object-cover opacity-[0.15] dark:opacity-[0.10]"
           sizes="100vw"
         />
         {/* Subtle overlay for better text contrast */}
-        <div className="absolute inset-0 bg-white/60 dark:bg-slate-950/60" />
+        <div className="absolute inset-0 bg-white/50 dark:bg-slate-950/50" />
       </div>
 
-      {/* Subtle Grid Pattern - B&W Only */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:80px_80px]" />
-
-      {/* Content */}
-      <div className="container mx-auto px-4 relative z-10 pt-20 pb-32">
+      {/* Layer 3: Content - PALING DEPAN */}
+      <div className="container mx-auto px-4 relative z-10 pt-20 pb-24">
         <div className="max-w-5xl mx-auto text-center space-y-8">
 
           {/* Badge - Clean B&W */}
@@ -119,9 +119,9 @@ export function HeroSection() {
             </Button>
           </motion.div>
 
-          {/* Trust Indicators - Clean B&W - Added bottom margin */}
+          {/* Trust Indicators - Clean B&W */}
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-6 pt-12 pb-16 text-slate-600 dark:text-slate-400 text-sm"
+            className="flex flex-wrap items-center justify-center gap-6 pt-12 text-slate-600 dark:text-slate-400 text-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 1.1 }}
@@ -136,9 +136,9 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll Indicator - Moved lower, won't overlap */}
+      {/* Scroll Indicator - MOVED HIGHER, NOW VISIBLE IN VIEWPORT */}
       <motion.div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20"
+        className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20"
         animate={{ y: [0, 8, 0] }}
         transition={{
           duration: 2,
