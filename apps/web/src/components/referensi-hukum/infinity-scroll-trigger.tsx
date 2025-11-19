@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,12 @@ export function InfinityScrollTrigger({
   visibleCount,
   onLoadMore
 }: InfinityScrollTriggerProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <div className="relative mt-8">
       {/* Spacer to ensure scrollability */}
@@ -33,7 +40,7 @@ export function InfinityScrollTrigger({
 
       {/* Loading State */}
       <AnimatePresence>
-        {isLoadingMore && (
+        {mounted && isLoadingMore && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -58,7 +65,7 @@ export function InfinityScrollTrigger({
       </AnimatePresence>
 
       {/* Fallback Manual Button (appears if auto-loading seems stuck) */}
-      {!isLoadingMore && (
+      {mounted && !isLoadingMore && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

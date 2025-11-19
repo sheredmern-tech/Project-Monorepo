@@ -34,7 +34,7 @@ export function SearchBar({ value, onChange, onClear }: SearchBarProps) {
         className="pl-9 pr-10 h-11"
       />
       <AnimatePresence>
-        {value && (
+        {mounted && value && (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
