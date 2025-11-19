@@ -17,31 +17,67 @@ export const metadata: Metadata = {
 }
 
 // API Base URL
-const API_BASE_URL = 'http://localhost:3000/api/v1/external-data'
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1/external-data'
 
 // Fetch data for a specific category
 async function fetchCategoryData(
   category: LegalCategory
 ): Promise<LegalReferenceItem[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/${category}`, {
-      next: { revalidate: 3600 } // Revalidate every hour
+    const url = `${API_BASE_URL}/${category}`
+    console.log(`[Referensi Hukum] Fetching ${category} from ${url}`)
+
+    const response = await fetch(url, {
+      next: { revalidate: 3600 }, // Revalidate every hour
+      headers: {
+        'Accept': 'application/json'
+      }
     })
 
     if (!response.ok) {
-      console.error(`Failed to fetch ${category}: ${response.statusText}`)
+      console.error(
+        `[Referensi Hukum] Failed to fetch ${category}: ${response.status} ${response.statusText}`
+      )
       return []
     }
 
-    const data: LegalReferenceResponse = await response.json()
+    const json = await response.json()
+    console.log(
+      `[Referensi Hukum] Response for ${category}:`,
+      JSON.stringify(json).substring(0, 200)
+    )
 
-    if (data.success && Array.isArray(data.data)) {
-      return data.data
+    // Handle response wrapped by TransformInterceptor
+    // Expected structure: { success: true, data: [...], timestamp: "..." }
+    if (json.success && json.data) {
+      // If data is already an array, use it directly
+      if (Array.isArray(json.data)) {
+        console.log(`[Referensi Hukum] ${category}: Found ${json.data.length} items`)
+        return json.data
+      }
+      // If data is an object, check if it has a data property (double wrapped)
+      if (json.data.data && Array.isArray(json.data.data)) {
+        console.log(
+          `[Referensi Hukum] ${category}: Found ${json.data.data.length} items (double wrapped)`
+        )
+        return json.data.data
+      }
+      // If data is an object but not an array, wrap it in an array
+      console.log(`[Referensi Hukum] ${category}: Converting object to array`)
+      return [json.data]
     }
 
+    // Fallback: if response is directly an array
+    if (Array.isArray(json)) {
+      console.log(`[Referensi Hukum] ${category}: Direct array with ${json.length} items`)
+      return json
+    }
+
+    console.warn(`[Referensi Hukum] ${category}: Unexpected response structure`, json)
     return []
   } catch (error) {
-    console.error(`Error fetching ${category}:`, error)
+    console.error(`[Referensi Hukum] Error fetching ${category}:`, error)
     return []
   }
 }
