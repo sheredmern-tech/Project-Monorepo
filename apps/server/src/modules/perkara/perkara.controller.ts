@@ -47,7 +47,7 @@ export class PerkaraController {
   }
 
   @Get()
-  @Roles(UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get semua perkara dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data perkara berhasil diambil' })
   findAll(
@@ -59,7 +59,7 @@ export class PerkaraController {
   }
 
   @Get(':id')
-  @Roles(UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail perkara by ID' })
   @ApiResponse({ status: 200, description: 'Detail perkara berhasil diambil' })
   findOne(@Param('id') id: string) {
@@ -67,6 +67,7 @@ export class PerkaraController {
   }
 
   @Get(':id/statistics')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get statistik perkara' })
   @ApiResponse({ status: 200, description: 'Statistik berhasil diambil' })
   getStatistics(@Param('id') id: string) {

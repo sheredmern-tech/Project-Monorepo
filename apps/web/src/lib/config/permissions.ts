@@ -179,7 +179,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "perkara:create",
     "perkara:read",
     "perkara:update",
-    "perkara:delete", // Can delete cases they own
+    // "perkara:delete", // ❌ REMOVED - Only ADMIN can delete cases
     "perkara:export",
     "perkara:assign",
     // Tugas
