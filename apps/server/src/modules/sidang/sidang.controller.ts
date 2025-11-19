@@ -35,7 +35,7 @@ export class SidangController {
   constructor(private readonly sidangService: SidangService) {}
 
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal)
   @ApiOperation({ summary: 'Buat jadwal sidang baru' })
   @ApiResponse({ status: 201, description: 'Jadwal sidang berhasil dibuat' })
   create(@Body() dto: CreateSidangDto, @CurrentUser('id') userId: string) {
@@ -84,7 +84,7 @@ export class SidangController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal)
   @ApiOperation({ summary: 'Update jadwal sidang by ID' })
   @ApiResponse({ status: 200, description: 'Jadwal sidang berhasil diupdate' })
   update(
@@ -96,7 +96,7 @@ export class SidangController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat)
   @ApiOperation({ summary: 'Hapus jadwal sidang by ID' })
   @ApiResponse({ status: 200, description: 'Jadwal sidang berhasil dihapus' })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {

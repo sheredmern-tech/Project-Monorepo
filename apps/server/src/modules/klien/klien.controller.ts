@@ -53,9 +53,9 @@ export class KlienController {
     return this.klienService.updateMyProfile(userId, dto);
   }
 
-  // 🔒 EXISTING: Endpoint untuk admin/advokat/paralegal/staff
+  // 🔒 EXISTING: Endpoint untuk admin/partner/advokat/paralegal/staff
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Buat klien baru' })
   @ApiResponse({ status: 201, description: 'Klien berhasil dibuat' })
   create(@Body() dto: CreateKlienDto, @CurrentUser('id') userId: string) {
@@ -64,7 +64,7 @@ export class KlienController {
 
   // 🔒 EXISTING: List semua klien (TIDAK untuk client)
   @Get()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get semua klien dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data klien berhasil diambil' })
   findAll(
@@ -77,7 +77,7 @@ export class KlienController {
 
   // 🔒 EXISTING: Detail klien by ID (TIDAK untuk client)
   @Get(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail klien by ID' })
   @ApiResponse({ status: 200, description: 'Detail klien berhasil diambil' })
   @ApiResponse({ status: 404, description: 'Klien tidak ditemukan' })
@@ -87,7 +87,7 @@ export class KlienController {
 
   // 🔒 EXISTING: Update klien (TIDAK untuk client)
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Update klien by ID' })
   @ApiResponse({ status: 200, description: 'Klien berhasil diupdate' })
   update(
@@ -99,7 +99,7 @@ export class KlienController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.admin)
+  @Roles(UserRole.admin, UserRole.partner)
   @ApiOperation({ summary: 'Hapus klien by ID' })
   @ApiResponse({ status: 200, description: 'Klien berhasil dihapus' })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {

@@ -37,7 +37,7 @@ export class TugasController {
   constructor(private readonly tugasService: TugasService) {}
 
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal)
   @ApiOperation({ summary: 'Buat tugas baru' })
   @ApiResponse({ status: 201, description: 'Tugas berhasil dibuat' })
   create(
@@ -49,7 +49,7 @@ export class TugasController {
   }
 
   @Get()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff) // ❌ REMOVED: klien
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get semua tugas dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data tugas berhasil diambil' })
   findAll(
@@ -61,7 +61,7 @@ export class TugasController {
   }
 
   @Get('my-tasks')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff) // ❌ REMOVED: klien
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get tugas saya' })
   @ApiResponse({ status: 200, description: 'Tugas saya berhasil diambil' })
   getMyTasks(@CurrentUser('id') userId: string, @Query() query: QueryTugasDto) {
@@ -83,7 +83,7 @@ export class TugasController {
   }
 
   @Get(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff) // ❌ REMOVED: klien
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail tugas by ID' })
   @ApiResponse({ status: 200, description: 'Detail tugas berhasil diambil' })
   findOne(@Param('id') id: string) {
@@ -91,7 +91,7 @@ export class TugasController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff) // ❌ REMOVED: klien
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Update tugas by ID' })
   @ApiResponse({ status: 200, description: 'Tugas berhasil diupdate' })
   update(
@@ -103,7 +103,7 @@ export class TugasController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat)
   @ApiOperation({ summary: 'Hapus tugas by ID' })
   @ApiResponse({ status: 200, description: 'Tugas berhasil dihapus' })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {

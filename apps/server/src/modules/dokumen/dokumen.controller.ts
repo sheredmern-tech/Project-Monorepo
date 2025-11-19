@@ -44,7 +44,7 @@ export class DokumenController {
   ) {}
 
   @Post()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Upload dokumen baru' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: 'Dokumen berhasil diupload' })
@@ -58,7 +58,7 @@ export class DokumenController {
   }
 
   @Get()
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get semua dokumen dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data dokumen berhasil diambil' })
   findAll(
@@ -70,7 +70,7 @@ export class DokumenController {
   }
 
   @Get(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Detail dokumen berhasil diambil' })
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
@@ -81,7 +81,7 @@ export class DokumenController {
   }
 
   @Get(':id/download')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Download dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Dokumen berhasil didownload' })
   download(@Param('id') id: string) {
@@ -89,7 +89,7 @@ export class DokumenController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.admin, UserRole.advokat, UserRole.paralegal)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal)
   @ApiOperation({ summary: 'Update dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Dokumen berhasil diupdate' })
   update(
@@ -101,7 +101,7 @@ export class DokumenController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.admin, UserRole.advokat)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat)
   @ApiOperation({ summary: 'Hapus dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Dokumen berhasil dihapus' })
   remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
