@@ -441,18 +441,22 @@ export class TugasService {
     switch (creatorRole) {
       case UserRole.admin:
       case UserRole.partner:
-        // Can assign to anyone except KLIEN
-        return targetRole !== UserRole.klien;
+        // Can assign to anyone except KLIEN (already checked above)
+        return true;
 
       case UserRole.advokat:
         // Can only assign to subordinates and peers
-        return [UserRole.advokat, UserRole.paralegal, UserRole.staff].includes(
-          targetRole,
+        return (
+          targetRole === UserRole.advokat ||
+          targetRole === UserRole.paralegal ||
+          targetRole === UserRole.staff
         );
 
       case UserRole.paralegal:
         // Can only assign to STAFF and other PARALEGAL
-        return [UserRole.paralegal, UserRole.staff].includes(targetRole);
+        return (
+          targetRole === UserRole.paralegal || targetRole === UserRole.staff
+        );
 
       case UserRole.staff:
         // STAFF cannot assign tasks
@@ -513,7 +517,7 @@ export class TugasService {
     return this.prisma.user.findMany({
       where: {
         role: { in: allowedRoles },
-        is_aktif: true, // Only active users
+        is_active: true, // Only active users
       },
       select: {
         id: true,
