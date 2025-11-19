@@ -23,9 +23,12 @@ export class ExternalDataService {
   private readonly npointConfig: NpointConfig = {
     baseUrl: 'https://api.npoint.io',
     endpoints: {
-      uu: '/7af9c2a9eddd4c50bb9e',
-      peraturan: '/7af9c2a9eddd4c50bb9e/uu',
-      artikelHukum: '/your-bin-id-here',
+      pancasila: '/a1a0f3580e5c51b7b7f5/pancasila',
+      uud1945: '/a1a0f3580e5c51b7b7f5/uud1945',
+      kuhp: '/a1a0f3580e5c51b7b7f5/kuhp',
+      kuhperdata: '/a1a0f3580e5c51b7b7f5/kuhperdata',
+      kuhd: '/a1a0f3580e5c51b7b7f5/kuhd',
+      kuhap: '/a1a0f3580e5c51b7b7f5/kuhap',
     },
   };
 
@@ -124,18 +127,50 @@ export class ExternalDataService {
     }
   }
 
+  // ========== PANCASILA ==========
+  async getPancasila(useCache = true): Promise<any[]> {
+    return this.fetchFromNpoint<any[]>('pancasila', { useCache });
+  }
+
+  // ========== UUD 1945 ==========
+  async getUUD1945(useCache = true): Promise<any> {
+    return this.fetchFromNpoint<any>('uud1945', { useCache });
+  }
+
+  // ========== KUHP ==========
+  async getKUHP(useCache = true): Promise<any> {
+    return this.fetchFromNpoint<any>('kuhp', { useCache });
+  }
+
+  // ========== KUH PERDATA ==========
+  async getKUHPerdata(useCache = true): Promise<any> {
+    return this.fetchFromNpoint<any>('kuhperdata', { useCache });
+  }
+
+  // ========== KUHD ==========
+  async getKUHD(useCache = true): Promise<any> {
+    return this.fetchFromNpoint<any>('kuhd', { useCache });
+  }
+
+  // ========== KUHAP ==========
+  async getKUHAP(useCache = true): Promise<any> {
+    return this.fetchFromNpoint<any>('kuhap', { useCache });
+  }
+
+  // ========== DEPRECATED (backward compatibility) ==========
   async getUU(useCache = true): Promise<any[]> {
-    return this.fetchFromNpoint<any[]>('uu', { useCache });
+    return this.getPancasila(useCache);
   }
 
   async getPeraturan(useCache = true): Promise<any[]> {
-    return this.fetchFromNpoint<any[]>('peraturan', { useCache });
+    return this.getUUD1945(useCache);
   }
 
   async getArtikelHukum(useCache = true): Promise<any[]> {
-    return this.fetchFromNpoint<any[]>('artikelHukum', { useCache });
+    return this.getKUHP(useCache);
   }
 
+  // ========== UTILITY METHODS ==========
   async fetchCustom<T>(url: string, useCache = true): Promise<T> {
     return this.fetchFromNpoint<T>(url, { useCache });
   }
@@ -150,7 +185,7 @@ export class ExternalDataService {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await this.fetchFromNpoint('uu', { useCache: false });
+      await this.fetchFromNpoint('pancasila', { useCache: false });
       return true;
     } catch (error) {
       return false;

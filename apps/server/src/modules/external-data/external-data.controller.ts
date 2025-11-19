@@ -1,29 +1,52 @@
-import { Controller, Get, Query, Param, Delete, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { Public } from '../../common/decorators/public.decorator';
 import { ExternalDataService } from './external-data.service';
 
+@Public()
 @Controller('external-data')
 export class ExternalDataController {
   constructor(private readonly externalDataService: ExternalDataService) { }
 
-  // ========== UU (UNDANG-UNDANG) ==========
-  @Get('uu')
-  async getUU(@Query('no-cache') noCache?: string) {
+  // ========== PANCASILA ==========
+  @Get('pancasila')
+  async getPancasila(@Query('no-cache') noCache?: string) {
     const useCache = noCache !== 'true';
-    return this.externalDataService.getUU(useCache);
+    return this.externalDataService.getPancasila(useCache);
   }
 
-  // ========== PERATURAN ==========
-  @Get('peraturan')
-  async getPeraturan(@Query('no-cache') noCache?: string) {
+  // ========== UUD 1945 ==========
+  @Get('uud1945')
+  async getUUD1945(@Query('no-cache') noCache?: string) {
     const useCache = noCache !== 'true';
-    return this.externalDataService.getPeraturan(useCache);
+    return this.externalDataService.getUUD1945(useCache);
   }
 
-  // ========== ARTIKEL HUKUM ==========
-  @Get('artikel-hukum')
-  async getArtikelHukum(@Query('no-cache') noCache?: string) {
+  // ========== KUHP ==========
+  @Get('kuhp')
+  async getKUHP(@Query('no-cache') noCache?: string) {
     const useCache = noCache !== 'true';
-    return this.externalDataService.getArtikelHukum(useCache);
+    return this.externalDataService.getKUHP(useCache);
+  }
+
+  // ========== KUH PERDATA ==========
+  @Get('kuhperdata')
+  async getKUHPerdata(@Query('no-cache') noCache?: string) {
+    const useCache = noCache !== 'true';
+    return this.externalDataService.getKUHPerdata(useCache);
+  }
+
+  // ========== KUHD ==========
+  @Get('kuhd')
+  async getKUHD(@Query('no-cache') noCache?: string) {
+    const useCache = noCache !== 'true';
+    return this.externalDataService.getKUHD(useCache);
+  }
+
+  // ========== KUHAP ==========
+  @Get('kuhap')
+  async getKUHAP(@Query('no-cache') noCache?: string) {
+    const useCache = noCache !== 'true';
+    return this.externalDataService.getKUHAP(useCache);
   }
 
   // ========== CUSTOM FETCH ==========
@@ -45,6 +68,7 @@ export class ExternalDataController {
 
   // ========== CACHE MANAGEMENT ==========
   @Delete('cache')
+  @HttpCode(HttpStatus.OK)
   clearAllCache() {
     this.externalDataService.clearCache();
     return {
@@ -54,8 +78,9 @@ export class ExternalDataController {
   }
 
   @Delete('cache/:key')
+  @HttpCode(HttpStatus.OK)
   clearSpecificCache(@Param('key') key: string) {
-    this.externalDataService.clearCache(key);
+    this.externalDataService.clearCache(decodeURIComponent(key));
     return {
       success: true,
       message: `Cache cleared for key: ${key}`,
@@ -72,6 +97,7 @@ export class ExternalDataController {
   }
 
   @Post('endpoints')
+  @HttpCode(HttpStatus.CREATED)
   addEndpoint(@Body() body: { key: string; path: string }) {
     const { key, path } = body;
 
@@ -100,6 +126,14 @@ export class ExternalDataController {
       service: 'External Data (Npoint.io)',
       status: isHealthy ? 'healthy' : 'unhealthy',
       timestamp: new Date().toISOString(),
+      endpoints: {
+        pancasila: '/external-data/pancasila',
+        uud1945: '/external-data/uud1945',
+        kuhp: '/external-data/kuhp',
+        kuhperdata: '/external-data/kuhperdata',
+        kuhd: '/external-data/kuhd',
+        kuhap: '/external-data/kuhap',
+      },
     };
   }
 }
