@@ -21,6 +21,8 @@ import {
 } from './dashboard.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 @ApiTags('Dashboard')
 @ApiBearerAuth()
@@ -30,6 +32,7 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('stats')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get statistik dashboard utama' })
   @ApiResponse({ status: 200, description: 'Statistik berhasil diambil' })
   getStats(): Promise<DashboardStats> {
@@ -37,6 +40,7 @@ export class DashboardController {
   }
 
   @Get('recent-activities')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get aktivitas terbaru' })
   @ApiResponse({
     status: 200,
@@ -47,6 +51,7 @@ export class DashboardController {
   }
 
   @Get('my-stats')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get statistik personal user' })
   @ApiResponse({
     status: 200,
@@ -57,6 +62,7 @@ export class DashboardController {
   }
 
   @Get('upcoming-sidang')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get jadwal sidang mendatang' })
   @ApiResponse({
     status: 200,
@@ -67,6 +73,7 @@ export class DashboardController {
   }
 
   @Get('chart/perkara-by-jenis')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get chart perkara berdasarkan jenis' })
   @ApiResponse({ status: 200, description: 'Data chart berhasil diambil' })
   getPerkaraByJenisChart(): Promise<ChartDataItem[]> {
@@ -74,6 +81,7 @@ export class DashboardController {
   }
 
   @Get('chart/perkara-by-status')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get chart perkara berdasarkan status' })
   @ApiResponse({ status: 200, description: 'Data chart berhasil diambil' })
   getPerkaraByStatusChart(): Promise<StatusChartDataItem[]> {

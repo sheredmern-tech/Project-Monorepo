@@ -41,6 +41,7 @@ export class TimPerkaraController {
   }
 
   @Get()
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get semua tim perkara dengan pagination' })
   @ApiResponse({
     status: 200,
@@ -51,6 +52,7 @@ export class TimPerkaraController {
   }
 
   @Get('perkara/:perkaraId')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get tim berdasarkan perkara ID' })
   @ApiResponse({
     status: 200,
@@ -61,6 +63,7 @@ export class TimPerkaraController {
   }
 
   @Get('user/:userId')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get perkara berdasarkan user ID' })
   @ApiResponse({
     status: 200,
@@ -71,6 +74,7 @@ export class TimPerkaraController {
   }
 
   @Get(':id')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
   @ApiOperation({ summary: 'Get detail tim perkara by ID' })
   @ApiResponse({
     status: 200,

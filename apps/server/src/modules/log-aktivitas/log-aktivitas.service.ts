@@ -1,13 +1,66 @@
 // ===== FILE: src/modules/log-aktivitas/log-aktivitas.service.ts (FIXED) =====
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import { QueryLogDto } from './dto/query-log.dto';
 import { PaginatedResult, LogAktivitasWithUser } from '../../common/interfaces';
+
+export interface AuditLogData {
+  user_id: string;
+  user_role?: UserRole;
+  aksi: string;
+  jenis_entitas?: string;
+  id_entitas?: string;
+  detail?: Record<string, any>;
+  permission_context?: {
+    required_roles?: UserRole[];
+    required_permissions?: string[];
+    access_granted: boolean;
+  };
+}
 
 @Injectable()
 export class LogAktivitasService {
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * Create audit log with permission context
+   * Enhanced logging with role and permission information
+   */
+  async log(data: AuditLogData): Promise<void> {
+    const { user_id, user_role, permission_context, detail, ...rest } = data;
+
+    // Enhance detail with permission context
+    const enhancedDetail = {
+      ...detail,
+      ...(user_role && { user_role }),
+      ...(permission_context && { permission_context }),
+      timestamp: new Date().toISOString(),
+    };
+
+    await this.prisma.logAktivitas.create({
+      data: {
+        user_id,
+        ...rest,
+        detail: enhancedDetail,
+      },
+    });
+  }
+
+  /**
+   * Create standard audit log (backward compatible)
+   */
+  async create(data: {
+    user_id: string;
+    aksi: string;
+    jenis_entitas?: string;
+    id_entitas?: string;
+    detail?: Record<string, any>;
+  }): Promise<void> {
+    await this.prisma.logAktivitas.create({
+      data,
+    });
+  }
 
   async findAll(
     query: QueryLogDto,
