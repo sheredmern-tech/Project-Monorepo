@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { LucideIcon } from 'lucide-react'
 import {
   Flag,
@@ -158,27 +158,47 @@ export function TabNavigation({
           </TabsList>
         </div>
 
-        {/* Chevron Navigation Buttons */}
-        {canScrollLeft && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={scrollLeft}
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full shadow-md bg-background/95 backdrop-blur z-10"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        )}
-        {canScrollRight && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={scrollRight}
-            className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full shadow-md bg-background/95 backdrop-blur z-10"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
+        {/* Chevron Navigation Buttons - Only render after mount to prevent hydration mismatch */}
+        <AnimatePresence>
+          {mounted && canScrollLeft && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10"
+            >
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={scrollLeft}
+                className="h-8 w-8 rounded-full shadow-md bg-background/95 backdrop-blur"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {mounted && canScrollRight && (
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10"
+            >
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={scrollRight}
+                className="h-8 w-8 rounded-full shadow-md bg-background/95 backdrop-blur"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </Tabs>
   )
