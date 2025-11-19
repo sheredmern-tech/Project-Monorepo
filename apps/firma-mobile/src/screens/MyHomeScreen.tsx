@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,27 +7,31 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import {
-  MY_ACTIVE_CASE,
-  MY_CASE_HISTORY,
-  hasActiveCase,
-  canCreateNewCase,
-  getDaysUntilDeadline,
-} from '../mocks/my-cases.mock';
+import { useStore } from '../store';
+import { getActiveCase, hasActiveCase as checkHasActiveCase, getCompletedCases } from '../utils/case-helpers';
 
 export default function MyHomeScreen({ navigation }: any) {
+  const { cases, loadCases, isLoadingCases } = useStore();
   const [refreshing, setRefreshing] = React.useState(false);
 
-  const onRefresh = () => {
+  useEffect(() => {
+    loadCases();
+  }, []);
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await loadCases(true);
+    setRefreshing(false);
   };
 
+  const MY_ACTIVE_CASE = getActiveCase(cases);
+  const MY_CASE_HISTORY = getCompletedCases(cases);
+  const hasActive = checkHasActiveCase(cases);
+
   const handleCreateCase = () => {
-    if (!canCreateNewCase()) {
+    if (hasActive) {
       Alert.alert(
         'Pengajuan Aktif',
         'Anda sudah memiliki 1 pengajuan yang sedang berjalan. Selesaikan pengajuan ini terlebih dahulu sebelum membuat yang baru.',
@@ -38,7 +42,23 @@ export default function MyHomeScreen({ navigation }: any) {
     navigation.navigate('CreateCase');
   };
 
+  const getDaysUntilDeadline = () => {
+    if (!MY_ACTIVE_CASE?.deadline) return null;
+    const deadline = new Date(MY_ACTIVE_CASE.deadline);
+    const now = new Date();
+    const diff = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diff;
+  };
+
   const daysLeft = getDaysUntilDeadline();
+
+  if (isLoadingCases && cases.length === 0) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -46,7 +66,7 @@ export default function MyHomeScreen({ navigation }: any) {
       <View style={styles.header}>
         <Text style={styles.title}>Pengajuan Saya</Text>
         <Text style={styles.subtitle}>
-          {hasActiveCase() ? '1 Active Case' : 'No Active Case'}
+          {hasActive ? '1 Active Case' : 'No Active Case'}
         </Text>
       </View>
 
@@ -57,7 +77,7 @@ export default function MyHomeScreen({ navigation }: any) {
         }
       >
         {/* ACTIVE CASE CARD */}
-        {hasActiveCase() && (
+        {hasActive && MY_ACTIVE_CASE && (
           <View style={styles.activeCard}>
             <View style={styles.activeBadge}>
               <Text style={styles.activeBadgeText}>🔥 ACTIVE</Text>
@@ -69,10 +89,10 @@ export default function MyHomeScreen({ navigation }: any) {
               }
             >
               <View style={styles.cardHeader}>
-                <Text style={styles.serviceIcon}>{MY_ACTIVE_CASE.service_icon}</Text>
+                <Text style={styles.serviceIcon}>{MY_ACTIVE_CASE.service?.icon || '📋'}</Text>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={styles.serviceName}>
-                    {MY_ACTIVE_CASE.service_name}
+                    {MY_ACTIVE_CASE.service?.name || 'Legal Service'}
                   </Text>
                   <Text style={styles.caseNumber}>
                     {MY_ACTIVE_CASE.case_number}
@@ -154,7 +174,7 @@ export default function MyHomeScreen({ navigation }: any) {
         )}
 
         {/* NO ACTIVE CASE - CTA */}
-        {!hasActiveCase() && (
+        {!hasActive && (
           <View style={styles.emptyState}>
             <Text style={styles.emptyIcon}>📋</Text>
             <Text style={styles.emptyTitle}>Tidak Ada Pengajuan Aktif</Text>

@@ -10,11 +10,12 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import { useStore } from '../store';
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('client@test.com');
-  const [password, setPassword] = useState('password123');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login, isLoading } = useStore();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -22,13 +23,17 @@ export default function LoginScreen({ navigation }: any) {
       return;
     }
 
-    setLoading(true);
+    try {
+      const success = await login(email, password);
 
-    // Mock login
-    setTimeout(() => {
-      setLoading(false);
-      navigation.replace('Main');
-    }, 1000);
+      if (success) {
+        navigation.replace('Main');
+      } else {
+        Alert.alert('Login Failed', 'Invalid email or password. Please try again.');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'An error occurred during login');
+    }
   };
 
   return (
@@ -50,12 +55,12 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
-              placeholder="client@test.com"
+              placeholder="your-email@example.com"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
-              editable={!loading}
+              editable={!isLoading}
             />
           </View>
 
@@ -67,16 +72,16 @@ export default function LoginScreen({ navigation }: any) {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              editable={!loading}
+              editable={!isLoading}
             />
           </View>
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleLogin}
-            disabled={loading}
+            disabled={isLoading}
           >
-            {loading ? (
+            {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
@@ -84,7 +89,7 @@ export default function LoginScreen({ navigation }: any) {
           </TouchableOpacity>
 
           <Text style={styles.hint}>
-            Demo: client@test.com / password123
+            Enter your credentials to continue
           </Text>
         </View>
       </View>

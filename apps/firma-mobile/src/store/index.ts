@@ -446,7 +446,7 @@ export const useStore = create<AppState>((set, get) => ({
         await syncService.addToUploadQueue({
           type: 'document',
           action: 'create',
-          endpoint: '/dokumen/upload',
+          endpoint: '/dokumen',
           payload: {
             perkaraId: caseId,
             kategori: category,

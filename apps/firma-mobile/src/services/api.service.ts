@@ -268,7 +268,7 @@ class ApiService {
     try {
       // Use direct axios call for multipart
       const response = await axios.post<UploadDokumenResponse>(
-        `${API_URL}/dokumen/upload`,
+        `${API_URL}/dokumen`,
         formData,
         {
           headers: {

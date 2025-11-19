@@ -133,7 +133,7 @@ export const API_ENDPOINTS = {
   
   // Dokumen (Documents)
   DOKUMEN: '/dokumen',
-  DOKUMEN_UPLOAD: '/dokumen/upload',
+  DOKUMEN_UPLOAD: '/dokumen',
   DOKUMEN_DETAIL: (id: string) => `/dokumen/${id}`,
   DOKUMEN_DOWNLOAD: (id: string) => `/dokumen/${id}/download`,
   

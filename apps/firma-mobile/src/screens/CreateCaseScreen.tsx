@@ -8,7 +8,8 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { hasActiveCase, MY_ACTIVE_CASE } from '../mocks/my-cases.mock';
+import { useStore } from '../store';
+import { hasActiveCase, getActiveCase } from '../utils/case-helpers';
 
 // Available services
 const SERVICES = [
@@ -70,20 +71,28 @@ const SERVICES = [
 ];
 
 export default function CreateCaseScreen({ navigation }: any) {
+  const { cases, loadCases } = useStore();
   const [step, setStep] = useState(1); // 1: check, 2: pilih layanan, 3: isi detail, 4: konfirmasi
   const [selectedService, setSelectedService] = useState<any>(null);
   const [caseTitle, setCaseTitle] = useState('');
   const [description, setDescription] = useState('');
 
+  const MY_ACTIVE_CASE = getActiveCase(cases);
+  const hasActive = hasActiveCase(cases);
+
   // ===================================================================
   // STEP 0: CHECK IF USER HAS ACTIVE CASE
   // ===================================================================
   useEffect(() => {
-    if (hasActiveCase()) {
+    loadCases();
+  }, []);
+
+  useEffect(() => {
+    if (hasActive && MY_ACTIVE_CASE) {
       // Block immediately - show warning
       Alert.alert(
         '⚠️ Pengajuan Sudah Ada',
-        `Anda sudah memiliki pengajuan aktif:\n\n"${MY_ACTIVE_CASE.service_name}"\n(${MY_ACTIVE_CASE.case_number})\n\nSelesaikan pengajuan ini terlebih dahulu sebelum membuat yang baru.`,
+        `Anda sudah memiliki pengajuan aktif:\n\n"${MY_ACTIVE_CASE.service?.name}"\n(${MY_ACTIVE_CASE.case_number})\n\nSelesaikan pengajuan ini terlebih dahulu sebelum membuat yang baru.`,
         [
           {
             text: 'Lihat Pengajuan',
@@ -101,10 +110,10 @@ export default function CreateCaseScreen({ navigation }: any) {
         ]
       );
     }
-  }, []);
+  }, [hasActive]);
 
   // Don't render form if has active case
-  if (hasActiveCase()) {
+  if (hasActive && MY_ACTIVE_CASE) {
     return (
       <View style={styles.blockedContainer}>
         <Text style={styles.blockedIcon}>🚫</Text>
@@ -113,10 +122,10 @@ export default function CreateCaseScreen({ navigation }: any) {
           Anda sudah memiliki 1 pengajuan aktif
         </Text>
         <View style={styles.activeInfoCard}>
-          <Text style={styles.activeInfoIcon}>{MY_ACTIVE_CASE.service_icon}</Text>
+          <Text style={styles.activeInfoIcon}>{MY_ACTIVE_CASE.service?.icon || '📋'}</Text>
           <View style={{ flex: 1 }}>
             <Text style={styles.activeInfoService}>
-              {MY_ACTIVE_CASE.service_name}
+              {MY_ACTIVE_CASE.service?.name || 'Legal Service'}
             </Text>
             <Text style={styles.activeInfoNumber}>
               {MY_ACTIVE_CASE.case_number}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,42 +6,39 @@ import {
   StyleSheet,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
-import { MOCK_CASES, Case } from '../mocks/cases.mock';
+import { useStore } from '../store';
+import dataTransformService from '../services/data-transform.service';
+import type { Case } from '../types';
 
 export default function CaseListScreen({ navigation }: any) {
-  const [cases, setCases] = useState<Case[]>(MOCK_CASES);
+  const {
+    cases,
+    isLoadingCases,
+    casesError,
+    loadCases,
+    syncStatus
+  } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
-  const onRefresh = () => {
+  // Load cases on mount
+  useEffect(() => {
+    loadCases();
+  }, []);
+
+  const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate refresh
-    setTimeout(() => {
-      setCases(MOCK_CASES);
-      setRefreshing(false);
-    }, 1000);
+    await loadCases(true); // Force refresh from server
+    setRefreshing(false);
   };
 
   const getPhaseLabel = (phase: number, skipped: boolean) => {
-    if (phase === 2 && skipped) {
-      return 'Phase 3 (P2 Skipped)';
-    }
-    return `Phase ${phase}`;
+    return dataTransformService.getPhaseLabel(phase, skipped);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'phase_0':
-        return '#6b7280';
-      case 'phase_1':
-        return '#3b82f6';
-      case 'phase_2':
-        return '#f59e0b';
-      case 'phase_3':
-        return '#10b981';
-      default:
-        return '#6b7280';
-    }
+  const getStatusColor = (phase: number) => {
+    return dataTransformService.getPhaseColor(phase);
   };
 
   const renderCaseCard = ({ item }: { item: Case }) => (
@@ -59,11 +56,11 @@ export default function CaseListScreen({ navigation }: any) {
 style = {
   [
     styles.statusBadge,
-    { backgroundColor: getStatusColor(item.status) + '20' },
+    { backgroundColor: getStatusColor(item.current_phase) + '20' },
           ]}
   >
   <Text
-            style={ [styles.statusText, { color: getStatusColor(item.status) }] }
+            style={ [styles.statusText, { color: getStatusColor(item.current_phase) }] }
           >
   { getPhaseLabel(item.current_phase, item.phase_2_skipped) }
   </Text>
@@ -162,11 +159,42 @@ style = {
 </TouchableOpacity>
   );
 
+  // Show loading on first load
+  if (isLoadingCases && cases.length === 0) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text style={styles.loadingText}>Loading cases...</Text>
+      </View>
+    );
+  }
+
+  // Show error if exists
+  if (casesError && cases.length === 0) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text style={styles.errorIcon}>⚠️</Text>
+        <Text style={styles.errorText}>{casesError}</Text>
+        <TouchableOpacity
+          onPress={() => loadCases(true)}
+          style={styles.retryButton}
+        >
+          <Text style={styles.retryButtonText}>Tap to retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
 return (
   <View style= { styles.container } >
   <View style={ styles.header }>
     <Text style={ styles.title }> My Cases </Text>
       < Text style = { styles.subtitle } > { cases.length } Active Cases </Text>
+      {!syncStatus.isOnline && (
+        <View style={styles.offlineBadge}>
+          <Text style={styles.offlineBadgeText}>📴 Offline Mode</Text>
+        </View>
+      )}
         </View>
 
         < FlatList
@@ -338,5 +366,48 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#6b7280',
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#6b7280',
+  },
+  errorIcon: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ef4444',
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 40,
+  },
+  retryButton: {
+    backgroundColor: '#3b82f6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  offlineBadge: {
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  offlineBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400e',
   },
 });
