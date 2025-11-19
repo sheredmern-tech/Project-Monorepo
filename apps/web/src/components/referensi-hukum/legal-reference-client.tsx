@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import {
   Search,
   Copy,
@@ -101,56 +101,50 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
     return filtered
   }, [data, searchQuery])
 
-  // Load more items when scrolling
-  const loadMore = () => {
+  // Load more items when scrolling (wrapped with useCallback)
+  const loadMore = useCallback(() => {
+    if (isLoadingMore) return
+
     const currentCount = visibleCounts[activeTab]
     const totalItems = filteredData[activeTab]?.items.length || 0
 
     if (currentCount < totalItems) {
       setIsLoadingMore(true)
+      // Small delay for smooth UX
       setTimeout(() => {
         setVisibleCounts((prev) => ({
           ...prev,
-          [activeTab]: Math.min(currentCount + ITEMS_PER_BATCH, totalItems)
+          [activeTab]: Math.min(prev[activeTab] + ITEMS_PER_BATCH, totalItems)
         }))
         setIsLoadingMore(false)
       }, 300)
     }
-  }
+  }, [activeTab, visibleCounts, filteredData, isLoadingMore])
 
-  // Setup intersection observer
+  // Setup intersection observer for infinite scroll
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
+    const currentRef = loadMoreRef.current
+    if (!currentRef) return
+
+    const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore) {
+        // When the load more trigger is visible, load more items
+        if (entries[0].isIntersecting) {
           loadMore()
         }
       },
-      { threshold: 0.1 }
+      {
+        threshold: 0.1,
+        rootMargin: '100px' // Start loading 100px before reaching the trigger
+      }
     )
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect()
-      }
-    }
-  }, [activeTab, isLoadingMore, visibleCounts])
-
-  // Attach observer to load more trigger
-  useEffect(() => {
-    const currentRef = loadMoreRef.current
-    const currentObserver = observerRef.current
-
-    if (currentRef && currentObserver) {
-      currentObserver.observe(currentRef)
-    }
+    observer.observe(currentRef)
 
     return () => {
-      if (currentRef && currentObserver) {
-        currentObserver.unobserve(currentRef)
-      }
+      observer.disconnect()
     }
-  }, [activeTab, filteredData])
+  }, [loadMore])
 
   // Reset visible count when search changes or tab changes
   useEffect(() => {
@@ -431,17 +425,34 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
 
                       {/* Infinite Scroll Trigger & Loading Indicator */}
                       {visibleCounts[category.id] < items.length && (
-                        <div ref={loadMoreRef} className="flex items-center justify-center py-8">
-                          {isLoadingMore ? (
-                            <div className="flex items-center gap-3 text-muted-foreground">
-                              <Loader2 className="h-6 w-6 animate-spin" />
-                              <span className="text-base font-medium">Memuat lebih banyak...</span>
-                            </div>
-                          ) : (
-                            <div className="text-sm text-muted-foreground bg-muted/50 px-6 py-3 rounded-full">
-                              Menampilkan {visibleCounts[category.id]} dari {items.length} item
-                            </div>
-                          )}
+                        <div className="mt-8 space-y-4">
+                          {/* Intersection Observer Trigger */}
+                          <div ref={loadMoreRef} className="h-1" />
+
+                          <div className="flex flex-col items-center justify-center gap-4 py-6">
+                            {isLoadingMore ? (
+                              <div className="flex items-center gap-3 text-muted-foreground">
+                                <Loader2 className="h-6 w-6 animate-spin" />
+                                <span className="text-base font-medium">Memuat lebih banyak...</span>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="text-sm text-muted-foreground bg-muted/50 px-6 py-3 rounded-full">
+                                  Menampilkan {visibleCounts[category.id]} dari {items.length} item
+                                </div>
+                                {/* Manual Load More Button (fallback) */}
+                                <Button
+                                  variant="outline"
+                                  onClick={loadMore}
+                                  disabled={isLoadingMore}
+                                  className="gap-2"
+                                >
+                                  <Search className="h-4 w-4" />
+                                  Muat {Math.min(ITEMS_PER_BATCH, items.length - visibleCounts[category.id])} Item Lagi
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       )}
 
