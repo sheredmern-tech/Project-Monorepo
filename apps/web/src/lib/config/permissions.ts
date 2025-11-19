@@ -208,10 +208,15 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "konflik:update",
     // Tim
     "tim:read",
-    "tim:update", // Can update team assignments
+    "tim:update", // Can update team assignments (tim-perkara, NOT user management)
     // Laporan
-    "laporan:read",
-    "laporan:export",
+    "laporan:read", // ✅ ADVOKAT can view reports & analytics
+    "laporan:export", // ✅ Can export reports for client presentations & case analysis
+    // Note: Professional lawyers NEED access to:
+    // - Performance metrics (kinerja)
+    // - Activity logs (aktivitas)
+    // - Billing reports (keuangan) for their cases
+    // - Custom reports for clients
     // Pengaturan
     "pengaturan:read",
   ],
