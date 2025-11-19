@@ -26,6 +26,7 @@ interface LegalReferenceClientProps {
 const ITEMS_PER_BATCH = 30
 
 export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
+  const [mounted, setMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<LegalCategory>('pancasila')
@@ -39,6 +40,11 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
   })
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
+
+  // Handle hydration
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Filter data based on search query
   const filteredData = useMemo(() => {
@@ -212,7 +218,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
             <TabsContent key={category.id} value={category.id} className="mt-6">
               {/* Category Header */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={mounted ? { opacity: 0, y: 20 } : false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 className="mb-6 pb-4 border-b"
@@ -234,7 +240,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
               {/* Items List */}
               {items.length === 0 ? (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={mounted ? { opacity: 0, scale: 0.95 } : false}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   className="flex flex-col items-center justify-center py-16 text-center"
@@ -279,7 +285,7 @@ export function LegalReferenceClient({ data }: LegalReferenceClientProps) {
                   {/* All items loaded */}
                   {!hasMore && items.length > 0 && (
                     <motion.div
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={mounted ? { opacity: 0, y: 20 } : false}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4 }}
                       className="flex items-center justify-center gap-2 py-8 mt-6 text-sm text-muted-foreground border-t"

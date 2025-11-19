@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { LucideIcon } from 'lucide-react'
 import {
@@ -37,6 +38,12 @@ export function TabNavigation({
   searchQuery,
   getResultCount
 }: TabNavigationProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const getIconComponent = (iconName: string): LucideIcon => {
     return CATEGORY_ICONS[iconName] || FileText
   }
@@ -50,9 +57,9 @@ export function TabNavigation({
           return (
             <motion.div
               key={category.id}
-              initial={{ opacity: 0, y: -20 }}
+              initial={mounted ? { opacity: 0, y: -20 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.05 }}
+              transition={{ duration: 0.3, delay: mounted ? idx * 0.05 : 0 }}
             >
               <TabsTrigger
                 value={category.id}

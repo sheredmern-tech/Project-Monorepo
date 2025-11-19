@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { LegalCategory } from '@/types/external-data'
 
 interface InfinityScrollTriggerProps {
-  loadMoreRef: React.RefObject<HTMLDivElement>
+  loadMoreRef: React.RefObject<HTMLDivElement | null>
   isLoadingMore: boolean
   itemsPerBatch: number
   totalItems: number

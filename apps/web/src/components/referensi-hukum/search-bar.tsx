@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -12,9 +13,15 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ value, onChange, onClear }: SearchBarProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
+      initial={mounted ? { opacity: 0, y: -10 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className="relative"

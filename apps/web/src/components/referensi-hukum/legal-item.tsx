@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Copy, Share2, Check } from 'lucide-react'
 import {
@@ -21,6 +22,12 @@ interface LegalItemProps {
 }
 
 export function LegalItem({ item, itemId, index, isCopied, onCopy, onShare }: LegalItemProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const isPancasila = 'butir' in item
   const title = item.nama || 'Untitled'
 
@@ -36,11 +43,11 @@ export function LegalItem({ item, itemId, index, isCopied, onCopy, onShare }: Le
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={mounted ? { opacity: 0, y: 20 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 0.3,
-        delay: Math.min(index * 0.02, 0.5)
+        delay: mounted ? Math.min(index * 0.02, 0.5) : 0
       }}
     >
       <AccordionItem value={itemId} className="border rounded-lg px-4 hover:bg-muted/50 transition-colors">
