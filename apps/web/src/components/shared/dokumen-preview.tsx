@@ -109,7 +109,6 @@ function getGoogleWorkspaceUrls(googleDriveId: string, mimeType?: string): {
 export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) {
   const [iframeLoading, setIframeLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false); // ✨ NEW: Edit mode state
 
   // ✅ Use Google Drive links directly
   const downloadLink = dokumen.google_drive_link;
@@ -131,8 +130,8 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
     return getGoogleWorkspaceUrls(dokumen.google_drive_id, mimeType);
   }, [dokumen.google_drive_id, dokumen.tipe_file, dokumen.embed_link]);
 
-  // ✨ Dynamic iframe URL based on mode
-  const embedLink = isEditMode ? fileUrls.editUrl : fileUrls.viewUrl;
+  // ✅ Always use viewUrl for iframe (edit mode opens in new tab)
+  const embedLink = fileUrls.viewUrl;
 
   const handleDownload = () => {
     if (downloadLink) {
@@ -179,27 +178,15 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
             {/* Action Buttons */}
             <div className="hidden lg:flex gap-2">
-              {/* ✨ NEW: Edit Mode Toggle (only for Google Workspace files) */}
+              {/* ✨ Edit Button - Opens in new tab for proper Google Drive editing */}
               {fileUrls.isEditable && (
                 <Button
-                  variant={isEditMode ? "default" : "outline"}
+                  variant="default"
                   size="sm"
-                  onClick={() => {
-                    setIsEditMode(!isEditMode);
-                    setIframeLoading(true); // Reset loading state when switching
-                  }}
+                  onClick={() => window.open(fileUrls.editUrl, '_blank')}
                 >
-                  {isEditMode ? (
-                    <>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editing
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Mode
-                    </>
-                  )}
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit di Google Drive
                 </Button>
               )}
               <Button variant="outline" size="sm" onClick={handleOpenInDrive}>
@@ -315,28 +302,16 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
               {/* Mobile Action Buttons */}
               <div className="lg:hidden space-y-2">
-                {/* ✨ NEW: Edit Mode Toggle for Mobile */}
+                {/* ✨ Edit Button - Opens in new tab for proper Google Drive editing */}
                 {fileUrls.isEditable && (
                   <Button
-                    variant={isEditMode ? "default" : "outline"}
+                    variant="default"
                     size="sm"
                     className="w-full"
-                    onClick={() => {
-                      setIsEditMode(!isEditMode);
-                      setIframeLoading(true);
-                    }}
+                    onClick={() => window.open(fileUrls.editUrl, '_blank')}
                   >
-                    {isEditMode ? (
-                      <>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editing
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Mode
-                      </>
-                    )}
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit di Google Drive
                   </Button>
                 )}
                 <div className="flex gap-2">

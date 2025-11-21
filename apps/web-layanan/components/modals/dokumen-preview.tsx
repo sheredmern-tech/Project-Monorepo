@@ -114,7 +114,6 @@ function getGoogleWorkspaceUrls(googleDriveId: string, mimeType?: string): {
 export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) {
   const [iframeLoading, setIframeLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false); // ✨ NEW: Edit mode state
 
   const downloadLink = dokumen.google_drive_link;
   const extension = dokumen.nama_dokumen.split('.').pop()?.toUpperCase() || 'FILE';
@@ -133,8 +132,8 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
     return getGoogleWorkspaceUrls(dokumen.google_drive_id, dokumen.mime_type);
   }, [dokumen.google_drive_id, dokumen.mime_type, dokumen.embed_link]);
 
-  // ✨ Dynamic iframe URL based on mode
-  const embedLink = isEditMode ? fileUrls.editUrl : fileUrls.viewUrl;
+  // ✅ Always use viewUrl for iframe (edit mode opens in new tab)
+  const embedLink = fileUrls.viewUrl;
 
   const handleDownload = () => {
     if (downloadLink) {
@@ -177,30 +176,14 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
           {/* Desktop Action Buttons */}
           <div className="hidden lg:flex gap-2">
-            {/* ✨ NEW: Edit Mode Toggle (only for Google Workspace files) */}
+            {/* ✨ Edit Button - Opens in new tab for proper Google Drive editing */}
             {fileUrls.isEditable && (
               <button
-                onClick={() => {
-                  setIsEditMode(!isEditMode);
-                  setIframeLoading(true); // Reset loading state when switching
-                }}
-                className={`px-4 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition ${
-                  isEditMode
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
+                onClick={() => window.open(fileUrls.editUrl, '_blank')}
+                className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition"
               >
-                {isEditMode ? (
-                  <>
-                    <Edit className="h-4 w-4" />
-                    Editing
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4" />
-                    View Mode
-                  </>
-                )}
+                <Edit className="h-4 w-4" />
+                Edit di Google Drive
               </button>
             )}
             <button
@@ -329,30 +312,14 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
               {/* Mobile Action Buttons */}
               <div className="lg:hidden space-y-2">
-                {/* ✨ NEW: Edit Mode Toggle for Mobile */}
+                {/* ✨ Edit Button - Opens in new tab for proper Google Drive editing */}
                 {fileUrls.isEditable && (
                   <button
-                    onClick={() => {
-                      setIsEditMode(!isEditMode);
-                      setIframeLoading(true);
-                    }}
-                    className={`w-full px-4 py-2 text-sm font-medium rounded-lg flex items-center justify-center gap-2 transition ${
-                      isEditMode
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                    }`}
+                    onClick={() => window.open(fileUrls.editUrl, '_blank')}
+                    className="w-full px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 transition"
                   >
-                    {isEditMode ? (
-                      <>
-                        <Edit className="h-4 w-4" />
-                        Editing
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4" />
-                        View Mode
-                      </>
-                    )}
+                    <Edit className="h-4 w-4" />
+                    Edit di Google Drive
                   </button>
                 )}
                 <div className="flex gap-2">

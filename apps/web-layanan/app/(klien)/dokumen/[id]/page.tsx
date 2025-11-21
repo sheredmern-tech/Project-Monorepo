@@ -108,7 +108,6 @@ export default function DokumenDetailPage() {
   const [error, setError] = useState('');
   const [iframeLoading, setIframeLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false); // ✨ NEW: Edit mode state
 
   // ✅ FIX: Extract google_drive_id from google_drive_link - BEFORE any hooks
   const extractDriveId = (link?: string): string | undefined => {
@@ -133,8 +132,8 @@ export default function DokumenDetailPage() {
     return getGoogleWorkspaceUrls(google_drive_id, dokumen.mime_type);
   }, [google_drive_id, dokumen?.mime_type, dokumen?.embed_link]);
 
-  // ✨ Dynamic iframe URL based on mode
-  const embedLink = isEditMode ? fileUrls.editUrl : fileUrls.viewUrl;
+  // ✅ Always use viewUrl for iframe (edit mode opens in new tab)
+  const embedLink = fileUrls.viewUrl;
   const extension = dokumen?.nama_dokumen.split('.').pop()?.toUpperCase() || 'FILE';
 
   useEffect(() => {
@@ -245,30 +244,14 @@ export default function DokumenDetailPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {/* ✨ NEW: Edit Mode Toggle (only for Google Workspace files) */}
+            {/* ✨ Edit Button - Opens in new tab for proper Google Drive editing */}
             {fileUrls.isEditable && (
               <button
-                onClick={() => {
-                  setIsEditMode(!isEditMode);
-                  setIframeLoading(true); // Reset loading state when switching
-                }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-medium ${
-                  isEditMode
-                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'border hover:bg-accent'
-                }`}
+                onClick={() => window.open(fileUrls.editUrl, '_blank')}
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition text-sm font-medium"
               >
-                {isEditMode ? (
-                  <>
-                    <Edit className="h-4 w-4" />
-                    Editing
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4" />
-                    View Mode
-                  </>
-                )}
+                <Edit className="h-4 w-4" />
+                Edit di Google Drive
               </button>
             )}
             <button
