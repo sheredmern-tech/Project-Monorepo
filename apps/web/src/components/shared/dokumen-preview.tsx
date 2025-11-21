@@ -34,20 +34,30 @@ interface DokumenPreviewProps {
 
 /**
  * Helper function to detect Google Workspace file type and build URLs
+ * ✨ UPDATED: Now supports MS Office files (DOCX, XLSX, PPTX)
  */
 function getGoogleWorkspaceUrls(googleDriveId: string, mimeType?: string): {
   isEditable: boolean;
   viewUrl: string;
   editUrl: string;
-  fileType: 'docs' | 'sheets' | 'slides' | 'generic';
+  fileType: 'docs' | 'sheets' | 'slides' | 'office' | 'generic';
 } {
-  // Google Workspace MIME types
+  // Google Workspace MIME types (Native)
   const GOOGLE_DOCS = 'application/vnd.google-apps.document';
   const GOOGLE_SHEETS = 'application/vnd.google-apps.spreadsheet';
   const GOOGLE_SLIDES = 'application/vnd.google-apps.presentation';
 
+  // Microsoft Office MIME types
+  const MS_WORD = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'; // .docx
+  const MS_EXCEL = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; // .xlsx
+  const MS_POWERPOINT = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'; // .pptx
+  const MS_WORD_OLD = 'application/msword'; // .doc
+  const MS_EXCEL_OLD = 'application/vnd.ms-excel'; // .xls
+  const MS_POWERPOINT_OLD = 'application/vnd.ms-powerpoint'; // .ppt
+
   // Detect file type and build appropriate URLs
   switch (mimeType) {
+    // Google Workspace Native Files
     case GOOGLE_DOCS:
       return {
         isEditable: true,
@@ -69,6 +79,22 @@ function getGoogleWorkspaceUrls(googleDriveId: string, mimeType?: string): {
         editUrl: `https://docs.google.com/presentation/d/${googleDriveId}/edit`,
         fileType: 'slides',
       };
+
+    // ✨ NEW: Microsoft Office Files (Editable in Google Drive!)
+    case MS_WORD:
+    case MS_WORD_OLD:
+    case MS_EXCEL:
+    case MS_EXCEL_OLD:
+    case MS_POWERPOINT:
+    case MS_POWERPOINT_OLD:
+      return {
+        isEditable: true,
+        viewUrl: `https://drive.google.com/file/d/${googleDriveId}/preview`,
+        // ✅ MS Office files can be opened in Google Drive editor
+        editUrl: `https://drive.google.com/file/d/${googleDriveId}/edit`,
+        fileType: 'office',
+      };
+
     default:
       // Generic file (PDF, images, etc) - no edit mode
       return {
