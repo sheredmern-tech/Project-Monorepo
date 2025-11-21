@@ -36,6 +36,7 @@ export class DokumenService {
     dto: CreateDokumenDto,
     file: Express.Multer.File,
     userId: string,
+    userRole: UserRole, // ✅ ADDED for access control
   ): Promise<DokumenWithRelations> {
     if (!file) {
       throw new BadRequestException('File harus diupload');
@@ -43,12 +44,25 @@ export class DokumenService {
 
     const perkara = await this.prisma.perkara.findUnique({
       where: { id: dto.perkara_id },
-      select: { id: true, nomor_perkara: true },
+      select: { id: true, nomor_perkara: true, klien_id: true }, // ✅ Need klien_id for validation
     });
 
     if (!perkara) {
       throw new BadRequestException('Perkara tidak ditemukan');
     }
+
+    // 🔒 RBAC: KLIEN hanya bisa upload ke perkara mereka sendiri
+    if (userRole === UserRole.klien) {
+      if (perkara.klien_id !== userId) {
+        this.logger.warn(
+          `🚨 Unauthorized upload attempt: User ${userId} (klien) tried to upload to perkara ${dto.perkara_id} owned by ${perkara.klien_id}`,
+        );
+        throw new BadRequestException(
+          'Anda tidak memiliki akses untuk upload dokumen ke perkara ini',
+        );
+      }
+    }
+    // ✅ INTERNAL STAFF: Can upload to any perkara
 
     // ✅ UPLOAD TO GOOGLE DRIVE (instead of local storage)
     const driveFile = await this.googleDriveService.uploadFile({

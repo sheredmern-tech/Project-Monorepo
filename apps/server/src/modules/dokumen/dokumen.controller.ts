@@ -44,7 +44,7 @@ export class DokumenController {
   ) {}
 
   @Post()
-  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
   @ApiOperation({ summary: 'Upload dokumen baru' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: 'Dokumen berhasil diupload' })
@@ -53,8 +53,9 @@ export class DokumenController {
     @Body() dto: CreateDokumenDto,
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
   ) {
-    return this.dokumenService.create(dto, file, userId);
+    return this.dokumenService.create(dto, file, userId, userRole);
   }
 
   @Get()
