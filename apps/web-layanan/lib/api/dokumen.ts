@@ -130,4 +130,25 @@ export const dokumenApi = {
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/dokumen/${id}`);
   },
+
+  /**
+   * Move document to folder
+   */
+  move: async (id: string, folderId: string | null): Promise<any> => {
+    const response = await apiClient.patch(`/dokumen/${id}/move`, {
+      folder_id: folderId,
+    });
+    return response.data;
+  },
+
+  /**
+   * Copy document
+   */
+  copy: async (id: string, data?: {
+    folder_id?: string | null;
+    nama_dokumen?: string;
+  }): Promise<any> => {
+    const response = await apiClient.post(`/dokumen/${id}/copy`, data || {});
+    return response.data;
+  },
 };
