@@ -106,13 +106,17 @@ export function useUpload() {
           );
         }, 200);
 
+        // ⚠️ WARNING: This hook is NOT compatible with SINGLE SYSTEM
+        // SINGLE SYSTEM requires perkara_id which is not available in bulk upload
+        // Use /dokumen/upload page instead for client uploads
+
         // Upload to backend
         const response = await dokumenApi.upload({
-          files: [file.file],
+          file: file.file,
+          perkara_id: '', // ❌ REQUIRED but not available in bulk upload!
           nama_dokumen: metadata.nama_dokumen,
-          tipe_dokumen: metadata.tipe_dokumen,
-          deskripsi: metadata.deskripsi,
-          kategori: metadata.kategori,
+          kategori: metadata.kategori || 'lainnya',
+          catatan: metadata.deskripsi,
         });
 
         clearInterval(progressInterval);
