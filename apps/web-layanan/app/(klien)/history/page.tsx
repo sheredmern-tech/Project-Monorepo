@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { dokumenApi } from '@/lib/api/dokumen';
+import { useDokumenStore } from '@/lib/stores/dokumen-store';
 import { Dokumen } from '@/types';
 import {
   ArrowLeft,
@@ -22,46 +22,13 @@ import { getDocumentTypeLabel } from '@/lib/utils/fileDetection';
 export default function HistoryPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [documents, setDocuments] = useState<Dokumen[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState('');
+
+  // ✅ Use Zustand store for global state
+  const { documents, loading, error, fetchDocuments } = useDokumenStore();
 
   useEffect(() => {
     fetchDocuments();
-  }, []);
-
-  const fetchDocuments = async () => {
-    try {
-      setError('');
-      const response = await dokumenApi.getAll();
-
-      // ✅ Defensive check - ensure data is array before sort
-      const documentsData = Array.isArray(response?.data)
-        ? response.data
-        : [];
-
-      // Sort by date descending (newest first)
-      const sorted = documentsData.sort(
-        (a, b) =>
-          new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
-      );
-
-      setDocuments(sorted);
-    } catch (error: any) {
-      console.error('Failed to fetch documents:', error);
-      setError('Gagal memuat riwayat. Silakan coba lagi.');
-      setDocuments([]); // ✅ Prevent errors in groupByDate
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchDocuments();
-  };
+  }, [fetchDocuments]);
 
   /**
    * Group documents by date
@@ -172,12 +139,12 @@ export default function HistoryPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-900">Ringkasan</h2>
             <button
-              onClick={handleRefresh}
-              disabled={refreshing}
+              onClick={fetchDocuments}
+              disabled={loading}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2 disabled:opacity-50"
             >
               <RefreshCw
-                className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
+                className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
               />
               Refresh
             </button>

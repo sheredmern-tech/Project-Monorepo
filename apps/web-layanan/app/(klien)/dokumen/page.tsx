@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { dokumenApi } from '@/lib/api/dokumen';
-import { Dokumen } from '@/types';
+import { useDokumenStore } from '@/lib/stores/dokumen-store';
 import {
   FileText,
   Search,
@@ -18,45 +17,20 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { getDocumentTypeLabel } from '@/lib/utils/fileDetection';
 import { cn } from '@/lib/utils';
 
 export default function DokumenPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [documents, setDocuments] = useState<Dokumen[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // ✅ Use Zustand store for global state
+  const { documents, loading, error, fetchDocuments } = useDokumenStore();
 
   useEffect(() => {
     fetchDocuments();
-  }, []);
-
-  const fetchDocuments = async () => {
-    try {
-      setError('');
-      const response = await dokumenApi.getAll();
-
-      const documentsData = Array.isArray(response?.data)
-        ? response.data
-        : [];
-
-      const sorted = documentsData.sort(
-        (a, b) =>
-          new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
-      );
-
-      setDocuments(sorted);
-    } catch (error: any) {
-      console.error('Failed to fetch documents:', error);
-      setError('Gagal memuat dokumen. Silakan coba lagi.');
-      setDocuments([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [fetchDocuments]);
 
   const filteredDocuments = documents.filter((doc) =>
     doc.nama_dokumen.toLowerCase().includes(searchQuery.toLowerCase())
