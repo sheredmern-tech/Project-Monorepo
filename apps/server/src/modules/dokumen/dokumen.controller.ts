@@ -77,6 +77,17 @@ export class DokumenController {
     return this.dokumenService.findAll(query, userId, userRole);
   }
 
+  @Get('stats')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
+  @ApiOperation({ summary: 'Get statistik dokumen' })
+  @ApiResponse({ status: 200, description: 'Statistik dokumen berhasil diambil' })
+  getStats(
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenService.getStats(userId, userRole);
+  }
+
   @Get(':id')
   @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
   @ApiOperation({ summary: 'Get detail dokumen by ID' })

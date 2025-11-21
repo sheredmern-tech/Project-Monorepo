@@ -274,6 +274,70 @@ export class DokumenService {
     };
   }
 
+  // ============================================================================
+  // GET STATS (with RBAC filtering)
+  // ============================================================================
+  async getStats(
+    userId: string,
+    userRole: UserRole,
+  ): Promise<{
+    total_dokumen: number;
+    dokumen_bulan_ini: number;
+    dokumen_minggu_ini: number;
+  }> {
+    const where: Prisma.DokumenHukumWhereInput = {};
+
+    // 🔥 RBAC: Apply same filtering as findAll
+    if (userRole === UserRole.klien) {
+      // ✅ KLIEN: Hanya dokumen dari perkara mereka sendiri
+      const perkaraIds = await this.prisma.perkara.findMany({
+        where: { klien_id: userId },
+        select: { id: true },
+      });
+
+      where.perkara_id = {
+        in: perkaraIds.map((p) => p.id),
+      };
+    }
+    // ✅ INTERNAL STAFF: FULL ACCESS (no filter)
+
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
+
+    const [total_dokumen, dokumen_bulan_ini, dokumen_minggu_ini] = await Promise.all([
+      // Total documents (with RBAC filter)
+      this.prisma.dokumenHukum.count({ where }),
+
+      // Documents this month
+      this.prisma.dokumenHukum.count({
+        where: {
+          ...where,
+          tanggal_upload: {
+            gte: startOfMonth,
+          },
+        },
+      }),
+
+      // Documents this week
+      this.prisma.dokumenHukum.count({
+        where: {
+          ...where,
+          tanggal_upload: {
+            gte: startOfWeek,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      total_dokumen,
+      dokumen_bulan_ini,
+      dokumen_minggu_ini,
+    };
+  }
+
   async findOne(
     id: string,
     userId: string,
