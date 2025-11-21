@@ -101,7 +101,9 @@ export const extractMetadataFromFilename = (file: File) => {
 /**
  * Get document type label (Indonesian)
  */
-export const getDocumentTypeLabel = (type: DocumentType): string => {
+export const getDocumentTypeLabel = (type?: DocumentType | string | null): string => {
+  if (!type) return 'Lainnya';
+
   const labels: Record<DocumentType, string> = {
     surat_kuasa: 'Surat Kuasa',
     gugatan: 'Gugatan',
@@ -112,13 +114,15 @@ export const getDocumentTypeLabel = (type: DocumentType): string => {
     lainnya: 'Lainnya',
   };
 
-  return labels[type] || 'Lainnya';
+  return labels[type as DocumentType] || 'Lainnya';
 };
 
 /**
  * Get document type color for UI
  */
-export const getDocumentTypeColor = (type: DocumentType): string => {
+export const getDocumentTypeColor = (type?: DocumentType | string | null): string => {
+  if (!type) return 'gray';
+
   const colors: Record<DocumentType, string> = {
     surat_kuasa: 'blue',
     gugatan: 'red',
@@ -129,7 +133,7 @@ export const getDocumentTypeColor = (type: DocumentType): string => {
     lainnya: 'gray',
   };
 
-  return colors[type] || 'gray';
+  return colors[type as DocumentType] || 'gray';
 };
 
 /**
