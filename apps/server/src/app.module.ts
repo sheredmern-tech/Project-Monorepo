@@ -63,6 +63,7 @@ import { KlienModule } from './modules/klien/klien.module';
 import { PerkaraModule } from './modules/perkara/perkara.module';
 import { TugasModule } from './modules/tugas/tugas.module';
 import { DokumenModule } from './modules/dokumen/dokumen.module';
+import { DokumenKlienModule } from './modules/dokumen-klien/dokumen-klien.module';
 import { SidangModule } from './modules/sidang/sidang.module';
 import { CatatanModule } from './modules/catatan/catatan.module';
 import { TimPerkaraModule } from './modules/tim-perkara/tim-perkara.module';
@@ -112,6 +113,7 @@ import { ExternalDataModule } from './modules/external-data/external-data.module
     PerkaraModule,
     TugasModule,
     DokumenModule,
+    DokumenKlienModule, // ✅ Client Self-Service Documents
     SidangModule,
     CatatanModule,
     TimPerkaraModule,

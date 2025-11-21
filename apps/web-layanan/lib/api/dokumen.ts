@@ -3,7 +3,7 @@ import { Dokumen, PaginatedResponse } from '@/types';
 
 export const dokumenApi = {
   /**
-   * Upload dokumen
+   * Upload dokumen (bulk upload)
    */
   upload: async (data: {
     files: File[];
@@ -34,7 +34,7 @@ export const dokumenApi = {
       formData.append('tags', JSON.stringify(data.tags));
     }
 
-    const response = await apiClient.post<Dokumen>('/dokumen', formData, {
+    const response = await apiClient.post<Dokumen>('/dokumen-klien/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -52,7 +52,7 @@ export const dokumenApi = {
     page?: number;
     limit?: number;
   }): Promise<PaginatedResponse<Dokumen>> => {
-    const response = await apiClient.get<PaginatedResponse<Dokumen>>('/dokumen', {
+    const response = await apiClient.get<PaginatedResponse<Dokumen>>('/dokumen-klien', {
       params,
     });
     return response.data;
@@ -62,7 +62,7 @@ export const dokumenApi = {
    * Get single document
    */
   getById: async (id: string): Promise<Dokumen> => {
-    const response = await apiClient.get<Dokumen>(`/dokumen/${id}`);
+    const response = await apiClient.get<Dokumen>(`/dokumen-klien/${id}`);
     return response.data;
   },
 
@@ -70,6 +70,6 @@ export const dokumenApi = {
    * Delete document
    */
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/dokumen/${id}`);
+    await apiClient.delete(`/dokumen-klien/${id}`);
   },
 };
