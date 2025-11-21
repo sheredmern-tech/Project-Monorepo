@@ -163,9 +163,9 @@ export class DokumenService {
     const skip = (page - 1) * limit;
     const where: Prisma.DokumenHukumWhereInput = {};
 
-    // 🔥 RBAC: DATA FILTERING BASED ON USER ROLE
+    // 🔥 RBAC: DATA FILTERING BASED ON USER ROLE (OPSI A: SIMPLE MODEL)
     if (userRole === UserRole.klien) {
-      // KLIEN: Hanya dokumen dari perkara mereka
+      // ✅ KLIEN: Hanya dokumen dari perkara mereka sendiri
       const perkaraIds = await this.prisma.perkara.findMany({
         where: { klien_id: userId },
         select: { id: true },
@@ -174,16 +174,9 @@ export class DokumenService {
       where.perkara_id = {
         in: perkaraIds.map((p) => p.id),
       };
-    } else if (userRole === UserRole.advokat) {
-      // ADVOKAT: Dokumen dari perkara yang mereka handle (dibuat) atau di tim
-      where.perkara = {
-        OR: [
-          { dibuat_oleh: userId },
-          { tim_perkara: { some: { user_id: userId } } },
-        ],
-      };
     }
-    // ADMIN, STAFF, PARALEGAL: Full access (no additional filter)
+    // ✅ INTERNAL STAFF (admin, partner, advokat, paralegal, staff): FULL ACCESS
+    // No additional filter needed - they can see ALL documents
 
     // Apply search & filters
     if (search) {
@@ -267,7 +260,11 @@ export class DokumenService {
     };
   }
 
-  async findOne(id: string): Promise<DokumenWithRelations> {
+  async findOne(
+    id: string,
+    userId: string,
+    userRole: UserRole,
+  ): Promise<DokumenWithRelations> {
     const dokumen = await this.prisma.dokumenHukum.findUnique({
       where: { id },
       include: {
@@ -276,6 +273,7 @@ export class DokumenService {
             id: true,
             nomor_perkara: true,
             judul: true,
+            klien_id: true, // ✅ Need this for access check
             klien: {
               select: {
                 id: true,
@@ -303,11 +301,27 @@ export class DokumenService {
       throw new NotFoundException('Dokumen tidak ditemukan');
     }
 
+    // 🔒 RBAC: ACCESS CONTROL (OPSI A: SIMPLE MODEL)
+    if (userRole === UserRole.klien) {
+      // ✅ KLIEN: Hanya bisa akses dokumen dari perkara mereka sendiri
+      if (dokumen.perkara.klien_id !== userId) {
+        this.logger.warn(
+          `🚨 Unauthorized access attempt: User ${userId} (klien) tried to access document ${id} belonging to ${dokumen.perkara.klien_id}`,
+        );
+        throw new NotFoundException('Dokumen tidak ditemukan');
+      }
+    }
+    // ✅ INTERNAL STAFF: Full access (no check needed)
+
     return dokumen;
   }
 
-  async download(id: string): Promise<DokumenDownloadResponse> {
-    const dokumen = await this.findOne(id);
+  async download(
+    id: string,
+    userId: string,
+    userRole: UserRole,
+  ): Promise<DokumenDownloadResponse> {
+    const dokumen = await this.findOne(id, userId, userRole);
 
     // ✅ Return Google Drive download link (not local file)
     if (!dokumen.google_drive_link) {
@@ -326,8 +340,9 @@ export class DokumenService {
     id: string,
     dto: UpdateDokumenDto,
     userId: string,
+    userRole: UserRole,
   ): Promise<DokumenWithRelations> {
-    await this.findOne(id);
+    await this.findOne(id, userId, userRole);
 
     const updateData: Prisma.DokumenHukumUpdateInput = { ...dto };
 
@@ -381,8 +396,12 @@ export class DokumenService {
     return dokumen;
   }
 
-  async remove(id: string, userId: string): Promise<{ message: string }> {
-    const dokumen = await this.findOne(id);
+  async remove(
+    id: string,
+    userId: string,
+    userRole: UserRole,
+  ): Promise<{ message: string }> {
+    const dokumen = await this.findOne(id, userId, userRole);
 
     // ✅ Delete from Google Drive if exists
     if (dokumen.google_drive_id) {

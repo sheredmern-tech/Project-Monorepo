@@ -58,34 +58,42 @@ export class DokumenController {
   }
 
   @Get()
-  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
   @ApiOperation({ summary: 'Get semua dokumen dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data dokumen berhasil diambil' })
   findAll(
     @Query() query: QueryDokumenDto,
     @CurrentUser('id') userId: string,
-    @CurrentUser('role') userRole: UserRole, // ✅ AMBIL ROLE
+    @CurrentUser('role') userRole: UserRole,
   ) {
     return this.dokumenService.findAll(query, userId, userRole);
   }
 
   @Get(':id')
-  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
   @ApiOperation({ summary: 'Get detail dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Detail dokumen berhasil diambil' })
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
   @Header('Pragma', 'no-cache')
   @Header('Expires', '0')
-  findOne(@Param('id') id: string) {
-    return this.dokumenService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenService.findOne(id, userId, userRole);
   }
 
   @Get(':id/download')
-  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
   @ApiOperation({ summary: 'Download dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Dokumen berhasil didownload' })
-  download(@Param('id') id: string) {
-    return this.dokumenService.download(id);
+  download(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenService.download(id, userId, userRole);
   }
 
   @Patch(':id')
@@ -96,16 +104,21 @@ export class DokumenController {
     @Param('id') id: string,
     @Body() dto: UpdateDokumenDto,
     @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
   ) {
-    return this.dokumenService.update(id, dto, userId);
+    return this.dokumenService.update(id, dto, userId, userRole);
   }
 
   @Delete(':id')
   @Roles(UserRole.admin, UserRole.partner, UserRole.advokat)
   @ApiOperation({ summary: 'Hapus dokumen by ID' })
   @ApiResponse({ status: 200, description: 'Dokumen berhasil dihapus' })
-  remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
-    return this.dokumenService.remove(id, userId);
+  remove(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenService.remove(id, userId, userRole);
   }
 
   @Get('test/google-drive-connection')
