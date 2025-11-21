@@ -207,8 +207,8 @@ export class DokumenService {
     }
 
     // Upload semua file ke Google Drive dan simpan ke database
-    const uploadedDokumen = [];
-    const errors = [];
+    const uploadedDokumen: any[] = [];
+    const errors: { filename: string; error: string }[] = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];

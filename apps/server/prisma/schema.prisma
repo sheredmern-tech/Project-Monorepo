@@ -37,6 +37,7 @@ model User {
   akses_portal_klien  AksesPortalKlien[]
   catatan_perkara     CatatanPerkara[]
   dokumen_diunggah    DokumenHukum[]       @relation("DokumenDiunggah")
+  folder_dibuat       FolderDokumen[]      @relation("FolderDibuat")
   sidang_dibuat       JadwalSidang[]
   klien_dibuat        Klien[]              @relation("KlienDibuat")
   log_aktivitas       LogAktivitas[]
@@ -114,6 +115,7 @@ model Perkara {
   updated_at                DateTime             @updatedAt
   catatan_perkara           CatatanPerkara[]
   dokumen                   DokumenHukum[]
+  folders                   FolderDokumen[]
   jadwal_sidang             JadwalSidang[]
   pemeriksaan_konflik       PemeriksaanKonflik[]
   pembuat                   User?                @relation("PerkaraDibuat", fields: [dibuat_oleh], references: [id])
@@ -174,6 +176,7 @@ model Tugas {
 model DokumenHukum {
   id                String          @id @default(uuid())
   perkara_id        String
+  folder_id         String?         // ✅ Virtual folder organization
   nama_dokumen      String
   kategori          KategoriDokumen
   nomor_bukti       String?
@@ -190,6 +193,7 @@ model DokumenHukum {
   catatan           String?
   pengunggah        User?           @relation("DokumenDiunggah", fields: [diunggah_oleh], references: [id])
   perkara           Perkara         @relation(fields: [perkara_id], references: [id], onDelete: Cascade)
+  folder            FolderDokumen?  @relation(fields: [folder_id], references: [id], onDelete: SetNull)
 
   @@map("dokumen_hukum")
 }
@@ -263,6 +267,34 @@ model AksesPortalKlien {
 
   @@unique([klien_id, user_id])
   @@map("akses_portal_klien")
+}
+
+// ============================================================================
+// MODEL: FOLDER DOKUMEN (Virtual Folder for Document Organization)
+// ============================================================================
+model FolderDokumen {
+  id             String           @id @default(uuid())
+  perkara_id     String
+  nama_folder    String
+  parent_id      String?          // For nested folders (subfolder support)
+  warna          String?          // Optional color for visual organization
+  icon           String?          // Optional icon name
+  urutan         Int              @default(0) // Custom sort order
+  dibuat_oleh    String?
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+
+  // Relations
+  perkara        Perkara          @relation(fields: [perkara_id], references: [id], onDelete: Cascade)
+  pembuat        User?            @relation("FolderDibuat", fields: [dibuat_oleh], references: [id])
+  parent         FolderDokumen?   @relation("NestedFolder", fields: [parent_id], references: [id], onDelete: Cascade)
+  children       FolderDokumen[]  @relation("NestedFolder")
+  dokumen        DokumenHukum[]
+
+  // Indexes
+  @@index([perkara_id])
+  @@index([parent_id])
+  @@map("folder_dokumen")
 }
 
 enum UserRole {
