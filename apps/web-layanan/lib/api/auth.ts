@@ -13,10 +13,12 @@ export const authApi = {
   },
 
   /**
-   * Register new user
+   * Register new client (portal klien)
+   * Uses /auth/register-client endpoint which auto-sets role to 'klien'
+   * and creates klien record in database
    */
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post('/auth/register', data);
+    const response = await apiClient.post('/auth/register-client', data);
 
     // ✅ FIX: Extract from wrapped response
     return response.data.data;

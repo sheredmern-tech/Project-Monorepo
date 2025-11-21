@@ -173,6 +173,37 @@ export class AuthService {
         role: user.role,
       });
 
+      // ✅ Auto-create Klien record if role is 'klien' (for perkara dropdown)
+      if (role === 'klien') {
+        try {
+          const klien = await this.prisma.klien.create({
+            data: {
+              nama: dto.nama_lengkap,
+              email: dto.email,
+              telepon: dto.telepon || null,
+              jenis_klien: 'perorangan',
+              dibuat_oleh: user.id, // Track who created this klien record
+            },
+          });
+
+          // Create akses_portal link
+          await this.prisma.aksesPortalKlien.create({
+            data: {
+              user_id: user.id,
+              klien_id: klien.id,
+            },
+          });
+
+          console.log('✅ Klien record auto-created:', {
+            klien_id: klien.id,
+            user_id: user.id,
+          });
+        } catch (klienError) {
+          console.error('⚠️ Failed to create klien record:', klienError);
+          // Don't fail registration if klien creation fails
+        }
+      }
+
       // Generate token with proper typing
       const payload: JwtPayload = {
         sub: user.id,

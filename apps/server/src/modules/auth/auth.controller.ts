@@ -48,6 +48,20 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Public()
+  @Post('register-client')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register klien baru (client portal)' })
+  @ApiResponse({ status: 201, description: 'Registrasi klien berhasil' })
+  @ApiResponse({
+    status: 400,
+    description: 'Data tidak valid atau email sudah terdaftar',
+  })
+  registerClient(@Body() dto: RegisterDto) {
+    // Force role to 'klien' for client portal registration
+    return this.authService.register({ ...dto, role: 'klien' as any });
+  }
+
   @Get('profile')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get profile user yang sedang login' })
