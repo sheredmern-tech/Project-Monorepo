@@ -84,6 +84,33 @@ export default function DokumenDetailPage() {
   const [iframeError, setIframeError] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false); // ✨ NEW: Edit mode state
 
+  // ✅ FIX: Extract google_drive_id from google_drive_link - BEFORE any hooks
+  const extractDriveId = (link?: string): string | undefined => {
+    if (!link) return undefined;
+    const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : undefined;
+  };
+
+  const google_drive_id = dokumen ? extractDriveId(dokumen.google_drive_link) : undefined;
+
+  // ✅ FIX: Move useMemo BEFORE any conditional returns (Rules of Hooks)
+  const fileUrls = useMemo(() => {
+    if (!google_drive_id || !dokumen) {
+      return {
+        isEditable: false,
+        viewUrl: dokumen?.embed_link || '',
+        editUrl: '',
+        fileType: 'generic' as const,
+      };
+    }
+
+    return getGoogleWorkspaceUrls(google_drive_id, dokumen.mime_type);
+  }, [google_drive_id, dokumen?.mime_type, dokumen?.embed_link]);
+
+  // ✨ Dynamic iframe URL based on mode
+  const embedLink = isEditMode ? fileUrls.editUrl : fileUrls.viewUrl;
+  const extension = dokumen?.nama_dokumen.split('.').pop()?.toUpperCase() || 'FILE';
+
   useEffect(() => {
     fetchDokumen();
   }, [id]);
@@ -121,6 +148,7 @@ export default function DokumenDetailPage() {
     }
   };
 
+  // ✅ Conditional returns AFTER all hooks
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -161,34 +189,6 @@ export default function DokumenDetailPage() {
       </div>
     );
   }
-
-  const extension = dokumen.nama_dokumen.split('.').pop()?.toUpperCase() || 'FILE';
-
-  // ✨ NEW: Extract google_drive_id from google_drive_link if available
-  const extractDriveId = (link?: string): string | undefined => {
-    if (!link) return undefined;
-    const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    return match ? match[1] : undefined;
-  };
-
-  const google_drive_id = extractDriveId(dokumen.google_drive_link);
-
-  // ✨ NEW: Detect file type and build dynamic URLs
-  const fileUrls = useMemo(() => {
-    if (!google_drive_id) {
-      return {
-        isEditable: false,
-        viewUrl: dokumen.embed_link || '',
-        editUrl: '',
-        fileType: 'generic' as const,
-      };
-    }
-
-    return getGoogleWorkspaceUrls(google_drive_id, dokumen.mime_type);
-  }, [google_drive_id, dokumen.mime_type, dokumen.embed_link]);
-
-  // ✨ Dynamic iframe URL based on mode
-  const embedLink = isEditMode ? fileUrls.editUrl : fileUrls.viewUrl;
 
   return (
     <div className="min-h-screen bg-background">
