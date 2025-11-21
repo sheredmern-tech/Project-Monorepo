@@ -100,7 +100,9 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
       };
     }
 
-    return getGoogleWorkspaceUrls(dokumen.google_drive_id, dokumen.tipe_file);
+    // ✅ FIX: Convert null to undefined for TypeScript
+    const mimeType = dokumen.tipe_file || undefined;
+    return getGoogleWorkspaceUrls(dokumen.google_drive_id, mimeType);
   }, [dokumen.google_drive_id, dokumen.tipe_file, dokumen.embed_link]);
 
   // ✨ Dynamic iframe URL based on mode
@@ -121,7 +123,6 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-[90vw] md:max-w-[95vw] lg:max-w-[1600px] max-h-[90vh] p-0 gap-0 overflow-hidden">
-        {/* Header */}
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b bg-muted/50 flex-shrink-0">
           <div className="flex flex-col gap-3 pr-8">

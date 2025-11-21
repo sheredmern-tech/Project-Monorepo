@@ -1,219 +1,257 @@
-// ============================================
-// FILE: app/home/_components/layout/home-header.tsx
-// FIXED: Client-only, no server dependencies
-// UPDATED: Added auth detection + avatar + dashboard button (Railway-style)
-// ============================================
-'use client'
+// ============================================================================
+// FILE: components/layouts/landing-home-header.tsx - FIXED AVATAR TYPE
+// ============================================================================
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Scale,
+  ChevronRight,
+  LogOut,
+  Settings,
+  User,
+  Menu,
+} from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Scale, LogIn, UserPlus, Menu, X, LayoutDashboard, LogOut, User } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { useNavbarScroll } from '@/lib/hooks/use-navbar-scroll'
-import { useAuth } from '@/lib/hooks/use-auth'
-import { ThemeToggle } from '@/components/custom-landing-ui/theme-toggle'
-import { DesktopNav } from './landing-desktop-nav'
-import { MobileNav } from './landing-mobile-nav'
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { APP_NAME } from "@/lib/config/constants";
 
 export function HomeHeader() {
-  const { isScrolled, isVisible } = useNavbarScroll(20)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { user, isAuthenticated, logout } = useAuth()
+  const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const [mounted, setMounted] = React.useState(false);
 
-  // Get user initials for avatar fallback
-  const getUserInitials = () => {
-    if (!user) return 'U'
-    if (user.nama_lengkap) {
-      const names = user.nama_lengkap.split(' ')
-      if (names.length >= 2) {
-        return `${names[0][0]}${names[1][0]}`.toUpperCase()
-      }
-      return names[0][0].toUpperCase()
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const initials = user?.nama_lengkap
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || user?.email[0].toUpperCase() || "U";
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      await logout();
+    } catch (error) {
+      console.error('❌ Logout error:', error);
     }
-    return user.email?.[0]?.toUpperCase() || 'U'
-  }
+  };
+
+  // ✅ FIX: Pastikan avatar_url hanya string atau undefined (bukan null)
+  const avatarUrl = user?.avatar_url || undefined;
+
+  const navigationLinks = [
+    { href: "/", label: "Beranda" },
+    { href: "/fitur", label: "Fitur" },
+    { href: "/harga", label: "Harga" },
+    { href: "/tentang", label: "Tentang" },
+    { href: "/kontak", label: "Kontak" },
+  ];
 
   return (
-    <motion.header
-      initial={{ y: 0 }}
-      animate={{ y: isVisible ? 0 : -100 }}
-      transition={{ duration: 0.3 }}
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isScrolled
-          ? 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-md'
-          : 'bg-transparent'
-      )}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <motion.div
-              className={cn(
-                'p-2 rounded-lg transition-colors',
-                isScrolled ? 'bg-primary/10' : 'bg-white/10 dark:bg-white/10'
-              )}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Scale className="size-4" />
+          </div>
+          <span className="font-semibold text-lg">{APP_NAME}</span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6">
+          {navigationLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-sm font-medium transition-colors hover:text-primary ${pathname === link.href
+                ? "text-foreground"
+                : "text-muted-foreground"
+                }`}
             >
-              <Scale
-                className={cn(
-                  'w-6 h-6 transition-colors',
-                  isScrolled ? 'text-primary' : 'text-slate-900 dark:text-white'
-                )}
-              />
-            </motion.div>
-            <span
-              className={cn(
-                'font-bold text-lg md:text-xl transition-colors',
-                isScrolled ? 'text-slate-900 dark:text-white' : 'text-slate-900 dark:text-white'
-              )}
-            >
-              FIRMA PERARI
-            </span>
-          </Link>
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
-          {/* Desktop Navigation */}
-          <DesktopNav isScrolled={isScrolled} />
-
-          {/* Right Actions */}
-          <div className="hidden lg:flex items-center gap-2">
-            <ThemeToggle />
-
-            {isAuthenticated && user ? (
-              // ✅ AUTHENTICATED: Show Dashboard button + Avatar dropdown (Railway-style)
-              <>
-                <Button
-                  size="sm"
-                  asChild
-                  variant={isScrolled ? 'default' : 'secondary'}
-                  className="gap-2"
-                >
-                  <Link href="/dashboard">
-                    <LayoutDashboard className="w-4 h-4" />
+        {/* Desktop Auth Section */}
+        <div className="hidden md:flex items-center gap-4">
+          {!user ? (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/login">Masuk</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/register">Daftar Gratis</Link>
+              </Button>
+            </>
+          ) : mounted ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10">
+                    {/* ✅ FIX: Gunakan avatarUrl yang sudah difilter dari null */}
+                    <AvatarImage src={avatarUrl} alt={user.nama_lengkap || "User"} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user.nama_lengkap}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard" className="cursor-pointer">
+                    <Scale className="mr-2 h-4 w-4" />
                     Dashboard
                   </Link>
-                </Button>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-10 w-10 rounded-full"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar_url} alt={user.nama_lengkap || user.email} />
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {getUserInitials()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user.nama_lengkap || 'User'}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="cursor-pointer">
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/pengaturan" className="cursor-pointer">
-                        <User className="w-4 h-4 mr-2" />
-                        Profil
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => logout()}
-                      className="cursor-pointer text-destructive focus:text-destructive"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              // ❌ NOT AUTHENTICATED: Show Login + Register
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className={cn(
-                    'transition-colors',
-                    isScrolled
-                      ? 'text-slate-700 dark:text-slate-300 hover:text-primary hover:bg-primary/5'
-                      : 'text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10'
-                  )}
-                >
-                  <Link href="/login">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Masuk
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/tim/${user.id}`} className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    Profil Saya
                   </Link>
-                </Button>
-                <Button
-                  size="sm"
-                  asChild
-                  variant={isScrolled ? 'default' : 'secondary'}
-                >
-                  <Link href="/register">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Daftar
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/pengaturan" className="cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Pengaturan
                   </Link>
-                </Button>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className={cn(
-              'lg:hidden',
-              isScrolled ? 'text-slate-900 dark:text-white' : 'text-slate-900 dark:text-white'
-            )}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </Button>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 focus:text-red-600 cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Keluar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          )}
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      <MobileNav
-        isOpen={isMobileMenuOpen}
-        setIsOpen={setIsMobileMenuOpen}
-        isScrolled={isScrolled}
-      />
-    </motion.header>
-  )
+        {/* Mobile Menu */}
+        <Sheet>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right">
+            <div className="flex flex-col gap-6 mt-6">
+              {/* Mobile Navigation Links */}
+              <nav className="flex flex-col gap-4">
+                {navigationLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`text-sm font-medium transition-colors hover:text-primary ${pathname === link.href
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                      }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              {/* Mobile Auth Section */}
+              {!user ? (
+                <div className="flex flex-col gap-2 pt-4 border-t">
+                  <Button variant="ghost" asChild className="w-full">
+                    <Link href="/login">Masuk</Link>
+                  </Button>
+                  <Button asChild className="w-full">
+                    <Link href="/register">Daftar Gratis</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-3 px-2 py-3">
+                    <Avatar className="h-10 w-10">
+                      {/* ✅ FIX: Gunakan avatarUrl yang sudah difilter dari null */}
+                      <AvatarImage src={avatarUrl} alt={user.nama_lengkap || "User"} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{user.nama_lengkap}</span>
+                      <span className="text-xs text-muted-foreground">{user.email}</span>
+                    </div>
+                  </div>
+                  <Button variant="ghost" asChild className="w-full justify-start">
+                    <Link href="/dashboard">
+                      <Scale className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" asChild className="w-full justify-start">
+                    <Link href={`/dashboard/tim/${user.id}`}>
+                      <User className="mr-2 h-4 w-4" />
+                      Profil Saya
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" asChild className="w-full justify-start">
+                    <Link href="/dashboard/pengaturan">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Pengaturan
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    className="w-full justify-start text-red-600 hover:text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Keluar
+                  </Button>
+                </div>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </header>
+  );
 }
