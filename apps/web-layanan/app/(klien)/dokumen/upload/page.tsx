@@ -25,7 +25,7 @@ export default function UploadDokumenPage() {
   const [loadingPerkara, setLoadingPerkara] = useState(true);
   const [selectedPerkara, setSelectedPerkara] = useState('');
   const [file, setFile] = useState<File | null>(null);
-  const [kategori, setKategori] = useState('administratif');
+  const [kategori, setKategori] = useState('bukti');
   const [namaDokumen, setNamaDokumen] = useState('');
   const [catatan, setCatatan] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -292,9 +292,10 @@ export default function UploadDokumenPage() {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 disabled={uploading}
               >
-                <option value="administratif">Administratif (KTP, KK, NPWP)</option>
-                <option value="bukti">Bukti Pendukung</option>
-                <option value="surat">Surat/Korespondensi</option>
+                <option value="bukti">Bukti Pendukung (KTP, KK, NPWP, dll)</option>
+                <option value="surat_kuasa">Surat Kuasa</option>
+                <option value="kontrak">Kontrak/Perjanjian</option>
+                <option value="korespondensi">Surat/Email</option>
                 <option value="lainnya">Lainnya</option>
               </select>
             </div>
