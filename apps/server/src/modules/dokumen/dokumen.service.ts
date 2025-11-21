@@ -53,7 +53,13 @@ export class DokumenService {
 
     // 🔒 RBAC: KLIEN hanya bisa upload ke perkara mereka sendiri
     if (userRole === UserRole.klien) {
-      if (perkara.klien_id !== userId) {
+      // ✅ FIX: Look up klien_id from akses_portal_klien (user_id -> klien_id)
+      const aksesPortal = await this.prisma.aksesPortalKlien.findFirst({
+        where: { user_id: userId },
+        select: { klien_id: true },
+      });
+
+      if (!aksesPortal || perkara.klien_id !== aksesPortal.klien_id) {
         this.logger.warn(
           `🚨 Unauthorized upload attempt: User ${userId} (klien) tried to upload to perkara ${dto.perkara_id} owned by ${perkara.klien_id}`,
         );
@@ -180,14 +186,26 @@ export class DokumenService {
     // 🔥 RBAC: DATA FILTERING BASED ON USER ROLE (OPSI A: SIMPLE MODEL)
     if (userRole === UserRole.klien) {
       // ✅ KLIEN: Hanya dokumen dari perkara mereka sendiri
-      const perkaraIds = await this.prisma.perkara.findMany({
-        where: { klien_id: userId },
-        select: { id: true },
+      // Step 1: Get klien_id from akses_portal_klien (user_id -> klien_id)
+      const aksesPortal = await this.prisma.aksesPortalKlien.findFirst({
+        where: { user_id: userId },
+        select: { klien_id: true },
       });
 
-      where.perkara_id = {
-        in: perkaraIds.map((p) => p.id),
-      };
+      if (aksesPortal) {
+        // Step 2: Get perkara IDs for this klien
+        const perkaraIds = await this.prisma.perkara.findMany({
+          where: { klien_id: aksesPortal.klien_id },
+          select: { id: true },
+        });
+
+        where.perkara_id = {
+          in: perkaraIds.map((p) => p.id),
+        };
+      } else {
+        // No klien record linked - return empty (no access)
+        where.perkara_id = { in: [] };
+      }
     }
     // ✅ INTERNAL STAFF (admin, partner, advokat, paralegal, staff): FULL ACCESS
     // No additional filter needed - they can see ALL documents
@@ -290,14 +308,26 @@ export class DokumenService {
     // 🔥 RBAC: Apply same filtering as findAll
     if (userRole === UserRole.klien) {
       // ✅ KLIEN: Hanya dokumen dari perkara mereka sendiri
-      const perkaraIds = await this.prisma.perkara.findMany({
-        where: { klien_id: userId },
-        select: { id: true },
+      // Step 1: Get klien_id from akses_portal_klien (user_id -> klien_id)
+      const aksesPortal = await this.prisma.aksesPortalKlien.findFirst({
+        where: { user_id: userId },
+        select: { klien_id: true },
       });
 
-      where.perkara_id = {
-        in: perkaraIds.map((p) => p.id),
-      };
+      if (aksesPortal) {
+        // Step 2: Get perkara IDs for this klien
+        const perkaraIds = await this.prisma.perkara.findMany({
+          where: { klien_id: aksesPortal.klien_id },
+          select: { id: true },
+        });
+
+        where.perkara_id = {
+          in: perkaraIds.map((p) => p.id),
+        };
+      } else {
+        // No klien record linked - return empty (no access)
+        where.perkara_id = { in: [] };
+      }
     }
     // ✅ INTERNAL STAFF: FULL ACCESS (no filter)
 
@@ -381,8 +411,14 @@ export class DokumenService {
 
     // 🔒 RBAC: ACCESS CONTROL (OPSI A: SIMPLE MODEL)
     if (userRole === UserRole.klien) {
+      // ✅ FIX: Look up klien_id from akses_portal_klien (user_id -> klien_id)
+      const aksesPortal = await this.prisma.aksesPortalKlien.findFirst({
+        where: { user_id: userId },
+        select: { klien_id: true },
+      });
+
       // ✅ KLIEN: Hanya bisa akses dokumen dari perkara mereka sendiri
-      if (dokumen.perkara.klien_id !== userId) {
+      if (!aksesPortal || dokumen.perkara.klien_id !== aksesPortal.klien_id) {
         this.logger.warn(
           `🚨 Unauthorized access attempt: User ${userId} (klien) tried to access document ${id} belonging to ${dokumen.perkara.klien_id}`,
         );
