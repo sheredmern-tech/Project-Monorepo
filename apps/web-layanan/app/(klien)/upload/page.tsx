@@ -39,7 +39,8 @@ export default function BulkUploadPage() {
         </button>
       </div>
     </div>
-  );}
+  );
+}
 
 /**
  * OLD BULK UPLOAD CODE - DISABLED KARENA TIDAK COMPATIBLE
