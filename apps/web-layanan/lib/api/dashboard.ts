@@ -6,7 +6,8 @@ export const dashboardApi = {
    * Get dashboard statistics
    */
   getStats: async (): Promise<DashboardStats> => {
-    const response = await apiClient.get<DashboardStats>('/dokumen-klien/stats');
-    return response.data;
+    const response = await apiClient.get<any>('/dokumen-klien/stats');
+    // ✅ Backend returns: { success: true, data: {...} }
+    return response.data.data || response.data;
   },
 };

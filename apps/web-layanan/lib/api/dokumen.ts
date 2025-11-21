@@ -52,10 +52,15 @@ export const dokumenApi = {
     page?: number;
     limit?: number;
   }): Promise<PaginatedResponse<Dokumen>> => {
-    const response = await apiClient.get<PaginatedResponse<Dokumen>>('/dokumen-klien', {
+    const response = await apiClient.get<any>('/dokumen-klien', {
       params,
     });
-    return response.data;
+    // ✅ Backend returns: { success: true, data: [...], meta: {...} }
+    // Extract the actual data array
+    return {
+      data: response.data.data || [],
+      meta: response.data.meta || {},
+    };
   },
 
   /**

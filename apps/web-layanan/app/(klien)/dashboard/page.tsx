@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { formatFileSize } from '@/lib/utils/fileValidation';
 import { getDocumentTypeLabel } from '@/lib/utils/fileDetection';
+import { DokumenPreview } from '@/components/modals/dokumen-preview';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [error, setError] = useState('');
+  const [previewDokumen, setPreviewDokumen] = useState<Dokumen | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -306,7 +308,8 @@ export default function DashboardPage() {
               {filteredDocuments.map((doc) => (
                 <div
                   key={doc.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition"
+                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition cursor-pointer"
+                  onClick={() => setPreviewDokumen(doc)}
                 >
                   <div className="flex items-start gap-4">
                     {/* Icon */}
@@ -347,22 +350,21 @@ export default function DashboardPage() {
                       )}
 
                       {/* Actions */}
-                      <div className="flex flex-wrap gap-2">
-                        <a
-                          href={doc.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                      <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setPreviewDokumen(doc)}
                           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium flex items-center gap-2"
                         >
                           <Eye className="w-4 h-4" />
-                          Lihat
-                        </a>
+                          Preview
+                        </button>
                         <a
-                          href={doc.file_url}
-                          download
+                          href={doc.google_drive_link || doc.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium flex items-center gap-2"
                         >
-                          <Download className="w-4 h-4" />
+                          <Download className="w-4 w-4" />
                           Download
                         </a>
                         <button
@@ -381,6 +383,15 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Preview Modal */}
+      {previewDokumen && (
+        <DokumenPreview
+          dokumen={previewDokumen}
+          open={!!previewDokumen}
+          onClose={() => setPreviewDokumen(null)}
+        />
+      )}
     </div>
   );
 }
