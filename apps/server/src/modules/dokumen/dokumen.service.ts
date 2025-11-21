@@ -676,4 +676,146 @@ export class DokumenService {
 
     return { message: 'Dokumen berhasil dihapus' };
   }
+
+  // ============================================================================
+  // FOLDER OPERATIONS: Move and Copy
+  // ============================================================================
+  async moveToFolder(
+    id: string,
+    folderId: string | null,
+    userId: string,
+    userRole: UserRole,
+  ) {
+    const dokumen = await this.findOne(id, userId, userRole);
+
+    // If folder_id provided, verify folder exists and in same perkara
+    if (folderId) {
+      const folder = await this.prisma.folderDokumen.findUnique({
+        where: { id: folderId },
+        select: { id: true, perkara_id: true, nama_folder: true },
+      });
+
+      if (!folder) {
+        throw new BadRequestException('Folder tidak ditemukan');
+      }
+
+      if (folder.perkara_id !== dokumen.perkara_id) {
+        throw new BadRequestException('Folder harus di perkara yang sama');
+      }
+    }
+
+    const updated = await this.prisma.dokumenHukum.update({
+      where: { id },
+      data: { folder_id: folderId },
+      include: {
+        folder: {
+          select: {
+            id: true,
+            nama_folder: true,
+          },
+        },
+      },
+    });
+
+    // Log activity
+    await this.prisma.logAktivitas.create({
+      data: {
+        user_id: userId,
+        aksi: 'MOVE_DOKUMEN',
+        jenis_entitas: 'dokumen',
+        id_entitas: id,
+        detail: {
+          nama_dokumen: dokumen.nama_dokumen,
+          folder_id: folderId,
+          folder_name: updated.folder?.nama_folder || 'Root',
+        },
+      },
+    });
+
+    this.logger.log(`Dokumen ${id} moved to folder ${folderId || 'root'}`);
+
+    return {
+      success: true,
+      message: `Dokumen dipindahkan ke ${updated.folder?.nama_folder || 'Root'}`,
+      dokumen: updated,
+    };
+  }
+
+  async copyDocument(
+    id: string,
+    folderId: string | null | undefined,
+    newName: string | undefined,
+    userId: string,
+    userRole: UserRole,
+  ) {
+    const original = await this.findOne(id, userId, userRole);
+
+    // Verify folder if provided
+    if (folderId) {
+      const folder = await this.prisma.folderDokumen.findUnique({
+        where: { id: folderId },
+        select: { id: true, perkara_id: true },
+      });
+
+      if (!folder) {
+        throw new BadRequestException('Folder tidak ditemukan');
+      }
+
+      if (folder.perkara_id !== original.perkara_id) {
+        throw new BadRequestException('Folder harus di perkara yang sama');
+      }
+    }
+
+    // Create copy in database (file already in Google Drive, just reference it)
+    const copy = await this.prisma.dokumenHukum.create({
+      data: {
+        perkara_id: original.perkara_id,
+        folder_id: folderId === undefined ? original.folder_id : folderId,
+        nama_dokumen: newName || `${original.nama_dokumen} (Copy)`,
+        kategori: original.kategori,
+        nomor_bukti: original.nomor_bukti,
+        google_drive_id: original.google_drive_id, // Same Drive file
+        google_drive_link: original.google_drive_link,
+        embed_link: original.embed_link,
+        ukuran_file: original.ukuran_file,
+        tipe_file: original.tipe_file,
+        tanggal_dokumen: original.tanggal_dokumen,
+        catatan: original.catatan,
+        diunggah_oleh: userId,
+        file_path: null,
+      },
+      include: {
+        folder: {
+          select: {
+            id: true,
+            nama_folder: true,
+          },
+        },
+      },
+    });
+
+    // Log activity
+    await this.prisma.logAktivitas.create({
+      data: {
+        user_id: userId,
+        aksi: 'COPY_DOKUMEN',
+        jenis_entitas: 'dokumen',
+        id_entitas: copy.id,
+        detail: {
+          original_id: id,
+          original_name: original.nama_dokumen,
+          copy_name: copy.nama_dokumen,
+          folder_id: copy.folder_id,
+        },
+      },
+    });
+
+    this.logger.log(`Dokumen ${id} copied to ${copy.id}`);
+
+    return {
+      success: true,
+      message: 'Dokumen berhasil dicopy',
+      dokumen: copy,
+    };
+  }
 }

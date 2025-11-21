@@ -161,6 +161,32 @@ export class DokumenController {
     return this.dokumenService.remove(id, userId, userRole);
   }
 
+  @Patch(':id/move')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
+  @ApiOperation({ summary: 'Pindahkan dokumen ke folder lain' })
+  @ApiResponse({ status: 200, description: 'Dokumen berhasil dipindahkan' })
+  move(
+    @Param('id') id: string,
+    @Body() body: { folder_id: string | null },
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenService.moveToFolder(id, body.folder_id, userId, userRole);
+  }
+
+  @Post(':id/copy')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @ApiOperation({ summary: 'Copy dokumen' })
+  @ApiResponse({ status: 201, description: 'Dokumen berhasil dicopy' })
+  copy(
+    @Param('id') id: string,
+    @Body() body: { folder_id?: string | null; nama_dokumen?: string },
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenService.copyDocument(id, body.folder_id, body.nama_dokumen, userId, userRole);
+  }
+
   @Get('test/google-drive-connection')
   @Roles(UserRole.admin)
   @ApiOperation({ summary: 'Test Google Drive API connection (Admin only)' })
