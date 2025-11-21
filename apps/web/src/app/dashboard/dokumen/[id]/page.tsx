@@ -23,6 +23,7 @@ import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { DokumenPreview } from "@/components/shared/dokumen-preview";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
 import { usePermission } from "@/lib/hooks/use-permission";
+import { dokumenApi } from "@/lib/api/dokumen.api";
 import { DokumenWithRelations } from "@/types";
 import { formatDate, formatFileSize } from "@/lib/utils/format";
 import { getFileIcon, getFileExtension, isPreviewable } from "@/lib/utils/file";
@@ -56,11 +57,22 @@ export default function DokumenDetailPage() {
         try {
           setIsLoading(true);
           setLoadError(null);
-          const data = await fetchDokumenById(params.id as string);
-          setDokumen(data);
+
+          // ✅ FIX: Use same approach as web-layanan - fetch all and filter
+          // This is more reliable than fetchDokumenById
+          // Directly call API to avoid store dependency issues
+          const response = await dokumenApi.getAll({});
+
+          // Find dokumen by ID from response data
+          const documentsData = Array.isArray(response?.data) ? response.data : [];
+          const found = documentsData.find((doc) => doc.id === params.id);
+
+          if (found) {
+            setDokumen(found);
+          } else {
+            setLoadError('Dokumen tidak ditemukan atau sudah dihapus');
+          }
         } catch (error) {
-          // Error already handled by hook (toast shown)
-          // Set error state for display
           console.error('Failed to load dokumen:', error);
           setLoadError(error instanceof Error ? error.message : 'Gagal memuat dokumen');
         } finally {
@@ -69,7 +81,7 @@ export default function DokumenDetailPage() {
       }
     };
     loadDokumen();
-  }, [params.id, fetchDokumenById]);
+  }, [params.id]);
 
   const handleDelete = async () => {
     try {
