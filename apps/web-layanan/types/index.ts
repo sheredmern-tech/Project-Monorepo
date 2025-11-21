@@ -46,15 +46,28 @@ export type DocumentType =
 export interface Dokumen {
   id: string;
   nama_dokumen: string;
-  tipe_dokumen: DocumentType;
+  tipe_dokumen?: DocumentType | string;
   deskripsi?: string;
   kategori?: string;
   tags?: string[];
-  file_url: string;
-  google_drive_file_id: string;
-  uploaded_by: string;
+
+  // Google Drive fields (from backend)
+  google_drive_id?: string;
+  google_drive_link?: string;
+  embed_link?: string;
+
+  // Legacy fields (keep for backward compatibility)
+  file_url?: string;
+  google_drive_file_id?: string;
+
+  // File metadata
+  file_size?: number;
+  mime_type?: string;
+
+  // Timestamps
+  uploaded_by?: string;
   uploaded_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 // ============================================================================
@@ -87,7 +100,16 @@ export interface DashboardStats {
 
 export interface PaginatedResponse<T> {
   data: T[];
-  total: number;
-  page: number;
-  limit: number;
+  meta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages?: number;
+    hasNextPage?: boolean;
+    hasPrevPage?: boolean;
+  };
+  // Backward compatibility (flatten meta)
+  total?: number;
+  page?: number;
+  limit?: number;
 }

@@ -54,11 +54,19 @@ export default function DashboardPage() {
         dashboardApi.getStats(),
       ]);
 
-      setDocuments(docsResponse.data);
-      setStats(statsData);
+      // ✅ Robust defensive check - handle various response formats
+      const documentsData = Array.isArray(docsResponse?.data)
+        ? docsResponse.data
+        : Array.isArray(docsResponse)
+          ? docsResponse
+          : [];
+
+      setDocuments(documentsData);
+      setStats(statsData || { total_dokumen: 0, dokumen_bulan_ini: 0, dokumen_minggu_ini: 0 });
     } catch (error: any) {
       console.error('Failed to fetch data:', error);
       setError('Gagal memuat data. Silakan coba lagi.');
+      setDocuments([]); // ✅ Prevent "documents.filter is not a function"
     } finally {
       setLoading(false);
       setRefreshing(false);
