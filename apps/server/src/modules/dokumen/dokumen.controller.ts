@@ -14,6 +14,8 @@ import {
   UseInterceptors,
   UploadedFile,
   Header,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -49,6 +51,11 @@ export class DokumenController {
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: 'Dokumen berhasil diupload' })
   @UseInterceptors(FileInterceptor('file'))
+  @UsePipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: false, // ✅ Allow file field in multipart form
+    transform: true
+  }))
   create(
     @Body() dto: CreateDokumenDto,
     @UploadedFile() file: Express.Multer.File,
