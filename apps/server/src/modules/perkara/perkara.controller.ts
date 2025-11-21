@@ -47,7 +47,7 @@ export class PerkaraController {
   }
 
   @Get()
-  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
   @ApiOperation({ summary: 'Get semua perkara dengan pagination' })
   @ApiResponse({ status: 200, description: 'Data perkara berhasil diambil' })
   findAll(

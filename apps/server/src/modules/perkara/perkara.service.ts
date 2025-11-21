@@ -78,7 +78,18 @@ export class PerkaraService {
 
     // RBAC: DATA FILTERING BASED ON USER ROLE
     if (userRole === UserRole.klien) {
-      where.klien_id = userId;
+      // ✅ FIX: Look up klien_id from akses_portal_klien (user_id -> klien_id)
+      const aksesPortal = await this.prisma.aksesPortalKlien.findFirst({
+        where: { user_id: userId },
+        select: { klien_id: true },
+      });
+
+      if (aksesPortal) {
+        where.klien_id = aksesPortal.klien_id;
+      } else {
+        // No klien record linked - return empty
+        where.klien_id = 'no-access';
+      }
     } else if (userRole === UserRole.advokat) {
       where.OR = [
         { dibuat_oleh: userId },
