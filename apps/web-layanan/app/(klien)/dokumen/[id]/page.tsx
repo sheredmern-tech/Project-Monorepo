@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { dokumenApi } from '@/lib/api/dokumen';
 import { Dokumen } from '@/types';
@@ -14,6 +14,8 @@ import {
   Tag,
   Loader2,
   AlertCircle,
+  Edit,
+  Eye,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +23,54 @@ import { Separator } from '@/components/ui/separator';
 import { getDocumentTypeLabel } from '@/lib/utils/fileDetection';
 import { formatFileSize } from '@/lib/utils/fileValidation';
 import { cn } from '@/lib/utils';
+
+/**
+ * Helper function to detect Google Workspace file type and build URLs
+ */
+function getGoogleWorkspaceUrls(googleDriveId: string, mimeType?: string): {
+  isEditable: boolean;
+  viewUrl: string;
+  editUrl: string;
+  fileType: 'docs' | 'sheets' | 'slides' | 'generic';
+} {
+  // Google Workspace MIME types
+  const GOOGLE_DOCS = 'application/vnd.google-apps.document';
+  const GOOGLE_SHEETS = 'application/vnd.google-apps.spreadsheet';
+  const GOOGLE_SLIDES = 'application/vnd.google-apps.presentation';
+
+  // Detect file type and build appropriate URLs
+  switch (mimeType) {
+    case GOOGLE_DOCS:
+      return {
+        isEditable: true,
+        viewUrl: `https://docs.google.com/document/d/${googleDriveId}/preview`,
+        editUrl: `https://docs.google.com/document/d/${googleDriveId}/edit`,
+        fileType: 'docs',
+      };
+    case GOOGLE_SHEETS:
+      return {
+        isEditable: true,
+        viewUrl: `https://docs.google.com/spreadsheets/d/${googleDriveId}/preview`,
+        editUrl: `https://docs.google.com/spreadsheets/d/${googleDriveId}/edit`,
+        fileType: 'sheets',
+      };
+    case GOOGLE_SLIDES:
+      return {
+        isEditable: true,
+        viewUrl: `https://docs.google.com/presentation/d/${googleDriveId}/preview`,
+        editUrl: `https://docs.google.com/presentation/d/${googleDriveId}/edit`,
+        fileType: 'slides',
+      };
+    default:
+      // Generic file (PDF, images, etc) - no edit mode
+      return {
+        isEditable: false,
+        viewUrl: `https://drive.google.com/file/d/${googleDriveId}/preview`,
+        editUrl: `https://drive.google.com/file/d/${googleDriveId}/view`,
+        fileType: 'generic',
+      };
+  }
+}
 
 export default function DokumenDetailPage() {
   const router = useRouter();
@@ -32,6 +82,7 @@ export default function DokumenDetailPage() {
   const [error, setError] = useState('');
   const [iframeLoading, setIframeLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false); // ✨ NEW: Edit mode state
 
   useEffect(() => {
     fetchDokumen();
@@ -111,8 +162,33 @@ export default function DokumenDetailPage() {
     );
   }
 
-  const embedLink = dokumen.embed_link;
   const extension = dokumen.nama_dokumen.split('.').pop()?.toUpperCase() || 'FILE';
+
+  // ✨ NEW: Extract google_drive_id from google_drive_link if available
+  const extractDriveId = (link?: string): string | undefined => {
+    if (!link) return undefined;
+    const match = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : undefined;
+  };
+
+  const google_drive_id = extractDriveId(dokumen.google_drive_link);
+
+  // ✨ NEW: Detect file type and build dynamic URLs
+  const fileUrls = useMemo(() => {
+    if (!google_drive_id) {
+      return {
+        isEditable: false,
+        viewUrl: dokumen.embed_link || '',
+        editUrl: '',
+        fileType: 'generic' as const,
+      };
+    }
+
+    return getGoogleWorkspaceUrls(google_drive_id, dokumen.mime_type);
+  }, [google_drive_id, dokumen.mime_type, dokumen.embed_link]);
+
+  // ✨ Dynamic iframe URL based on mode
+  const embedLink = isEditMode ? fileUrls.editUrl : fileUrls.viewUrl;
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,6 +219,32 @@ export default function DokumenDetailPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            {/* ✨ NEW: Edit Mode Toggle (only for Google Workspace files) */}
+            {fileUrls.isEditable && (
+              <button
+                onClick={() => {
+                  setIsEditMode(!isEditMode);
+                  setIframeLoading(true); // Reset loading state when switching
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-medium ${
+                  isEditMode
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'border hover:bg-accent'
+                }`}
+              >
+                {isEditMode ? (
+                  <>
+                    <Edit className="h-4 w-4" />
+                    Editing
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-4 w-4" />
+                    View Mode
+                  </>
+                )}
+              </button>
+            )}
             <button
               onClick={handleOpenInDrive}
               className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-accent transition text-sm font-medium"
