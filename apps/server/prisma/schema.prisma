@@ -33,11 +33,10 @@ model User {
   google_drive_token_expires  DateTime?
   google_drive_connected      Boolean              @default(false)
 
-  // Relations (unchanged)
+  // Relations
   akses_portal_klien  AksesPortalKlien[]
   catatan_perkara     CatatanPerkara[]
   dokumen_diunggah    DokumenHukum[]       @relation("DokumenDiunggah")
-  dokumen_klien       DokumenKlien[]       @relation("DokumenKlien")
   sidang_dibuat       JadwalSidang[]
   klien_dibuat        Klien[]              @relation("KlienDibuat")
   log_aktivitas       LogAktivitas[]
@@ -264,45 +263,6 @@ model AksesPortalKlien {
 
   @@unique([klien_id, user_id])
   @@map("akses_portal_klien")
-}
-
-// ============================================================================
-// MODEL: DOKUMEN KLIEN (Client Self-Service Documents)
-// ============================================================================
-model DokumenKlien {
-  id                String    @id @default(uuid())
-
-  // ✅ CRITICAL: Ownership - untuk data isolation
-  klien_id          String
-
-  // Document Info
-  nama_dokumen      String
-  tipe_dokumen      String?   // surat_kuasa, gugatan, bukti, dll
-  deskripsi         String?
-  kategori          String?
-  tags              String[]  @default([])
-
-  // Google Drive Storage
-  google_drive_id   String    @unique
-  google_drive_link String
-  embed_link        String?
-
-  // File Metadata
-  file_size         BigInt?
-  mime_type         String?
-
-  // Timestamps
-  uploaded_at       DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
-  deleted_at        DateTime? // Soft delete
-
-  // Relations
-  klien             User      @relation("DokumenKlien", fields: [klien_id], references: [id], onDelete: Cascade)
-
-  // Indexes for Performance
-  @@index([klien_id, uploaded_at(sort: Desc)])
-  @@index([klien_id, tipe_dokumen])
-  @@map("dokumen_klien")
 }
 
 enum UserRole {
