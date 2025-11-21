@@ -195,23 +195,23 @@ export class GoogleDriveService {
 
       const file = response.data;
 
-      // Set file permissions to 'anyone with link can view'
+      // Set file permissions to 'anyone with link can edit'
       try {
         this.logger.log(`🔓 Setting public permissions for file: ${file.id}`);
 
         await this.drive.permissions.create({
           fileId: file.id,
           requestBody: {
-            role: 'reader',
+            role: 'writer',
             type: 'anyone',
           },
         });
 
-        this.logger.log(`✅ File is now publicly accessible (anyone with link)`);
+        this.logger.log(`✅ File is now publicly editable (anyone with link can edit)`);
       } catch (permError) {
         this.logger.error(`❌ Failed to set public permissions: ${permError.message}`);
-        this.logger.warn(`⚠️  File uploaded but may not be publicly accessible!`);
-        this.logger.warn(`📋 Manual action: Share the file publicly in Google Drive`);
+        this.logger.warn(`⚠️  File uploaded but may not be publicly editable!`);
+        this.logger.warn(`📋 Manual action: Share the file with edit access in Google Drive`);
         // Don't throw - file is uploaded successfully, just permissions might fail
       }
 
