@@ -45,6 +45,49 @@ export const dokumenApi = {
   },
 
   /**
+   * Bulk upload multiple dokumen at once
+   * ✅ Max 10 files per request
+   */
+  bulkUpload: async (data: {
+    files: File[];
+    perkara_id: string;
+    kategori: string;
+    nomor_bukti?: string;
+    tanggal_dokumen?: string;
+    catatan?: string;
+  }): Promise<any> => {
+    const formData = new FormData();
+
+    // Append multiple files
+    data.files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    formData.append('perkara_id', data.perkara_id);
+    formData.append('kategori', data.kategori);
+
+    if (data.nomor_bukti) {
+      formData.append('nomor_bukti', data.nomor_bukti);
+    }
+
+    if (data.tanggal_dokumen) {
+      formData.append('tanggal_dokumen', data.tanggal_dokumen);
+    }
+
+    if (data.catatan) {
+      formData.append('catatan', data.catatan);
+    }
+
+    const response = await apiClient.post<any>('/dokumen/bulk', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  },
+
+  /**
    * Get all documents (filtered by user role automatically in backend)
    */
   getAll: async (params?: {

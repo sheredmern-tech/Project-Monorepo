@@ -13,11 +13,12 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
   Header,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
@@ -63,6 +64,26 @@ export class DokumenController {
     @CurrentUser('role') userRole: UserRole,
   ) {
     return this.dokumenService.create(dto, file, userId, userRole);
+  }
+
+  @Post('bulk')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff, UserRole.klien)
+  @ApiOperation({ summary: 'Upload multiple dokumen sekaligus' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201, description: 'Dokumen berhasil diupload' })
+  @UseInterceptors(FilesInterceptor('files', 10)) // Max 10 files
+  @UsePipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: false,
+    transform: true
+  }))
+  createBulk(
+    @Body() dto: CreateDokumenDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenService.createBulk(dto, files, userId, userRole);
   }
 
   @Get()

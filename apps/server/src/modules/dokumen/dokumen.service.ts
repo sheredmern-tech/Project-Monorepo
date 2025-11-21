@@ -163,6 +163,128 @@ export class DokumenService {
   }
 
   // ============================================================================
+  // BULK UPLOAD: Upload multiple files at once
+  // ============================================================================
+  async createBulk(
+    dto: CreateDokumenDto,
+    files: Express.Multer.File[],
+    userId: string,
+    userRole: UserRole,
+  ) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Minimal 1 file harus diupload');
+    }
+
+    if (files.length > 10) {
+      throw new BadRequestException('Maksimal 10 file per upload');
+    }
+
+    // Validate perkara dan RBAC (sama seperti single upload)
+    const perkara = await this.prisma.perkara.findUnique({
+      where: { id: dto.perkara_id },
+      select: { id: true, nomor_perkara: true, klien_id: true },
+    });
+
+    if (!perkara) {
+      throw new BadRequestException('Perkara tidak ditemukan');
+    }
+
+    // 🔒 RBAC: KLIEN hanya bisa upload ke perkara mereka sendiri
+    if (userRole === UserRole.klien) {
+      const aksesPortal = await this.prisma.aksesPortalKlien.findFirst({
+        where: { user_id: userId },
+        select: { klien_id: true },
+      });
+
+      if (!aksesPortal || perkara.klien_id !== aksesPortal.klien_id) {
+        this.logger.warn(
+          `🚨 Unauthorized bulk upload attempt: User ${userId} (klien) tried to upload to perkara ${dto.perkara_id}`,
+        );
+        throw new BadRequestException(
+          'Anda tidak memiliki akses untuk upload dokumen ke perkara ini',
+        );
+      }
+    }
+
+    // Upload semua file ke Google Drive dan simpan ke database
+    const uploadedDokumen = [];
+    const errors = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        this.logger.log(`📤 Uploading file ${i + 1}/${files.length}: ${file.originalname}`);
+
+        // Upload ke Google Drive
+        const driveFile = await this.googleDriveService.uploadFile({
+          fileName: file.originalname,
+          mimeType: file.mimetype,
+          buffer: file.buffer,
+        });
+
+        // Save metadata ke database
+        const dokumen = await this.prisma.dokumenHukum.create({
+          data: {
+            perkara_id: dto.perkara_id,
+            nama_dokumen: file.originalname,
+            kategori: dto.kategori,
+            nomor_bukti: dto.nomor_bukti,
+            google_drive_id: driveFile.id,
+            google_drive_link: driveFile.webViewLink,
+            embed_link: driveFile.embedLink,
+            ukuran_file: file.size,
+            tipe_file: file.mimetype,
+            tanggal_dokumen: dto.tanggal_dokumen,
+            catatan: dto.catatan,
+            diunggah_oleh: userId,
+            file_path: null,
+          },
+        });
+
+        uploadedDokumen.push(dokumen);
+
+        // Log aktivitas
+        await this.prisma.logAktivitas.create({
+          data: {
+            user_id: userId,
+            aksi: 'BULK_UPLOAD_DOKUMEN',
+            jenis_entitas: 'dokumen',
+            id_entitas: dokumen.id,
+            detail: {
+              nama_dokumen: dokumen.nama_dokumen,
+              perkara_id: dto.perkara_id,
+              google_drive_id: driveFile.id,
+              bulk_index: i + 1,
+              total_files: files.length,
+            },
+          },
+        });
+
+        this.logger.log(`✅ File ${i + 1}/${files.length} uploaded successfully`);
+      } catch (error) {
+        this.logger.error(`❌ Failed to upload file ${i + 1}: ${file.originalname}`, error);
+        errors.push({
+          filename: file.originalname,
+          error: error.message,
+        });
+      }
+    }
+
+    // Invalidate perkara cache
+    await this.perkaraService.invalidatePerkaraCache(dto.perkara_id);
+
+    return {
+      success: true,
+      message: `Successfully uploaded ${uploadedDokumen.length} out of ${files.length} files`,
+      uploaded: uploadedDokumen.length,
+      failed: errors.length,
+      total: files.length,
+      dokumen: uploadedDokumen,
+      errors: errors.length > 0 ? errors : undefined,
+    };
+  }
+
+  // ============================================================================
   // ✅ RBAC FILTERING APPLIED HERE!
   // ============================================================================
   async findAll(

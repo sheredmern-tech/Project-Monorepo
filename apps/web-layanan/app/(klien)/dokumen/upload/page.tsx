@@ -13,6 +13,7 @@ import {
   AlertCircle,
   CheckCircle,
   Folder,
+  X,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -24,12 +25,12 @@ export default function UploadDokumenPage() {
   const [perkaraList, setPerkaraList] = useState<Perkara[]>([]);
   const [loadingPerkara, setLoadingPerkara] = useState(true);
   const [selectedPerkara, setSelectedPerkara] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]); // Changed to array
   const [kategori, setKategori] = useState('bukti');
-  const [namaDokumen, setNamaDokumen] = useState('');
   const [catatan, setCatatan] = useState('');
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [uploadResult, setUploadResult] = useState<any>(null);
   const [error, setError] = useState('');
 
   // Fetch perkara list
@@ -51,20 +52,29 @@ export default function UploadDokumenPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      // Validate file size (max 10MB)
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        setError('Ukuran file maksimal 10MB');
-        return;
-      }
-      setFile(selectedFile);
-      // Auto-set nama dokumen dari filename
-      if (!namaDokumen) {
-        setNamaDokumen(selectedFile.name);
-      }
-      setError('');
+    const selectedFiles = Array.from(e.target.files || []);
+
+    if (selectedFiles.length === 0) return;
+
+    // Validate max files
+    if (selectedFiles.length > 10) {
+      setError('Maksimal 10 file per upload');
+      return;
     }
+
+    // Validate each file size (max 10MB per file)
+    const invalidFiles = selectedFiles.filter(f => f.size > 10 * 1024 * 1024);
+    if (invalidFiles.length > 0) {
+      setError(`File terlalu besar: ${invalidFiles.map(f => f.name).join(', ')} (Max 10MB per file)`);
+      return;
+    }
+
+    setFiles(selectedFiles);
+    setError('');
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
   };
 
   const handleUpload = async () => {
@@ -74,13 +84,8 @@ export default function UploadDokumenPage() {
       return;
     }
 
-    if (!file) {
-      setError('Pilih file terlebih dahulu');
-      return;
-    }
-
-    if (!namaDokumen.trim()) {
-      setError('Nama dokumen harus diisi');
+    if (files.length === 0) {
+      setError('Pilih minimal 1 file terlebih dahulu');
       return;
     }
 
@@ -88,20 +93,20 @@ export default function UploadDokumenPage() {
       setUploading(true);
       setError('');
 
-      await dokumenApi.upload({
-        file,
+      const result = await dokumenApi.bulkUpload({
+        files,
         perkara_id: selectedPerkara,
-        nama_dokumen: namaDokumen,
         kategori,
         catatan: catatan || undefined,
       });
 
       setSuccess(true);
+      setUploadResult(result.data);
 
-      // Redirect after 2 seconds
+      // Redirect after 3 seconds
       setTimeout(() => {
         router.push('/dokumen');
-      }, 2000);
+      }, 3000);
     } catch (err: any) {
       console.error('Upload failed:', err);
       setError(
@@ -135,8 +140,23 @@ export default function UploadDokumenPage() {
                 <CheckCircle className="h-10 w-10 text-green-600" />
               </div>
               <h2 className="text-2xl font-bold">Upload Berhasil!</h2>
-              <p className="text-muted-foreground">
-                Dokumen berhasil diupload. Mengarahkan ke halaman dokumen...
+              {uploadResult && (
+                <div className="text-sm space-y-2">
+                  <p className="text-muted-foreground">{uploadResult.message}</p>
+                  <div className="flex justify-center gap-4 text-xs">
+                    <span className="text-green-600">
+                      ✓ {uploadResult.uploaded} berhasil
+                    </span>
+                    {uploadResult.failed > 0 && (
+                      <span className="text-red-600">
+                        ✗ {uploadResult.failed} gagal
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              <p className="text-muted-foreground text-sm">
+                Mengarahkan ke halaman dokumen...
               </p>
             </div>
           </CardContent>
@@ -249,36 +269,47 @@ export default function UploadDokumenPage() {
               </label>
               <input
                 type="file"
+                multiple
                 onChange={handleFileChange}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
                 disabled={uploading}
               />
-              {file && (
-                <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4" />
-                  <span className="truncate">{file.name}</span>
-                  <span>({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+
+              {/* Files Preview */}
+              {files.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {files.length} file terpilih:
+                  </p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {files.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 p-2 bg-accent rounded-lg text-sm"
+                      >
+                        <FileText className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                        <span className="truncate flex-1">{file.name}</span>
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                        <button
+                          onClick={() => removeFile(index)}
+                          disabled={uploading}
+                          className="p-1 hover:bg-destructive/10 rounded transition disabled:opacity-50"
+                          title="Hapus file"
+                        >
+                          <X className="h-4 w-4 text-destructive" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-              <p className="text-xs text-muted-foreground mt-1">
-                Format: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT (Max 10MB)
-              </p>
-            </div>
 
-            {/* Nama Dokumen */}
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Nama Dokumen <span className="text-destructive">*</span>
-              </label>
-              <input
-                type="text"
-                value={namaDokumen}
-                onChange={(e) => setNamaDokumen(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Contoh: KTP - John Doe"
-                disabled={uploading}
-              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Format: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT (Max 10MB per file, Max 10 files)
+              </p>
             </div>
 
             {/* Kategori */}
@@ -326,18 +357,18 @@ export default function UploadDokumenPage() {
               </button>
               <button
                 onClick={handleUpload}
-                disabled={uploading || !selectedPerkara || !file || perkaraList.length === 0}
+                disabled={uploading || !selectedPerkara || files.length === 0 || perkaraList.length === 0}
                 className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    Mengupload...
+                    Mengupload {files.length} file...
                   </>
                 ) : (
                   <>
                     <Upload className="h-5 w-5" />
-                    Upload Dokumen
+                    Upload {files.length > 0 ? `${files.length} ` : ''}Dokumen
                   </>
                 )}
               </button>
