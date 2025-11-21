@@ -12,7 +12,7 @@ export const dokumenApi = {
     deskripsi?: string;
     kategori?: string;
     tags?: string[];
-  }): Promise<Dokumen> => {
+  }): Promise<any> => {
     const formData = new FormData();
 
     data.files.forEach((file) => {
@@ -34,12 +34,14 @@ export const dokumenApi = {
       formData.append('tags', JSON.stringify(data.tags));
     }
 
-    const response = await apiClient.post<Dokumen>('/dokumen-klien/upload', formData, {
+    const response = await apiClient.post<any>('/dokumen-klien/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
 
+    // ✅ Backend returns: { success: true, data: { uploaded: [...], failed: [...] } }
+    // Return the full response for useUpload hook to unwrap
     return response.data;
   },
 

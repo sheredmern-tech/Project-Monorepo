@@ -298,7 +298,7 @@ export default function BulkUploadPage() {
                       {file.status === 'success' && file.uploadedData && (
                         <div className="flex gap-2 mt-2">
                           <a
-                            href={file.uploadedData.file_url}
+                            href={file.uploadedData.google_drive_link || file.uploadedData.file_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition flex items-center gap-1"
@@ -307,7 +307,7 @@ export default function BulkUploadPage() {
                             View
                           </a>
                           <a
-                            href={file.uploadedData.file_url}
+                            href={file.uploadedData.google_drive_link || file.uploadedData.file_url}
                             download
                             className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition flex items-center gap-1"
                           >

@@ -36,8 +36,13 @@ export default function HistoryPage() {
       setError('');
       const response = await dokumenApi.getAll();
 
+      // ✅ Defensive check - ensure data is array before sort
+      const documentsData = Array.isArray(response?.data)
+        ? response.data
+        : [];
+
       // Sort by date descending (newest first)
-      const sorted = response.data.sort(
+      const sorted = documentsData.sort(
         (a, b) =>
           new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
       );
@@ -46,6 +51,7 @@ export default function HistoryPage() {
     } catch (error: any) {
       console.error('Failed to fetch documents:', error);
       setError('Gagal memuat riwayat. Silakan coba lagi.');
+      setDocuments([]); // ✅ Prevent errors in groupByDate
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -304,7 +310,7 @@ export default function HistoryPage() {
 
                           <div className="flex gap-2">
                             <a
-                              href={doc.file_url}
+                              href={doc.google_drive_link || doc.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-medium flex items-center gap-1"
@@ -313,7 +319,7 @@ export default function HistoryPage() {
                               Lihat
                             </a>
                             <a
-                              href={doc.file_url}
+                              href={doc.google_drive_link || doc.file_url}
                               download
                               className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-xs font-medium flex items-center gap-1"
                             >

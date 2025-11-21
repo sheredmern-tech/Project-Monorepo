@@ -112,6 +112,10 @@ export function useUpload() {
 
         clearInterval(progressInterval);
 
+        // ✅ Unwrap nested response from backend
+        // Backend returns: { success: true, data: { uploaded: [...], failed: [...] } }
+        const uploadedDoc = response?.data?.uploaded?.[0] || response;
+
         // Update status to success
         setFiles((prev) =>
           prev.map((f) =>
@@ -120,7 +124,7 @@ export function useUpload() {
                 ...f,
                 status: 'success',
                 progress: 100,
-                uploadedData: response,
+                uploadedData: uploadedDoc,
               }
               : f
           )
