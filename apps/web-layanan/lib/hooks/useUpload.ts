@@ -112,9 +112,9 @@ export function useUpload() {
 
         clearInterval(progressInterval);
 
-        // ✅ Unwrap nested response from backend
-        // Backend returns: { success: true, data: { uploaded: [...], failed: [...] } }
-        const uploadedDoc = response?.data?.uploaded?.[0] || response;
+        // ✅ Unwrap DOUBLE nested response from backend
+        // Backend returns: { success: true, data: { success: true, data: { uploaded: [...], failed: [...] } } }
+        const uploadedDoc = response?.data?.data?.uploaded?.[0] || response?.data?.uploaded?.[0] || response;
 
         // Update status to success
         setFiles((prev) =>
