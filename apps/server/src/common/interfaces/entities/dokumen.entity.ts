@@ -12,6 +12,7 @@ import { UserBasic } from './user.entity';
 export interface DokumenEntity {
   id: string;
   perkara_id: string;
+  folder_id: string | null; // ✅ Virtual folder organization
   nama_dokumen: string;
   kategori: KategoriDokumen;
   nomor_bukti: string | null;
@@ -46,6 +47,7 @@ export interface DokumenWithRelations extends DokumenEntity {
  */
 export interface CreateDokumenData {
   perkara_id: string;
+  folder_id?: string | null; // ✅ Virtual folder organization
   nama_dokumen: string;
   kategori: KategoriDokumen;
   nomor_bukti?: string | null;
