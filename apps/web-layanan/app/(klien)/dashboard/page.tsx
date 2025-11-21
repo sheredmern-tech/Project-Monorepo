@@ -23,7 +23,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
 
   // ✅ Use Zustand store instead of local state
-  const { documents, stats, loading, error, fetchDocuments, fetchStats } = useDokumenStore();
+  const { documents, stats, loading, error, fetchDocuments, fetchStats, clearError } = useDokumenStore();
 
   // Get recent 5 documents
   const recentDocuments = documents.slice(0, 5);
@@ -68,7 +68,7 @@ export default function DashboardPage() {
                   <p className="text-sm font-medium text-destructive">{error}</p>
                 </div>
                 <button
-                  onClick={() => setError('')}
+                  onClick={clearError}
                   className="text-destructive hover:text-destructive/80"
                 >
                   ×

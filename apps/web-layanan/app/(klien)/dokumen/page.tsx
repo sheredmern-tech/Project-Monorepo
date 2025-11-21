@@ -26,7 +26,7 @@ export default function DokumenPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // ✅ Use Zustand store for global state
-  const { documents, loading, error, fetchDocuments } = useDokumenStore();
+  const { documents, loading, error, fetchDocuments, clearError } = useDokumenStore();
 
   useEffect(() => {
     fetchDocuments();
@@ -82,7 +82,7 @@ export default function DokumenPage() {
                   <p className="text-sm font-medium text-destructive">{error}</p>
                 </div>
                 <button
-                  onClick={() => setError('')}
+                  onClick={clearError}
                   className="text-destructive hover:text-destructive/80"
                 >
                   ×

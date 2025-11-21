@@ -15,6 +15,7 @@ interface DokumenStore {
   fetchStats: () => Promise<void>;
   addDocument: (document: Dokumen) => void;
   removeDocument: (id: string) => void;
+  clearError: () => void;
   reset: () => void;
 }
 
@@ -103,6 +104,11 @@ export const useDokumenStore = create<DokumenStore>((set, get) => ({
         total_dokumen: Math.max(0, state.stats.total_dokumen - 1),
       },
     }));
+  },
+
+  // Clear error message
+  clearError: () => {
+    set({ error: null });
   },
 
   // Reset store (for logout)

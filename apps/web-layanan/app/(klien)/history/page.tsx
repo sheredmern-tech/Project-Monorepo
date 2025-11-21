@@ -24,7 +24,7 @@ export default function HistoryPage() {
   const { user } = useAuth();
 
   // ✅ Use Zustand store for global state
-  const { documents, loading, error, fetchDocuments } = useDokumenStore();
+  const { documents, loading, error, fetchDocuments, clearError } = useDokumenStore();
 
   useEffect(() => {
     fetchDocuments();
@@ -126,7 +126,7 @@ export default function HistoryPage() {
               <p className="text-sm font-medium text-red-800">{error}</p>
             </div>
             <button
-              onClick={() => setError('')}
+              onClick={clearError}
               className="text-red-600 hover:text-red-800"
             >
               ×
