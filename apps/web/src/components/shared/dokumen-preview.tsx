@@ -1,9 +1,10 @@
 // ============================================================================
 // FILE: components/shared/dokumen-preview.tsx - ENTERPRISE MODAL
+// ✨ FEATURE: Toggle View/Edit Mode for Google Workspace Files
 // ============================================================================
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,9 @@ import {
   Tag,
   User,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Eye
 } from "lucide-react";
 import { DokumenWithRelations } from "@/types";
 import { formatDate, formatFileSize } from "@/lib/utils/format";
@@ -29,14 +32,79 @@ interface DokumenPreviewProps {
   onClose: () => void;
 }
 
+/**
+ * Helper function to detect Google Workspace file type and build URLs
+ */
+function getGoogleWorkspaceUrls(googleDriveId: string, mimeType?: string): {
+  isEditable: boolean;
+  viewUrl: string;
+  editUrl: string;
+  fileType: 'docs' | 'sheets' | 'slides' | 'generic';
+} {
+  // Google Workspace MIME types
+  const GOOGLE_DOCS = 'application/vnd.google-apps.document';
+  const GOOGLE_SHEETS = 'application/vnd.google-apps.spreadsheet';
+  const GOOGLE_SLIDES = 'application/vnd.google-apps.presentation';
+
+  // Detect file type and build appropriate URLs
+  switch (mimeType) {
+    case GOOGLE_DOCS:
+      return {
+        isEditable: true,
+        viewUrl: `https://docs.google.com/document/d/${googleDriveId}/preview`,
+        editUrl: `https://docs.google.com/document/d/${googleDriveId}/edit`,
+        fileType: 'docs',
+      };
+    case GOOGLE_SHEETS:
+      return {
+        isEditable: true,
+        viewUrl: `https://docs.google.com/spreadsheets/d/${googleDriveId}/preview`,
+        editUrl: `https://docs.google.com/spreadsheets/d/${googleDriveId}/edit`,
+        fileType: 'sheets',
+      };
+    case GOOGLE_SLIDES:
+      return {
+        isEditable: true,
+        viewUrl: `https://docs.google.com/presentation/d/${googleDriveId}/preview`,
+        editUrl: `https://docs.google.com/presentation/d/${googleDriveId}/edit`,
+        fileType: 'slides',
+      };
+    default:
+      // Generic file (PDF, images, etc) - no edit mode
+      return {
+        isEditable: false,
+        viewUrl: `https://drive.google.com/file/d/${googleDriveId}/preview`,
+        editUrl: `https://drive.google.com/file/d/${googleDriveId}/view`, // fallback
+        fileType: 'generic',
+      };
+  }
+}
+
 export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) {
   const [iframeLoading, setIframeLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false); // ✨ NEW: Edit mode state
 
   // ✅ Use Google Drive links directly
-  const embedLink = dokumen.embed_link;
   const downloadLink = dokumen.google_drive_link;
   const extension = getFileExtension(dokumen.nama_dokumen);
+
+  // ✨ NEW: Detect file type and build dynamic URLs
+  const fileUrls = useMemo(() => {
+    if (!dokumen.google_drive_id) {
+      return {
+        isEditable: false,
+        viewUrl: dokumen.embed_link || '',
+        editUrl: '',
+        fileType: 'generic' as const,
+      };
+    }
+
+    return getGoogleWorkspaceUrls(dokumen.google_drive_id, dokumen.tipe_file);
+  }, [dokumen.google_drive_id, dokumen.tipe_file, dokumen.embed_link]);
+
+  // ✨ Dynamic iframe URL based on mode
+  const embedLink = isEditMode ? fileUrls.editUrl : fileUrls.viewUrl;
 
   const handleDownload = () => {
     if (downloadLink) {
@@ -84,6 +152,29 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
 
             {/* Action Buttons */}
             <div className="hidden lg:flex gap-2">
+              {/* ✨ NEW: Edit Mode Toggle (only for Google Workspace files) */}
+              {fileUrls.isEditable && (
+                <Button
+                  variant={isEditMode ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setIsEditMode(!isEditMode);
+                    setIframeLoading(true); // Reset loading state when switching
+                  }}
+                >
+                  {isEditMode ? (
+                    <>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editing
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Mode
+                    </>
+                  )}
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={handleOpenInDrive}>
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open in Drive
@@ -196,15 +287,41 @@ export function DokumenPreview({ dokumen, open, onClose }: DokumenPreviewProps) 
               </h3>
 
               {/* Mobile Action Buttons */}
-              <div className="lg:hidden flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1" onClick={handleOpenInDrive}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open in Drive
-                </Button>
-                <Button variant="default" size="sm" className="flex-1" onClick={handleDownload}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download
-                </Button>
+              <div className="lg:hidden space-y-2">
+                {/* ✨ NEW: Edit Mode Toggle for Mobile */}
+                {fileUrls.isEditable && (
+                  <Button
+                    variant={isEditMode ? "default" : "outline"}
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setIsEditMode(!isEditMode);
+                      setIframeLoading(true);
+                    }}
+                  >
+                    {isEditMode ? (
+                      <>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editing
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Mode
+                      </>
+                    )}
+                  </Button>
+                )}
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={handleOpenInDrive}>
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open in Drive
+                  </Button>
+                  <Button variant="default" size="sm" className="flex-1" onClick={handleDownload}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                </div>
               </div>
 
               {/* Perkara */}
