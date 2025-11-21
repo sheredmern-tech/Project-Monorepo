@@ -13,6 +13,7 @@ import {
   AlertCircle,
   TrendingUp,
   Calendar,
+  MessageCircle,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,17 @@ export default function DashboardPage() {
     fetchDocuments();
     fetchStats();
   }, [fetchDocuments, fetchStats]);
+
+  // ✅ WhatsApp Consultation Handler (FREE - No backend needed!)
+  const handleWhatsAppConsultation = () => {
+    const phone = '6281234567890'; // Firma's WhatsApp number (REPLACE WITH REAL NUMBER!)
+    const clientName = user?.nama_lengkap || 'Klien';
+    const message = `Halo, saya ${clientName} ingin berkonsultasi untuk membuat perkara baru. Mohon bantuan untuk proses selanjutnya.`;
+
+    // Open WhatsApp with pre-filled message
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   if (loading) {
     return (
@@ -121,15 +133,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground cursor-pointer hover:shadow-lg transition" onClick={() => router.push('/upload')}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground cursor-pointer hover:shadow-lg transition" onClick={() => router.push('/dokumen/upload')}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Upload Dokumen Baru
+                Upload Dokumen
               </CardTitle>
               <CardDescription className="text-primary-foreground/80">
-                Upload dokumen hukum Anda dengan mudah
+                Upload dokumen ke perkara Anda
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -144,15 +156,33 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Lihat Semua Dokumen
+                Lihat Dokumen
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                Kelola dan cari semua dokumen Anda
+                Kelola semua dokumen Anda
               </CardDescription>
             </CardHeader>
             <CardContent>
               <button className="flex items-center gap-2 text-sm font-medium hover:underline">
                 Buka Dokumen
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white cursor-pointer hover:shadow-lg transition" onClick={handleWhatsAppConsultation}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5" />
+                Konsultasi Via WhatsApp
+              </CardTitle>
+              <CardDescription className="text-white/80">
+                Hubungi tim kami untuk konsultasi
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <button className="flex items-center gap-2 text-sm font-medium hover:underline">
+                Chat Sekarang
                 <ArrowRight className="h-4 w-4" />
               </button>
             </CardContent>
