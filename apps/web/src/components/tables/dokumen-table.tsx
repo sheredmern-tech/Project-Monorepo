@@ -163,10 +163,16 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                       <Icon className="h-8 w-8 text-muted-foreground" />
                       <div className="flex-1">
                         <p className="font-medium">{dokumen.nama_dokumen}</p>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
                           <Badge variant="outline" className="text-xs">
                             {extension}
                           </Badge>
+                          {/* ✨ Badge: Uploaded by Client */}
+                          {dokumen.pengunggah?.role === 'klien' && (
+                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
+                              📤 Client Upload
+                            </Badge>
+                          )}
                           {dokumen.nomor_bukti && (
                             <span className="text-xs text-muted-foreground">
                               {dokumen.nomor_bukti}

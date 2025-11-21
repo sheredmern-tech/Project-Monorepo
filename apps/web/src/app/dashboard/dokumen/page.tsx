@@ -3,7 +3,7 @@
 // ============================================================================
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,21 @@ export default function DokumenPage() {
     setKategori,
     fetchDokumen,
   } = useDokumen();
+
+  // ✨ NEW: Uploader filter (client-side)
+  const [uploaderFilter, setUploaderFilter] = useState<string>("all");
+
+  // ✨ Filter documents by uploader role
+  const filteredDokumen = useMemo(() => {
+    if (uploaderFilter === "all") return dokumen;
+    if (uploaderFilter === "client") {
+      return dokumen.filter(doc => doc.pengunggah?.role === 'klien');
+    }
+    if (uploaderFilter === "staff") {
+      return dokumen.filter(doc => doc.pengunggah?.role !== 'klien');
+    }
+    return dokumen;
+  }, [dokumen, uploaderFilter]);
 
   useEffect(() => {
     fetchDokumen();
@@ -80,16 +95,27 @@ export default function DokumenPage() {
             ))}
           </SelectContent>
         </Select>
+        {/* ✨ NEW: Uploader Filter */}
+        <Select value={uploaderFilter} onValueChange={setUploaderFilter}>
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Diunggah oleh" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Upload</SelectItem>
+            <SelectItem value="staff">Upload Staff</SelectItem>
+            <SelectItem value="client">Upload Client</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
-      <DokumenTable 
-        data={dokumen} 
-        isLoading={isLoading} 
+      <DokumenTable
+        data={filteredDokumen}
+        isLoading={isLoading}
         error={error}
-        page={page} 
-        limit={limit} 
-        total={total} 
+        page={page}
+        limit={limit}
+        total={filteredDokumen.length}
       />
     </div>
   );
