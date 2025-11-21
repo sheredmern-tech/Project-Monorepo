@@ -43,7 +43,7 @@ export function CreateFolderModal({ perkaraId, parentId, onClose, onSuccess }: C
       await folderApi.create({
         perkara_id: perkaraId,
         nama_folder: nama.trim(),
-        parent_id: parentId,
+        parent_id: parentId || undefined,
         warna,
       });
 
@@ -107,9 +107,8 @@ export function CreateFolderModal({ perkaraId, parentId, onClose, onSuccess }: C
                     key={color.value}
                     type="button"
                     onClick={() => setWarna(color.value)}
-                    className={`w-10 h-10 rounded-lg border-2 transition ${
-                      warna === color.value ? 'border-primary scale-110' : 'border-transparent hover:scale-105'
-                    }`}
+                    className={`w-10 h-10 rounded-lg border-2 transition ${warna === color.value ? 'border-primary scale-110' : 'border-transparent hover:scale-105'
+                      }`}
                     style={{ backgroundColor: color.value }}
                     title={color.label}
                     disabled={loading}
