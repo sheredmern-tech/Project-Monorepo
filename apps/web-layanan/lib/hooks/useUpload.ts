@@ -117,9 +117,9 @@ export function useUpload() {
 
         clearInterval(progressInterval);
 
-        // ✅ Unwrap DOUBLE nested response from backend
-        // Backend returns: { success: true, data: { success: true, data: { uploaded: [...], failed: [...] } } }
-        const uploadedDoc = response?.data?.data?.uploaded?.[0] || response?.data?.uploaded?.[0] || response;
+        // ✅ Unwrap response from backend (TransformInterceptor wraps it)
+        // Backend returns: { success: true, data: { uploaded: [...], failed: [...] }, timestamp: "..." }
+        const uploadedDoc = response?.data?.uploaded?.[0] || response;
 
         // ✅ Add to global Zustand store (so all pages get updated!)
         if (uploadedDoc && uploadedDoc.id) {

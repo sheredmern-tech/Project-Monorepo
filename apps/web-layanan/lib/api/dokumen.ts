@@ -57,11 +57,11 @@ export const dokumenApi = {
     const response = await apiClient.get<any>('/dokumen-klien', {
       params,
     });
-    // ✅ Backend returns: { success: true, data: [...], meta: {...} }
-    // Extract the actual data array
+    // ✅ TransformInterceptor wraps response:
+    // { success: true, data: { data: [...], meta: {...} }, timestamp: "..." }
     return {
-      data: response.data.data || [],
-      meta: response.data.meta || {},
+      data: response.data.data?.data || [],
+      meta: response.data.data?.meta || {},
     };
   },
 

@@ -134,16 +134,15 @@ export class DokumenKlienService {
       },
     });
 
+    // ✅ Return data directly - TransformInterceptor will wrap it!
+    // Interceptor adds: { success: true, data: <this>, timestamp: "..." }
     return {
-      success: true,
-      data: {
-        uploaded,
-        failed,
-        summary: {
-          total: files.length,
-          success: uploaded.length,
-          failed: failed.length,
-        },
+      uploaded,
+      failed,
+      summary: {
+        total: files.length,
+        success: uploaded.length,
+        failed: failed.length,
       },
     };
   }
@@ -199,8 +198,8 @@ export class DokumenKlienService {
 
     const totalPages = Math.ceil(total / limit);
 
+    // ✅ Return data directly - TransformInterceptor will wrap it!
     return {
-      success: true,
       data: data.map((doc) => ({
         ...doc,
         file_size: doc.file_size ? Number(doc.file_size) : null, // Convert BigInt
@@ -259,20 +258,18 @@ export class DokumenKlienService {
       }),
     ]);
 
+    // ✅ Return data directly - TransformInterceptor will wrap it!
     return {
-      success: true,
-      data: {
-        total_dokumen: total,
-        dokumen_bulan_ini: bulanIni,
-        dokumen_minggu_ini: mingguIni,
-        by_type: byType.reduce(
-          (acc, item) => {
-            acc[item.tipe_dokumen || 'lainnya'] = item._count;
-            return acc;
-          },
-          {} as Record<string, number>,
-        ),
-      },
+      total_dokumen: total,
+      dokumen_bulan_ini: bulanIni,
+      dokumen_minggu_ini: mingguIni,
+      by_type: byType.reduce(
+        (acc, item) => {
+          acc[item.tipe_dokumen || 'lainnya'] = item._count;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
     };
   }
 

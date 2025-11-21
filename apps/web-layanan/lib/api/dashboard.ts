@@ -7,7 +7,8 @@ export const dashboardApi = {
    */
   getStats: async (): Promise<DashboardStats> => {
     const response = await apiClient.get<any>('/dokumen-klien/stats');
-    // ✅ Backend returns: { success: true, data: {...} }
-    return response.data.data || response.data;
+    // ✅ TransformInterceptor wraps response:
+    // { success: true, data: { total_dokumen, dokumen_bulan_ini, ... }, timestamp: "..." }
+    return response.data.data || {};
   },
 };
