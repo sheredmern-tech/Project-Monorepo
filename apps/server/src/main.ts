@@ -1,4 +1,4 @@
-// ===== FILE: src/main.ts (ESLINT FIXED - COMPLETE) =====
+// ===== FILE: src/main.ts (ENHANCED WITH CORS LOGGING) =====
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -21,16 +21,19 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // CORS configuration
-  // CORS configuration
   const corsOrigins = configService.get<string[]>('app.corsOrigins') || [
     'http://localhost:3001',
+    'http://localhost:3002', // WEB-LAYANAN
   ];
+
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
-  // Global prefix
+  // Health check endpoint (before global prefix)
   app.getHttpAdapter().get('/health', (_req: Request, res: Response) => {
     const response: HealthCheckResponse = {
       status: 'ok',
@@ -58,7 +61,7 @@ async function bootstrap() {
   );
 
   // Serve static files (uploads)
-  const uploadPath = configService.get<string>('UPLOAD_PATH', './uploads');
+  const uploadPath = configService.get<string>('app.upload.path', './uploads');
   app.use('/uploads', express.static(join(process.cwd(), uploadPath)));
 
   // Swagger documentation
@@ -99,17 +102,29 @@ async function bootstrap() {
   const port = configService.get<number>('app.port', 3000);
   await app.listen(port);
 
-  console.log('\n='.repeat(80));
+  // ============================================================================
+  // ENHANCED STARTUP LOGGING WITH CORS INFO
+  // ============================================================================
+  console.log('\n' + '='.repeat(80));
   console.log('🚀 FIRMA HUKUM PERARI - SERVER STARTED');
   console.log('='.repeat(80));
   console.log(`📍 Application URL: http://localhost:${port}`);
   console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
+  console.log(`🏥 Health Check: http://localhost:${port}/health`);
   console.log(`🔧 Environment: ${configService.get<string>('app.nodeEnv')}`);
   console.log(`🗄️  Database: Connected`);
   console.log(`📦 Redis Cache: Connected`);
   console.log(`🔐 JWT Authentication: Enabled`);
   console.log(`📧 Email Service: Configured`);
   console.log(`📊 Monitoring: Active`);
+  console.log('-'.repeat(80));
+  console.log('🌐 CORS Enabled for:');
+  corsOrigins.forEach((origin, index) => {
+    console.log(`   ${index + 1}. ${origin}`);
+  });
+  console.log('-'.repeat(80));
+  console.log(`📁 Upload Path: ${uploadPath}`);
+  console.log(`📤 Max File Size: ${configService.get<number>('app.upload.maxFileSize', 10485760) / 1024 / 1024}MB`);
   console.log('='.repeat(80));
   console.log('✅ Server is ready to handle requests\n');
 
