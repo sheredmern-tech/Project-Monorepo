@@ -13,7 +13,6 @@ const registerSchema = z
   .object({
     nama_lengkap: z.string().min(3, 'Nama minimal 3 karakter'),
     email: z.string().email('Email tidak valid'),
-    no_hp: z.string().optional(),
     password: z.string().min(6, 'Password minimal 6 karakter'),
     confirm_password: z.string(),
   })
@@ -47,7 +46,6 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
         nama_lengkap: data.nama_lengkap,
-        no_hp: data.no_hp,
       });
 
       router.push('/dashboard');
@@ -127,19 +125,6 @@ export default function RegisterPage() {
                   {errors.email.message}
                 </p>
               )}
-            </div>
-
-            {/* No HP */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                No. Handphone (Opsional)
-              </label>
-              <input
-                {...register('no_hp')}
-                type="tel"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                placeholder="08123456789"
-              />
             </div>
 
             {/* Password */}
