@@ -1,16 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { dokumenApi } from '@/lib/api/dokumen';
-import { dashboardApi } from '@/lib/api/dashboard';
-import { Dokumen, DashboardStats } from '@/types';
+import { useDokumenStore } from '@/lib/stores/dokumen-store';
 import {
   Upload,
   FileText,
   Clock,
-  CheckCircle,
   ArrowRight,
   Loader2,
   AlertCircle,
@@ -25,49 +22,17 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  const [recentDocuments, setRecentDocuments] = useState<Dokumen[]>([]);
-  const [stats, setStats] = useState<DashboardStats>({
-    total_dokumen: 0,
-    dokumen_bulan_ini: 0,
-    dokumen_minggu_ini: 0,
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // ✅ Use Zustand store instead of local state
+  const { documents, stats, loading, error, fetchDocuments, fetchStats } = useDokumenStore();
+
+  // Get recent 5 documents
+  const recentDocuments = documents.slice(0, 5);
 
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setError('');
-      const [docsResponse, statsData] = await Promise.all([
-        dokumenApi.getAll(),
-        dashboardApi.getStats(),
-      ]);
-
-      const documentsData = Array.isArray(docsResponse?.data)
-        ? docsResponse.data
-        : [];
-
-      // Sort by date and get only recent 5
-      const recent = documentsData
-        .sort(
-          (a, b) =>
-            new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
-        )
-        .slice(0, 5);
-
-      setRecentDocuments(recent);
-      setStats(statsData || { total_dokumen: 0, dokumen_bulan_ini: 0, dokumen_minggu_ini: 0 });
-    } catch (error: any) {
-      console.error('Failed to fetch data:', error);
-      setError('Gagal memuat data. Silakan coba lagi.');
-      setRecentDocuments([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Fetch data on mount
+    fetchDocuments();
+    fetchStats();
+  }, [fetchDocuments, fetchStats]);
 
   if (loading) {
     return (

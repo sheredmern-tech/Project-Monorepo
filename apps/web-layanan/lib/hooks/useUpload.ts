@@ -5,11 +5,16 @@ import { dokumenApi } from '@/lib/api/dokumen';
 import { BulkFile } from '@/types';
 import { extractMetadataFromFilename } from '@/lib/utils/fileDetection';
 import { validateFile } from '@/lib/utils/fileValidation';
+import { useDokumenStore } from '@/lib/stores/dokumen-store';
 
 export function useUpload() {
   const [files, setFiles] = useState<BulkFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+
+  // ✅ Zustand store for global state sync
+  const addDocument = useDokumenStore((state) => state.addDocument);
+  const fetchStats = useDokumenStore((state) => state.fetchStats);
 
   /**
    * Add files to upload queue
@@ -115,6 +120,12 @@ export function useUpload() {
         // ✅ Unwrap DOUBLE nested response from backend
         // Backend returns: { success: true, data: { success: true, data: { uploaded: [...], failed: [...] } } }
         const uploadedDoc = response?.data?.data?.uploaded?.[0] || response?.data?.uploaded?.[0] || response;
+
+        // ✅ Add to global Zustand store (so all pages get updated!)
+        if (uploadedDoc && uploadedDoc.id) {
+          addDocument(uploadedDoc);
+          fetchStats(); // Refresh stats too
+        }
 
         // Update status to success
         setFiles((prev) =>

@@ -41,13 +41,31 @@ export class DokumenKlienService {
     const uploaded: any[] = [];
     const failed: any[] = [];
 
-    // ✅ Create/get folder for this klien: /Klien-{userId}/
+    // ✅ Get user info for better folder naming
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { nama_lengkap: true, email: true },
+    });
+
+    // ✅ Create/get folder for this klien with name + hash
+    // Format: Klien_NamaUser_{first8charsOfUserId}
     let klienFolderId: string | undefined;
     try {
-      const folderName = `Klien-${userId}`;
+      const userNameSlug = user?.nama_lengkap
+        ? user.nama_lengkap
+            .replace(/[^a-zA-Z0-9]/g, '_') // Replace non-alphanumeric with underscore
+            .replace(/_+/g, '_') // Replace multiple underscores with single
+            .replace(/^_|_$/g, '') // Remove leading/trailing underscores
+        : 'Unknown';
+
+      const userIdHash = userId.substring(0, 8); // First 8 chars as identifier
+      const folderName = `Klien_${userNameSlug}_${userIdHash}`;
+
       klienFolderId =
         await this.googleDriveService.getOrCreatePerkaraFolder(folderName);
-      this.logger.log(`📁 Using folder for klien ${userId}: ${klienFolderId}`);
+      this.logger.log(
+        `📁 Using folder for klien ${user?.nama_lengkap || userId}: ${folderName} (${klienFolderId})`,
+      );
     } catch (error) {
       this.logger.error(
         `Failed to create/get klien folder: ${error.message}`,
