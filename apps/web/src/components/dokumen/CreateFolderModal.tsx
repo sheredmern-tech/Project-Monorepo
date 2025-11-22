@@ -42,7 +42,7 @@ export function CreateFolderModal({ perkaraId, parentId, onClose, onSuccess }: C
       await folderApi.create({
         perkara_id: perkaraId,
         nama_folder: nama.trim(),
-        parent_id: parentId,
+        parent_id: parentId || undefined,
         warna,
       });
 

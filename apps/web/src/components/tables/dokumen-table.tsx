@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Eye, Edit, Trash2, Download, AlertCircle } from "lucide-react";
+import { MoreHorizontal, Eye, Edit, Trash2, Download, AlertCircle, FolderInput, Copy } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -31,6 +31,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/modals/confirm-dialog";
 import { DokumenPreview } from "@/components/shared/dokumen-preview";
 import { TablePagination } from "@/components/tables/table-pagination";
+import { MoveFolderModal } from "@/components/dokumen/MoveFolderModal";
 import { DokumenWithRelations } from "@/types";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
 import { usePermission } from "@/lib/hooks/use-permission";
@@ -55,6 +56,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
   const [isDeleting, setIsDeleting] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [previewDokumen, setPreviewDokumen] = useState<DokumenWithRelations | null>(null);
+  const [moveOperation, setMoveOperation] = useState<{ dokumen: DokumenWithRelations; mode: 'move' | 'copy' } | null>(null);
 
   // 🔒 RBAC: Get user permissions
   const permissions = usePermission();
@@ -250,6 +252,25 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                             </DropdownMenuItem>
                           )}
 
+                          {/* 🔒 Move to Folder - requires dokumen:update permission */}
+                          {permissions.dokumen.update && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => setMoveOperation({ dokumen, mode: 'move' })}
+                              >
+                                <FolderInput className="mr-2 h-4 w-4" />
+                                Move to Folder
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setMoveOperation({ dokumen, mode: 'copy' })}
+                              >
+                                <Copy className="mr-2 h-4 w-4" />
+                                Copy to Folder
+                              </DropdownMenuItem>
+                            </>
+                          )}
+
                           {/* 🔒 Delete - requires dokumen:delete permission */}
                           {permissions.dokumen.delete && (
                             <>
@@ -294,6 +315,22 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
         confirmText={isDeleting ? "Menghapus..." : "Hapus"}
         variant="destructive"
       />
+
+      {/* Move/Copy Folder Modal */}
+      {moveOperation && (
+        <MoveFolderModal
+          dokumenId={moveOperation.dokumen.id}
+          dokumenName={moveOperation.dokumen.nama_dokumen}
+          perkaraId={moveOperation.dokumen.perkara_id}
+          currentFolderId={(moveOperation.dokumen as any).folder_id}
+          mode={moveOperation.mode}
+          onClose={() => setMoveOperation(null)}
+          onSuccess={() => {
+            fetchDokumen();
+            setMoveOperation(null);
+          }}
+        />
+      )}
     </>
   );
 }
