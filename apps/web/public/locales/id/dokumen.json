@@ -1,0 +1,128 @@
+{
+  "title": "Manajemen Dokumen",
+  "uploadDocument": "Unggah Dokumen",
+  "allDocuments": "Semua Dokumen",
+  "myDocuments": "Dokumen Saya",
+  "recentDocuments": "Dokumen Terkini",
+
+  "folder": {
+    "create": "Buat Folder Baru",
+    "rename": "Ubah Nama Folder",
+    "delete": "Hapus Folder",
+    "move": "Pindahkan ke Folder",
+    "root": "Root (Tanpa Folder)",
+    "recent": "Folder Terkini",
+    "allFolders": "Semua Folder",
+    "noFolders": "Belum ada folder",
+    "selectFolder": "Pilih Folder",
+    "folderName": "Nama Folder",
+    "folderColor": "Warna Folder"
+  },
+
+  "bulk": {
+    "selected": "terpilih",
+    "selectMode": "Mode Pilih",
+    "move": "Pindahkan",
+    "delete": "Hapus",
+    "moveSuccess": "{{count}} dokumen berhasil dipindahkan",
+    "moveFailed": "{{count}} dokumen gagal dipindahkan",
+    "deleteSuccess": "{{count}} dokumen berhasil dihapus",
+    "deleteFailed": "{{count}} dokumen gagal dihapus",
+    "deleteConfirm": "Apakah Anda yakin ingin menghapus {{count}} dokumen yang dipilih? Tindakan ini tidak dapat dibatalkan."
+  },
+
+  "statistics": {
+    "totalSize": "Total Ukuran",
+    "lastUpload": "Upload Terakhir",
+    "documentCount": "Jumlah Dokumen",
+    "fileTypes": "Jenis File"
+  },
+
+  "keyboard": {
+    "shortcuts": "Pintasan Keyboard",
+    "commandPalette": "Buka command palette",
+    "focusSearch": "Fokus ke pencarian",
+    "createFolder": "Buat folder baru",
+    "uploadDocument": "Unggah dokumen",
+    "toggleSelection": "Toggle mode seleksi",
+    "showHelp": "Tampilkan bantuan pintasan"
+  },
+
+  "filter": {
+    "category": "Kategori",
+    "uploader": "Pengunggah",
+    "client": "Klien",
+    "staff": "Staff",
+    "sortBy": "Urutkan Berdasarkan",
+    "uploadDate": "Tanggal Upload",
+    "documentName": "Nama Dokumen",
+    "fileSize": "Ukuran File",
+    "ascending": "Naik",
+    "descending": "Turun",
+    "savePreset": "Simpan Filter",
+    "applyPreset": "Terapkan Preset",
+    "presetName": "Nama Preset"
+  },
+
+  "search": {
+    "placeholder": "Cari nama dokumen, nomor bukti...",
+    "searching": "Mencari...",
+    "noResults": "Tidak ada hasil ditemukan",
+    "resultsFound": "{{count}} hasil ditemukan"
+  },
+
+  "upload": {
+    "title": "Unggah Dokumen Baru",
+    "dragDrop": "Seret & lepas file di sini",
+    "or": "atau",
+    "browseFiles": "Pilih File",
+    "maxSize": "Ukuran maksimal: {{size}}",
+    "allowedTypes": "Tipe file yang diizinkan: {{types}}",
+    "uploading": "Mengunggah...",
+    "uploadSuccess": "Dokumen berhasil diunggah",
+    "uploadFailed": "Gagal mengunggah dokumen"
+  },
+
+  "table": {
+    "documentName": "Nama Dokumen",
+    "category": "Kategori",
+    "fileSize": "Ukuran File",
+    "uploadDate": "Tanggal Upload",
+    "uploadedBy": "Diunggah Oleh",
+    "folder": "Folder",
+    "actions": "Aksi"
+  },
+
+  "category": {
+    "all": "Semua Kategori",
+    "kontrak": "Kontrak",
+    "surat_kuasa": "Surat Kuasa",
+    "bukti": "Bukti",
+    "keputusan": "Keputusan",
+    "lainnya": "Lainnya"
+  },
+
+  "actions": {
+    "view": "Lihat",
+    "download": "Unduh",
+    "move": "Pindahkan",
+    "copy": "Salin",
+    "rename": "Ubah Nama",
+    "delete": "Hapus",
+    "share": "Bagikan",
+    "preview": "Preview"
+  },
+
+  "messages": {
+    "noDocuments": "Belum ada dokumen",
+    "loadingDocuments": "Memuat dokumen...",
+    "createFolderSuccess": "Folder berhasil dibuat",
+    "createFolderFailed": "Gagal membuat folder",
+    "renameFolderSuccess": "Folder berhasil diubah namanya",
+    "deleteFolderSuccess": "Folder berhasil dihapus",
+    "deleteFolderConfirm": "Apakah Anda yakin ingin menghapus folder \"{{name}}\"? Dokumen di dalam folder akan dipindahkan ke root.",
+    "moveDocumentSuccess": "Dokumen berhasil dipindahkan",
+    "deleteDocumentSuccess": "Dokumen berhasil dihapus",
+    "deleteDocumentConfirm": "Apakah Anda yakin ingin menghapus dokumen ini?"
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "title": "Document Management",
+  "uploadDocument": "Upload Document",
+  "allDocuments": "All Documents",
+  "myDocuments": "My Documents",
+  "recentDocuments": "Recent Documents",
+
+  "folder": {
+    "create": "Create New Folder",
+    "rename": "Rename Folder",
+    "delete": "Delete Folder",
+    "move": "Move to Folder",
+    "root": "Root (No Folder)",
+    "recent": "Recent Folders",
+    "allFolders": "All Folders",
+    "noFolders": "No folders yet",
+    "selectFolder": "Select Folder",
+    "folderName": "Folder Name",
+    "folderColor": "Folder Color"
+  },
+
+  "bulk": {
+    "selected": "selected",
+    "selectMode": "Selection Mode",
+    "move": "Move",
+    "delete": "Delete",
+    "moveSuccess": "{{count}} documents moved successfully",
+    "moveFailed": "{{count}} documents failed to move",
+    "deleteSuccess": "{{count}} documents deleted successfully",
+    "deleteFailed": "{{count}} documents failed to delete",
+    "deleteConfirm": "Are you sure you want to delete {{count}} selected documents? This action cannot be undone."
+  },
+
+  "statistics": {
+    "totalSize": "Total Size",
+    "lastUpload": "Last Upload",
+    "documentCount": "Document Count",
+    "fileTypes": "File Types"
+  },
+
+  "keyboard": {
+    "shortcuts": "Keyboard Shortcuts",
+    "commandPalette": "Open command palette",
+    "focusSearch": "Focus search",
+    "createFolder": "Create new folder",
+    "uploadDocument": "Upload document",
+    "toggleSelection": "Toggle selection mode",
+    "showHelp": "Show shortcuts help"
+  },
+
+  "filter": {
+    "category": "Category",
+    "uploader": "Uploader",
+    "client": "Client",
+    "staff": "Staff",
+    "sortBy": "Sort By",
+    "uploadDate": "Upload Date",
+    "documentName": "Document Name",
+    "fileSize": "File Size",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "savePreset": "Save Filter",
+    "applyPreset": "Apply Preset",
+    "presetName": "Preset Name"
+  },
+
+  "search": {
+    "placeholder": "Search document name, evidence number...",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "resultsFound": "{{count}} results found"
+  },
+
+  "upload": {
+    "title": "Upload New Document",
+    "dragDrop": "Drag & drop files here",
+    "or": "or",
+    "browseFiles": "Browse Files",
+    "maxSize": "Maximum size: {{size}}",
+    "allowedTypes": "Allowed file types: {{types}}",
+    "uploading": "Uploading...",
+    "uploadSuccess": "Document uploaded successfully",
+    "uploadFailed": "Failed to upload document"
+  },
+
+  "table": {
+    "documentName": "Document Name",
+    "category": "Category",
+    "fileSize": "File Size",
+    "uploadDate": "Upload Date",
+    "uploadedBy": "Uploaded By",
+    "folder": "Folder",
+    "actions": "Actions"
+  },
+
+  "category": {
+    "all": "All Categories",
+    "kontrak": "Contract",
+    "surat_kuasa": "Power of Attorney",
+    "bukti": "Evidence",
+    "keputusan": "Decision",
+    "lainnya": "Other"
+  },
+
+  "actions": {
+    "view": "View",
+    "download": "Download",
+    "move": "Move",
+    "copy": "Copy",
+    "rename": "Rename",
+    "delete": "Delete",
+    "share": "Share",
+    "preview": "Preview"
+  },
+
+  "messages": {
+    "noDocuments": "No documents yet",
+    "loadingDocuments": "Loading documents...",
+    "createFolderSuccess": "Folder created successfully",
+    "createFolderFailed": "Failed to create folder",
+    "renameFolderSuccess": "Folder renamed successfully",
+    "deleteFolderSuccess": "Folder deleted successfully",
+    "deleteFolderConfirm": "Are you sure you want to delete folder \"{{name}}\"? Documents inside the folder will be moved to root.",
+    "moveDocumentSuccess": "Document moved successfully",
+    "deleteDocumentSuccess": "Document deleted successfully",
+    "deleteDocumentConfirm": "Are you sure you want to delete this document?"
+  }
+}

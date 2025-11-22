@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 export function Header() {
   const pathname = usePathname();
@@ -172,6 +173,7 @@ export function Header() {
           <Search className="h-5 w-5" />
         </Button>
 
+        <LanguageSwitcher />
         <ThemeToggle />
       </div>
 
