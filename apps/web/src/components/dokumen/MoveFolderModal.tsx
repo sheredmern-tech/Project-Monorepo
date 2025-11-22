@@ -48,9 +48,9 @@ export function MoveFolderModal({
     try {
       setLoading(true);
       if (!perkaraId) {
-        // For bulk operations without specific perkara, load all folders
-        // This is a simplified version - you might want to fetch from first document
+        toast.error('Perkara ID tidak tersedia');
         setFolders([]);
+        setLoading(false);
         return;
       }
       const data = await folderApi.getTree(perkaraId);
@@ -77,9 +77,10 @@ export function MoveFolderModal({
         };
         setExpandedFolders(expandParents(currentFolderId, data));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load folders:', error);
-      toast.error('Gagal memuat folder');
+      toast.error(error.response?.data?.message || 'Gagal memuat folder');
+      setFolders([]);
     } finally {
       setLoading(false);
     }
@@ -102,13 +103,45 @@ export function MoveFolderModal({
       setSubmitting(true);
 
       if (isBulk) {
-        // Bulk operation
+        // Bulk operation with better error handling
         if (mode === 'move') {
-          await Promise.all(targetIds.map(id => dokumenApi.move(id, selectedFolder)));
-          toast.success(`${targetIds.length} dokumen berhasil dipindahkan`);
+          const results = await Promise.allSettled(
+            targetIds.map(id => dokumenApi.move(id, selectedFolder))
+          );
+
+          const successCount = results.filter(r => r.status === 'fulfilled').length;
+          const failCount = results.filter(r => r.status === 'rejected').length;
+
+          if (successCount > 0) {
+            toast.success(`${successCount} dokumen berhasil dipindahkan`);
+          }
+          if (failCount > 0) {
+            toast.error(`${failCount} dokumen gagal dipindahkan`);
+          }
+
+          // If all failed, throw error
+          if (successCount === 0) {
+            throw new Error('Semua dokumen gagal dipindahkan');
+          }
         } else {
-          await Promise.all(targetIds.map(id => dokumenApi.copy(id, { folder_id: selectedFolder })));
-          toast.success(`${targetIds.length} dokumen berhasil disalin`);
+          const results = await Promise.allSettled(
+            targetIds.map(id => dokumenApi.copy(id, { folder_id: selectedFolder }))
+          );
+
+          const successCount = results.filter(r => r.status === 'fulfilled').length;
+          const failCount = results.filter(r => r.status === 'rejected').length;
+
+          if (successCount > 0) {
+            toast.success(`${successCount} dokumen berhasil disalin`);
+          }
+          if (failCount > 0) {
+            toast.error(`${failCount} dokumen gagal disalin`);
+          }
+
+          // If all failed, throw error
+          if (successCount === 0) {
+            throw new Error('Semua dokumen gagal disalin');
+          }
         }
       } else {
         // Single operation
@@ -125,7 +158,11 @@ export function MoveFolderModal({
       onClose();
     } catch (error: any) {
       console.error(`Failed to ${mode} document:`, error);
-      toast.error(error.response?.data?.message || `Gagal ${mode === 'move' ? 'memindahkan' : 'menyalin'} dokumen`);
+      // Only show error if not already shown in bulk operations
+      if (!isBulk || error.message === 'Semua dokumen gagal dipindahkan' || error.message === 'Semua dokumen gagal disalin') {
+        toast.error(error.response?.data?.message || error.message || `Gagal ${mode === 'move' ? 'memindahkan' : 'menyalin'} dokumen`);
+      }
+      // Don't close modal on error - let user try again
     } finally {
       setSubmitting(false);
     }

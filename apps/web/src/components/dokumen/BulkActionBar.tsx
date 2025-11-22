@@ -24,6 +24,8 @@ export function BulkActionBar({
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [perkaraId, setPerkaraId] = useState<string | null>(null);
+  const [loadingPerkara, setLoadingPerkara] = useState(false);
 
   const handleBulkDelete = async () => {
     try {
@@ -44,12 +46,31 @@ export function BulkActionBar({
     }
   };
 
-  const handleBulkMove = () => {
-    setShowMoveModal(true);
+  const handleBulkMove = async () => {
+    try {
+      setLoadingPerkara(true);
+
+      // Fetch perkara_id from the first selected document
+      const firstDoc = await dokumenApi.getById(selectedIds[0]);
+      const fetchedPerkaraId = firstDoc?.perkara_id;
+
+      if (!fetchedPerkaraId) {
+        toast.error('Tidak dapat menemukan perkara untuk dokumen ini');
+        return;
+      }
+
+      setPerkaraId(fetchedPerkaraId);
+      setShowMoveModal(true);
+    } catch (error: any) {
+      console.error('Failed to fetch perkara:', error);
+      toast.error('Gagal memuat informasi perkara');
+    } finally {
+      setLoadingPerkara(false);
+    }
   };
 
   const handleMoveSuccess = () => {
-    toast.success(`${selectedCount} dokumen berhasil dipindahkan`);
+    // Don't show toast here - MoveFolderModal already shows it
     setShowMoveModal(false);
     onClearSelection();
     onRefresh();
@@ -74,8 +95,13 @@ export function BulkActionBar({
               variant="ghost"
               className="text-white hover:bg-white/20 gap-2"
               onClick={handleBulkMove}
+              disabled={loadingPerkara}
             >
-              <FolderInput className="h-4 w-4" />
+              {loadingPerkara ? (
+                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+              ) : (
+                <FolderInput className="h-4 w-4" />
+              )}
               Pindahkan
             </Button>
 
@@ -104,10 +130,11 @@ export function BulkActionBar({
       </div>
 
       {/* Move Modal */}
-      {showMoveModal && selectedIds.length > 0 && (
+      {showMoveModal && selectedIds.length > 0 && perkaraId && (
         <MoveFolderModal
           dokumentIds={selectedIds}
           isBulk={true}
+          perkaraId={perkaraId}
           mode="move"
           onClose={() => setShowMoveModal(false)}
           onSuccess={handleMoveSuccess}
