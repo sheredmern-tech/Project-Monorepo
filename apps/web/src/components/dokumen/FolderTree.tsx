@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { folderApi, type Folder } from '@/lib/api/folder.api';
-import { Folder as FolderIcon, FolderOpen, ChevronRight, ChevronDown, Plus } from 'lucide-react';
+import { Folder as FolderIcon, FolderOpen, ChevronRight, ChevronDown, Plus, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { RenameFolderModal } from './RenameFolderModal';
+import { ConfirmDialog } from '@/components/modals/confirm-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 interface FolderTreeProps {
   perkaraId: string;
@@ -15,6 +25,9 @@ export function FolderTree({ perkaraId, currentFolderId, onFolderClick, onCreate
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [renameFolder, setRenameFolder] = useState<{ id: string; name: string; color?: string | null } | null>(null);
+  const [deleteFolder, setDeleteFolder] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadFolders();
@@ -44,6 +57,23 @@ export function FolderTree({ perkaraId, currentFolderId, onFolderClick, onCreate
     });
   };
 
+  const handleDelete = async () => {
+    if (!deleteFolder) return;
+
+    try {
+      setDeleting(true);
+      await folderApi.delete(deleteFolder.id);
+      toast.success('Folder berhasil dihapus');
+      setDeleteFolder(null);
+      loadFolders(); // Reload folder tree
+    } catch (err: any) {
+      console.error('Failed to delete folder:', err);
+      toast.error(err.response?.data?.message || 'Gagal menghapus folder');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const renderFolder = (folder: Folder, level: number = 0) => {
     const isExpanded = expandedFolders.has(folder.id);
     const isActive = currentFolderId === folder.id;
@@ -52,7 +82,7 @@ export function FolderTree({ perkaraId, currentFolderId, onFolderClick, onCreate
     return (
       <div key={folder.id} className="select-none">
         <div
-          className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition group ${
+          className={`flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition group ${
             isActive ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900' : ''
           }`}
           style={{ paddingLeft: `${level * 12 + 8}px` }}
@@ -90,6 +120,40 @@ export function FolderTree({ perkaraId, currentFolderId, onFolderClick, onCreate
               </span>
             )}
           </button>
+
+          {/* Dropdown Menu for Rename/Delete */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setRenameFolder({ id: folder.id, name: folder.nama_folder, color: folder.warna });
+                }}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Rename
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-red-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteFolder({ id: folder.id, name: folder.nama_folder });
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {hasChildren && isExpanded && (
@@ -111,31 +175,60 @@ export function FolderTree({ perkaraId, currentFolderId, onFolderClick, onCreate
   }
 
   return (
-    <div className="space-y-1">
-      {/* Root / All Documents */}
-      <div
-        className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition ${
-          currentFolderId === null ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900' : ''
-        }`}
-        onClick={() => onFolderClick(null)}
-      >
-        <FolderIcon className="h-4 w-4" />
-        <span className="text-sm font-medium">All Documents</span>
+    <>
+      <div className="space-y-1">
+        {/* Root / All Documents */}
+        <div
+          className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition ${
+            currentFolderId === null ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900' : ''
+          }`}
+          onClick={() => onFolderClick(null)}
+        >
+          <FolderIcon className="h-4 w-4" />
+          <span className="text-sm font-medium">All Documents</span>
+        </div>
+
+        {/* Folder tree */}
+        {folders.map(folder => renderFolder(folder))}
+
+        {/* Create folder button */}
+        {onCreateFolder && (
+          <button
+            onClick={onCreateFolder}
+            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition mt-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Folder</span>
+          </button>
+        )}
       </div>
 
-      {/* Folder tree */}
-      {folders.map(folder => renderFolder(folder))}
-
-      {/* Create folder button */}
-      {onCreateFolder && (
-        <button
-          onClick={onCreateFolder}
-          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition mt-2"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Folder</span>
-        </button>
+      {/* Rename Folder Modal */}
+      {renameFolder && (
+        <RenameFolderModal
+          folderId={renameFolder.id}
+          currentName={renameFolder.name}
+          currentColor={renameFolder.color}
+          onClose={() => setRenameFolder(null)}
+          onSuccess={() => {
+            setRenameFolder(null);
+            loadFolders();
+          }}
+        />
       )}
-    </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteFolder && (
+        <ConfirmDialog
+          open={!!deleteFolder}
+          onOpenChange={(open) => !open && setDeleteFolder(null)}
+          title="Hapus Folder"
+          description={`Apakah Anda yakin ingin menghapus folder "${deleteFolder.name}"? Dokumen di dalam folder akan dipindahkan ke root.`}
+          onConfirm={handleDelete}
+          confirmText={deleting ? 'Menghapus...' : 'Hapus'}
+          variant="destructive"
+        />
+      )}
+    </>
   );
 }

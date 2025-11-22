@@ -59,6 +59,8 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
   const [loadingPerkara, setLoadingPerkara] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [folders, setFolders] = useState<any[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
 
   const form = useForm<DokumenFormData>({
     resolver: zodResolver(dokumenSchema),
@@ -98,6 +100,38 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
     };
     fetchPerkara();
   }, []);
+
+  // ✅ Load folders when perkara is selected
+  useEffect(() => {
+    const loadFolders = async () => {
+      if (!perkaraId) {
+        setFolders([]);
+        return;
+      }
+
+      try {
+        const { folderApi } = await import('@/lib/api/folder.api');
+        const data = await folderApi.getTree(perkaraId);
+
+        // Flatten the folder tree for easier selection
+        const flattenFolders = (folders: any[], level: number = 0): any[] => {
+          return folders.reduce((acc, folder) => {
+            acc.push({ ...folder, level });
+            if (folder.children) {
+              acc.push(...flattenFolders(folder.children, level + 1));
+            }
+            return acc;
+          }, []);
+        };
+
+        setFolders(flattenFolders(data));
+      } catch (error) {
+        console.error('Failed to load folders:', error);
+      }
+    };
+
+    loadFolders();
+  }, [perkaraId]);
 
   // ✅ FIX: Use useMemo to prevent race condition with async data loading
   const selectedPerkara = useMemo(
@@ -158,6 +192,9 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
       
       if (data.catatan) formData.append("catatan", data.catatan);
       if (selectedFile) formData.append("file", selectedFile);
+
+      // ✅ FOLDER: Append folder_id if selected
+      if (selectedFolder) formData.append("folder_id", selectedFolder);
 
       // ✅ TIDAK mengirim diunggah_oleh - backend yang handle dari JWT token
 
@@ -420,6 +457,36 @@ export function DokumenUploadForm({ onSubmit, isLoading, onCancel }: DokumenUplo
               className="space-y-2"
             />
           </div>
+
+          {/* ✅ NEW: Folder Selector */}
+          {folders.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="folder_id">
+                Folder (Optional)
+              </Label>
+              <Select
+                value={selectedFolder || ""}
+                onValueChange={(value) => setSelectedFolder(value || null)}
+                disabled={isLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Simpan di root (no folder)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">📁 Root (No Folder)</SelectItem>
+                  {folders.map((folder) => (
+                    <SelectItem key={folder.id} value={folder.id}>
+                      {Array(folder.level).fill('').map((_, i) => <span key={i}>&nbsp;&nbsp;&nbsp;</span>)}
+                      📁 {folder.nama_folder}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Pilih folder untuk organize dokumen
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="catatan">Catatan</Label>

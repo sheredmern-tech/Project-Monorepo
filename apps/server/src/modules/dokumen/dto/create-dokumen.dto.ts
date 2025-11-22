@@ -39,4 +39,9 @@ export class CreateDokumenDto {
   @IsOptional()
   @IsString()
   catatan?: string;
+
+  @ApiPropertyOptional({ example: 'uuid-folder', description: 'ID folder untuk organize dokumen (optional)' })
+  @IsOptional()
+  @IsUUID()
+  folder_id?: string;
 }

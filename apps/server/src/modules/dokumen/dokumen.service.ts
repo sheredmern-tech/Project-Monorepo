@@ -98,6 +98,7 @@ export class DokumenService {
         nama_dokumen: dto.nama_dokumen || file.originalname,
         kategori: dto.kategori,
         nomor_bukti: dto.nomor_bukti,
+        folder_id: dto.folder_id || null, // ✅ Support folder organization
         // Google Drive fields
         google_drive_id: driveFile.id,
         google_drive_link: driveFile.webViewLink,
@@ -135,6 +136,14 @@ export class DokumenService {
             nama_lengkap: true,
             role: true,
             avatar_url: true,
+          },
+        },
+        folder: {
+          select: {
+            id: true,
+            nama_folder: true,
+            warna: true,
+            icon: true,
           },
         },
       },
@@ -406,6 +415,14 @@ export class DokumenService {
               avatar_url: true,
             },
           },
+          folder: {
+            select: {
+              id: true,
+              nama_folder: true,
+              warna: true,
+              icon: true,
+            },
+          },
         },
       }),
       this.prisma.dokumenHukum.count({ where }),
@@ -534,6 +551,14 @@ export class DokumenService {
             nama_lengkap: true,
             role: true,
             avatar_url: true,
+          },
+        },
+        folder: {
+          select: {
+            id: true,
+            nama_folder: true,
+            warna: true,
+            icon: true,
           },
         },
       },

@@ -139,6 +139,7 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
             <TableRow>
               <TableHead>Nama Dokumen</TableHead>
               <TableHead>Perkara</TableHead>
+              <TableHead>Folder</TableHead>
               <TableHead>Kategori</TableHead>
               <TableHead>Ukuran</TableHead>
               <TableHead>Diunggah</TableHead>
@@ -191,6 +192,21 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
                         {dokumen.perkara.judul}
                       </p>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {(dokumen as any).folder ? (
+                      <div className="flex items-center gap-1.5">
+                        <div
+                          className="w-3 h-3 rounded-sm flex-shrink-0"
+                          style={{ backgroundColor: (dokumen as any).folder.warna || '#6B7280' }}
+                        />
+                        <span className="text-sm truncate max-w-[120px]">
+                          {(dokumen as any).folder.nama_folder}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Root</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="capitalize">
