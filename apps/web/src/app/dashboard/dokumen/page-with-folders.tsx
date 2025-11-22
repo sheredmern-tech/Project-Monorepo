@@ -38,20 +38,21 @@ export default function DokumenWithFoldersPage() {
     limit,
     total,
     kategori,
+    folderId,
     setSearch,
     setKategori,
+    setFolderId,
     fetchDokumen,
   } = useDokumen();
 
   // Folder states
-  const [currentFolder, setCurrentFolder] = useState<string | null>(null);
   const [showCreateFolder, setShowCreateFolder] = useState(false);
   const [selectedPerkara, setSelectedPerkara] = useState<string | null>(null);
 
   // Existing filters
   const [uploaderFilter, setUploaderFilter] = useState<string>("all");
 
-  // Filter documents by uploader role AND folder
+  // ✅ Filter documents by uploader role (folder filtering is now server-side via folderId)
   const filteredDokumen = useMemo(() => {
     let filtered = dokumen;
 
@@ -62,25 +63,15 @@ export default function DokumenWithFoldersPage() {
       filtered = filtered.filter(doc => doc.pengunggah?.role !== 'klien');
     }
 
-    // Filter by folder
-    // Note: Backend doesn't have folder_id filter yet, so this is client-side
-    // In production, you should add folder_id to backend query
-    if (currentFolder !== null) {
-      filtered = filtered.filter(doc => (doc as any).folder_id === currentFolder);
-    } else if (currentFolder === null && selectedPerkara) {
-      // Show all documents in perkara when no folder selected
-      filtered = filtered.filter(doc => doc.perkara_id === selectedPerkara);
-    }
-
     return filtered;
-  }, [dokumen, uploaderFilter, currentFolder, selectedPerkara]);
+  }, [dokumen, uploaderFilter]);
 
   useEffect(() => {
     fetchDokumen();
   }, [fetchDokumen]);
 
-  const handleFolderClick = (folderId: string | null) => {
-    setCurrentFolder(folderId);
+  const handleFolderClick = (clickedFolderId: string | null) => {
+    setFolderId(clickedFolderId);
   };
 
   const handleFolderCreated = () => {
@@ -117,7 +108,7 @@ export default function DokumenWithFoldersPage() {
             {selectedPerkara ? (
               <FolderTree
                 perkaraId={selectedPerkara}
-                currentFolderId={currentFolder}
+                currentFolderId={folderId}
                 onFolderClick={handleFolderClick}
                 onCreateFolder={() => setShowCreateFolder(true)}
               />
@@ -162,10 +153,10 @@ export default function DokumenWithFoldersPage() {
           </div>
 
           {/* Breadcrumb */}
-          {currentFolder && (
+          {folderId && (
             <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
               <button
-                onClick={() => setCurrentFolder(null)}
+                onClick={() => setFolderId(null)}
                 className="hover:text-blue-600 dark:hover:text-blue-400"
               >
                 All Documents
@@ -191,7 +182,7 @@ export default function DokumenWithFoldersPage() {
       {showCreateFolder && selectedPerkara && (
         <CreateFolderModal
           perkaraId={selectedPerkara}
-          parentId={currentFolder}
+          parentId={folderId}
           onClose={() => setShowCreateFolder(false)}
           onSuccess={handleFolderCreated}
         />

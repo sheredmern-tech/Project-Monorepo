@@ -20,6 +20,7 @@ interface DokumenState {
   search: string;
   kategori: KategoriDokumen | string;
   perkaraId: string;
+  folderId: string | null;
 
   // Actions
   setDokumen: (dokumen: DokumenWithRelations[]) => void;
@@ -33,6 +34,7 @@ interface DokumenState {
   setSearch: (search: string) => void;
   setKategori: (kategori: KategoriDokumen | string) => void;
   setPerkaraId: (perkaraId: string) => void;
+  setFolderId: (folderId: string | null) => void;
   reset: () => void;
 }
 
@@ -48,6 +50,7 @@ export const useDokumenStore = create<DokumenState>((set) => ({
   search: "",
   kategori: "",
   perkaraId: "",
+  folderId: null,
 
   setDokumen: (dokumen) => set({ dokumen }),
   setSelectedDokumen: (dokumen) => set({ selectedDokumen: dokumen }),
@@ -60,6 +63,7 @@ export const useDokumenStore = create<DokumenState>((set) => ({
   setSearch: (search) => set({ search, page: 1 }),
   setKategori: (kategori) => set({ kategori, page: 1 }),
   setPerkaraId: (perkaraId) => set({ perkaraId, page: 1 }),
+  setFolderId: (folderId) => set({ folderId, page: 1 }),
   reset: () =>
     set({
       dokumen: [],
@@ -71,5 +75,6 @@ export const useDokumenStore = create<DokumenState>((set) => ({
       search: "",
       kategori: "",
       perkaraId: "",
+      folderId: null,
     }),
 }));

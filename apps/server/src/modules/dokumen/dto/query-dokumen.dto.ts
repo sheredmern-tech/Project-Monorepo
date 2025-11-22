@@ -14,4 +14,8 @@ export class QueryDokumenDto extends PaginationDto {
   @IsOptional()
   @IsUUID()
   perkara_id?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by folder ID (use "null" for root/no folder)' })
+  @IsOptional()
+  folder_id?: string;
 }

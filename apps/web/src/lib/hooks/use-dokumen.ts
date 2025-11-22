@@ -23,6 +23,7 @@ export function useDokumen() {
     search,
     kategori,
     perkaraId,
+    folderId,
     setDokumen,
     setSelectedDokumen,
     setLoading,
@@ -33,6 +34,7 @@ export function useDokumen() {
     setSearch,
     setKategori,
     setPerkaraId,
+    setFolderId,
     reset,
   } = useDokumenStore();
 
@@ -47,6 +49,7 @@ export function useDokumen() {
         search: search || undefined,
         kategori: (kategori as KategoriDokumen) || undefined,
         perkara_id: perkaraId || undefined,
+        folder_id: folderId !== null ? folderId : undefined,
       });
       setDokumen(response.data);
       setTotal(response.meta.total);
@@ -57,7 +60,7 @@ export function useDokumen() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, kategori, perkaraId, setDokumen, setLoading, setError, setTotal]);
+  }, [page, limit, search, kategori, perkaraId, folderId, setDokumen, setLoading, setError, setTotal]);
 
   // Fetch Dokumen by ID
   const fetchDokumenById = useCallback(
@@ -178,10 +181,12 @@ export function useDokumen() {
     search,
     kategori,
     perkaraId,
+    folderId,
     setPage,
     setSearch,
     setKategori,
     setPerkaraId,
+    setFolderId,
     setSelectedDokumen,
     fetchDokumen,
     fetchDokumenById,
