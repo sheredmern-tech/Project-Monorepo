@@ -47,9 +47,24 @@ interface DokumenTableProps {
   page: number;
   limit: number;
   total: number;
+  selectionMode?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelection?: (id: string) => void;
+  onSelectAll?: () => void;
 }
 
-export function DokumenTable({ data, isLoading, error, page, limit, total }: DokumenTableProps) {
+export function DokumenTable({
+  data,
+  isLoading,
+  error,
+  page,
+  limit,
+  total,
+  selectionMode = false,
+  selectedIds = new Set<string>(),
+  onToggleSelection,
+  onSelectAll,
+}: DokumenTableProps) {
   const router = useRouter();
   const { deleteDokumen, downloadDokumen, setPage, fetchDokumen } = useDokumen();
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -137,6 +152,16 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
         <Table>
           <TableHeader>
             <TableRow>
+              {selectionMode && (
+                <TableHead className="w-[50px]">
+                  <input
+                    type="checkbox"
+                    checked={data.length > 0 && data.every(d => selectedIds.has(d.id))}
+                    onChange={onSelectAll}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                </TableHead>
+              )}
               <TableHead>Nama Dokumen</TableHead>
               <TableHead>Perkara</TableHead>
               <TableHead>Folder</TableHead>
@@ -158,9 +183,19 @@ export function DokumenTable({ data, isLoading, error, page, limit, total }: Dok
               return (
                 <TableRow
                   key={dokumen.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setPreviewDokumen(dokumen)}
+                  className={`cursor-pointer hover:bg-muted/50 ${selectionMode && selectedIds.has(dokumen.id) ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                  onClick={() => !selectionMode && setPreviewDokumen(dokumen)}
                 >
+                  {selectionMode && (
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(dokumen.id)}
+                        onChange={() => onToggleSelection?.(dokumen.id)}
+                        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Icon className="h-8 w-8 text-muted-foreground" />

@@ -1,18 +1,20 @@
 // ============================================================================
-// FILE: app/(dashboard)/dokumen/page.tsx - WITH INTEGRATED FOLDER SYSTEM
+// FILE: app/(dashboard)/dokumen/page.tsx - WITH INTEGRATED FOLDER SYSTEM + BULK OPS
 // ============================================================================
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, FolderOpen, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Upload, FolderOpen, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, CheckSquare, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { DokumenTable } from "@/components/tables/dokumen-table";
 import { SearchInput } from "@/components/shared/search-input";
 import { FolderTree } from "@/components/dokumen/FolderTree";
 import { CreateFolderModal } from "@/components/dokumen/CreateFolderModal";
+import { BulkActionBar } from "@/components/dokumen/BulkActionBar";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
+import { useDokumenStore } from "@/lib/stores/dokumen.store";
 import { usePermission } from "@/lib/hooks/use-permission";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,6 +50,16 @@ export default function DokumenPage() {
     setSortOrder,
     fetchDokumen,
   } = useDokumen();
+
+  // Bulk selection from store
+  const {
+    selectedIds,
+    isSelectionMode,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    setSelectionMode,
+  } = useDokumenStore();
 
   // Folder states
   const [showCreateFolder, setShowCreateFolder] = useState(false);
@@ -110,12 +122,29 @@ export default function DokumenPage() {
         action={
           !user ? (
             <Skeleton className="h-10 w-40" />
-          ) : permissions.dokumen.upload ? (
-            <Button onClick={() => router.push("/dashboard/dokumen/upload")}>
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Dokumen
-            </Button>
-          ) : undefined
+          ) : (
+            <div className="flex gap-2">
+              {/* Selection Mode Toggle */}
+              <Button
+                variant={isSelectionMode ? "default" : "outline"}
+                onClick={() => setSelectionMode(!isSelectionMode)}
+                className="gap-2"
+              >
+                {isSelectionMode ? (
+                  <><CheckSquare className="h-4 w-4" /> Mode Pilih</>
+                ) : (
+                  <><Square className="h-4 w-4" /> Pilih</>
+                )}
+              </Button>
+
+              {permissions.dokumen.upload && (
+                <Button onClick={() => router.push("/dashboard/dokumen/upload")}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Dokumen
+                </Button>
+              )}
+            </div>
+          )
         }
       />
 
@@ -280,9 +309,23 @@ export default function DokumenPage() {
             page={page}
             limit={limit}
             total={filteredDokumen.length}
+            selectionMode={isSelectionMode}
+            selectedIds={selectedIds}
+            onToggleSelection={toggleSelection}
+            onSelectAll={selectAll}
           />
         </div>
       </div>
+
+      {/* Bulk Action Bar */}
+      {isSelectionMode && selectedIds.size > 0 && (
+        <BulkActionBar
+          selectedCount={selectedIds.size}
+          selectedIds={Array.from(selectedIds)}
+          onClearSelection={clearSelection}
+          onRefresh={fetchDokumen}
+        />
+      )}
 
       {/* Create Folder Modal */}
       {showCreateFolder && selectedPerkara && (
