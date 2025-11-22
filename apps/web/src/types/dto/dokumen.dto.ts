@@ -37,4 +37,5 @@ export interface UpdateDokumenDto {
 export interface QueryDokumenDto extends QueryFilters {
   kategori?: KategoriDokumen;
   perkara_id?: string;
+  folder_id?: string | null;
 }

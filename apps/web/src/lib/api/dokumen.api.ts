@@ -43,4 +43,25 @@ export const dokumenApi = {
     });
     return response as unknown as Blob;
   },
+
+  move: async (id: string, folderId: string | null): Promise<ApiResponse<any>> => {
+    return apiClient.patch(`/dokumen/${id}/move`, {
+      folder_id: folderId,
+    });
+  },
+
+  copy: async (id: string, data?: {
+    folder_id?: string | null;
+    nama_dokumen?: string;
+  }): Promise<ApiResponse<any>> => {
+    return apiClient.post(`/dokumen/${id}/copy`, data || {});
+  },
+
+  bulkUpload: async (formData: FormData): Promise<ApiResponse<any>> => {
+    return apiClient.post("/dokumen/bulk", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };

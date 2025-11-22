@@ -298,6 +298,7 @@ export class DokumenService {
       search,
       kategori,
       perkara_id,
+      folder_id,
       sortBy = 'tanggal_upload',
       sortOrder = 'desc',
     } = query;
@@ -357,6 +358,17 @@ export class DokumenService {
 
     if (kategori) where.kategori = kategori;
     if (perkara_id) where.perkara_id = perkara_id;
+
+    // 📁 FOLDER FILTERING: Support both specific folder and root (no folder)
+    if (folder_id !== undefined) {
+      if (folder_id === 'null' || folder_id === null) {
+        // Filter for documents without folder (root level)
+        where.folder_id = null;
+      } else {
+        // Filter for specific folder
+        where.folder_id = folder_id;
+      }
+    }
 
     const orderBy: Prisma.DokumenHukumOrderByWithRelationInput = {
       [sortBy]: sortOrder,
