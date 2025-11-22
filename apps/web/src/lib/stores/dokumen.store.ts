@@ -22,6 +22,10 @@ interface DokumenState {
   perkaraId: string;
   folderId: string | null;
 
+  // Sorting
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+
   // Actions
   setDokumen: (dokumen: DokumenWithRelations[]) => void;
   setSelectedDokumen: (dokumen: DokumenWithRelations | null) => void;
@@ -35,6 +39,8 @@ interface DokumenState {
   setKategori: (kategori: KategoriDokumen | string) => void;
   setPerkaraId: (perkaraId: string) => void;
   setFolderId: (folderId: string | null) => void;
+  setSortBy: (sortBy: string) => void;
+  setSortOrder: (sortOrder: 'asc' | 'desc') => void;
   reset: () => void;
 }
 
@@ -51,6 +57,8 @@ export const useDokumenStore = create<DokumenState>((set) => ({
   kategori: "",
   perkaraId: "",
   folderId: null,
+  sortBy: "tanggal_upload", // ✅ Default: newest first
+  sortOrder: "desc", // ✅ Default: descending
 
   setDokumen: (dokumen) => set({ dokumen }),
   setSelectedDokumen: (dokumen) => set({ selectedDokumen: dokumen }),
@@ -64,6 +72,8 @@ export const useDokumenStore = create<DokumenState>((set) => ({
   setKategori: (kategori) => set({ kategori, page: 1 }),
   setPerkaraId: (perkaraId) => set({ perkaraId, page: 1 }),
   setFolderId: (folderId) => set({ folderId, page: 1 }),
+  setSortBy: (sortBy) => set({ sortBy, page: 1 }), // ✅ Reset to page 1 when sorting
+  setSortOrder: (sortOrder) => set({ sortOrder, page: 1 }), // ✅ Reset to page 1 when sorting
   reset: () =>
     set({
       dokumen: [],
@@ -76,5 +86,7 @@ export const useDokumenStore = create<DokumenState>((set) => ({
       kategori: "",
       perkaraId: "",
       folderId: null,
+      sortBy: "tanggal_upload",
+      sortOrder: "desc",
     }),
 }));

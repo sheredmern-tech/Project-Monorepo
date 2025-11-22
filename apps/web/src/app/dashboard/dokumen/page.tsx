@@ -5,7 +5,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { Upload, FolderOpen, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { DokumenTable } from "@/components/tables/dokumen-table";
@@ -36,11 +36,16 @@ export default function DokumenPage() {
     page,
     limit,
     total,
+    search,
     kategori,
     folderId,
+    sortBy,
+    sortOrder,
     setSearch,
     setKategori,
     setFolderId,
+    setSortBy,
+    setSortOrder,
     fetchDokumen,
   } = useDokumen();
 
@@ -82,6 +87,19 @@ export default function DokumenPage() {
 
   const handleFolderCreated = () => {
     fetchDokumen();
+  };
+
+  // ✅ Sort options
+  const sortOptions = [
+    { value: 'tanggal_upload', label: 'Tanggal Upload' },
+    { value: 'nama_dokumen', label: 'Nama Dokumen' },
+    { value: 'ukuran_file', label: 'Ukuran File' },
+    { value: 'kategori', label: 'Kategori' },
+  ];
+
+  // ✅ Toggle sort order
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
   return (
@@ -152,49 +170,105 @@ export default function DokumenPage() {
 
         {/* Documents List */}
         <div className="flex-1 min-w-0">
-          {/* Filters */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center mb-6">
+          {/* Filters & Sort */}
+          <div className="flex flex-col gap-4 mb-6">
+            {/* Row 1: Search */}
             <div className="flex-1">
               <SearchInput placeholder="Cari nama dokumen, nomor bukti..." onSearch={setSearch} />
             </div>
-            <Select value={kategori} onValueChange={setKategori}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Kategori" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Kategori</SelectItem>
-                {Object.values(KategoriDokumen).map((kat) => (
-                  <SelectItem key={kat} value={kat} className="capitalize">
-                    {kat.replace(/_/g, " ")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={uploaderFilter} onValueChange={setUploaderFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Diunggah oleh" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Upload</SelectItem>
-                <SelectItem value="staff">Upload Staff</SelectItem>
-                <SelectItem value="client">Upload Client</SelectItem>
-              </SelectContent>
-            </Select>
+
+            {/* Row 2: Filters + Sort */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <Select value={kategori} onValueChange={setKategori}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Kategori" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Kategori</SelectItem>
+                  {Object.values(KategoriDokumen).map((kat) => (
+                    <SelectItem key={kat} value={kat} className="capitalize">
+                      {kat.replace(/_/g, " ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={uploaderFilter} onValueChange={setUploaderFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Diunggah oleh" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Upload</SelectItem>
+                  <SelectItem value="staff">Upload Staff</SelectItem>
+                  <SelectItem value="client">Upload Client</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Sort Controls */}
+              <div className="flex gap-2">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Urutkan..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sortOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleSortOrder}
+                  className="flex-shrink-0"
+                  title={sortOrder === 'asc' ? 'Urutan Naik (A-Z, 0-9, Lama-Baru)' : 'Urutan Turun (Z-A, 9-0, Baru-Lama)'}
+                >
+                  {sortOrder === 'asc' ? (
+                    <ArrowUp className="h-4 w-4" />
+                  ) : (
+                    <ArrowDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
 
-          {/* Breadcrumb - Show current folder */}
-          {folderId && (
-            <div className="mb-4 px-2 py-1 bg-blue-50 dark:bg-blue-950 rounded-md inline-block">
-              <span className="text-sm text-slate-600 dark:text-slate-400">
-                <button
-                  onClick={() => setFolderId(null)}
-                  className="hover:text-blue-600 dark:hover:text-blue-400 underline"
-                >
-                  All Documents
-                </button>
-                {' > '}
-                <span className="text-slate-900 dark:text-white font-medium">Current Folder</span>
-              </span>
+          {/* Context Info - Show current folder & search status */}
+          {(folderId || search) && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {folderId && (
+                <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-950 rounded-md inline-flex items-center gap-2">
+                  <FolderOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                    <button
+                      onClick={() => setFolderId(null)}
+                      className="hover:text-blue-600 dark:hover:text-blue-400 underline"
+                    >
+                      All Documents
+                    </button>
+                    {' > '}
+                    <span className="text-slate-900 dark:text-white font-medium">Current Folder</span>
+                  </span>
+                </div>
+              )}
+
+              {search && (
+                <div className="px-3 py-1.5 bg-green-50 dark:bg-green-950 rounded-md inline-flex items-center gap-2">
+                  <span className="text-sm text-green-700 dark:text-green-400">
+                    🔍 Mencari: <strong>"{search}"</strong>
+                    {folderId && <span className="ml-1">(dalam folder ini)</span>}
+                  </span>
+                  <button
+                    onClick={() => setSearch('')}
+                    className="text-green-700 dark:text-green-400 hover:text-green-900 dark:hover:text-green-200"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
