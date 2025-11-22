@@ -1,11 +1,11 @@
 // ============================================================================
-// FILE: app/(dashboard)/dokumen/page.tsx - WITH INTEGRATED FOLDER SYSTEM + BULK OPS
+// FILE: app/(dashboard)/dokumen/page.tsx - WITH INTEGRATED FOLDER SYSTEM + BULK OPS + KEYBOARD SHORTCUTS
 // ============================================================================
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, FolderOpen, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, CheckSquare, Square } from "lucide-react";
+import { Upload, FolderOpen, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, CheckSquare, Square, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared/page-header";
 import { DokumenTable } from "@/components/tables/dokumen-table";
@@ -13,10 +13,13 @@ import { SearchInput } from "@/components/shared/search-input";
 import { FolderTree } from "@/components/dokumen/FolderTree";
 import { CreateFolderModal } from "@/components/dokumen/CreateFolderModal";
 import { BulkActionBar } from "@/components/dokumen/BulkActionBar";
+import { CommandPalette } from "@/components/dokumen/CommandPalette";
+import { KeyboardShortcutsHelp } from "@/components/dokumen/KeyboardShortcutsHelp";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
 import { useDokumenStore } from "@/lib/stores/dokumen.store";
 import { usePermission } from "@/lib/hooks/use-permission";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { useKeyboardShortcuts } from "@/lib/hooks/use-keyboard-shortcuts";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -68,6 +71,73 @@ export default function DokumenPage() {
 
   // Uploader filter
   const [uploaderFilter, setUploaderFilter] = useState<string>("all");
+
+  // Keyboard shortcuts modals
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+
+  // Search input ref for Ctrl+F shortcut
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // ✨ Keyboard Shortcuts Setup
+  useKeyboardShortcuts([
+    // Command Palette (Ctrl+K)
+    {
+      key: 'k',
+      ctrlKey: true,
+      handler: (e) => {
+        e.preventDefault();
+        setShowCommandPalette(true);
+      },
+      description: 'Open command palette',
+    },
+    // Search Focus (Ctrl+F)
+    {
+      key: 'f',
+      ctrlKey: true,
+      handler: (e) => {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      },
+      description: 'Focus search',
+    },
+    // Show Shortcuts Help (?)
+    {
+      key: '?',
+      handler: () => {
+        setShowShortcutsHelp(true);
+      },
+      description: 'Show keyboard shortcuts',
+    },
+    // Create New Folder (N)
+    {
+      key: 'n',
+      handler: () => {
+        if (selectedPerkara && permissions.dokumen.upload) {
+          setShowCreateFolder(true);
+        }
+      },
+      description: 'Create new folder',
+    },
+    // Upload Document (U)
+    {
+      key: 'u',
+      handler: () => {
+        if (permissions.dokumen.upload) {
+          router.push('/dashboard/dokumen/upload');
+        }
+      },
+      description: 'Upload document',
+    },
+    // Toggle Selection Mode (S)
+    {
+      key: 's',
+      handler: () => {
+        setSelectionMode(!isSelectionMode);
+      },
+      description: 'Toggle selection mode',
+    },
+  ]);
 
   // ✅ Filter documents by uploader role (folder filtering is server-side via folderId)
   const filteredDokumen = useMemo(() => {
@@ -137,6 +207,16 @@ export default function DokumenPage() {
                 )}
               </Button>
 
+              {/* Keyboard Shortcuts Help Button */}
+              <Button
+                variant="outline"
+                onClick={() => setShowShortcutsHelp(true)}
+                className="gap-2"
+                title="Keyboard Shortcuts (Press ?)"
+              >
+                <Keyboard className="h-4 w-4" />
+              </Button>
+
               {permissions.dokumen.upload && (
                 <Button onClick={() => router.push("/dashboard/dokumen/upload")}>
                   <Upload className="mr-2 h-4 w-4" />
@@ -203,7 +283,11 @@ export default function DokumenPage() {
           <div className="flex flex-col gap-4 mb-6">
             {/* Row 1: Search */}
             <div className="flex-1">
-              <SearchInput placeholder="Cari nama dokumen, nomor bukti..." onSearch={setSearch} />
+              <SearchInput
+                ref={searchInputRef}
+                placeholder="Cari nama dokumen, nomor bukti... (Ctrl+F)"
+                onSearch={setSearch}
+              />
             </div>
 
             {/* Row 2: Filters + Sort */}
@@ -336,6 +420,23 @@ export default function DokumenPage() {
           onSuccess={handleFolderCreated}
         />
       )}
+
+      {/* Command Palette (Ctrl+K) */}
+      <CommandPalette
+        open={showCommandPalette}
+        onOpenChange={setShowCommandPalette}
+        onCreateFolder={() => {
+          if (selectedPerkara) {
+            setShowCreateFolder(true);
+          }
+        }}
+      />
+
+      {/* Keyboard Shortcuts Help (?) */}
+      <KeyboardShortcutsHelp
+        open={showShortcutsHelp}
+        onOpenChange={setShowShortcutsHelp}
+      />
     </div>
   );
 }

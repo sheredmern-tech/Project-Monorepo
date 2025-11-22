@@ -3,7 +3,7 @@
 // ============================================================================
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,11 @@ interface SearchInputProps {
   debounceMs?: number;
 }
 
-export function SearchInput({ 
-  placeholder = "Cari...", 
-  onSearch, 
-  debounceMs = 300 
-}: SearchInputProps) {
+export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
+  placeholder = "Cari...",
+  onSearch,
+  debounceMs = 300
+}, ref) => {
   const [value, setValue] = useState("");
 
   useEffect(() => {
@@ -33,6 +33,7 @@ export function SearchInput({
     <div className="relative">
       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
+        ref={ref}
         type="search"
         placeholder={placeholder}
         value={value}
@@ -51,4 +52,6 @@ export function SearchInput({
       )}
     </div>
   );
-}
+});
+
+SearchInput.displayName = 'SearchInput';
