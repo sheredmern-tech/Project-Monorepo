@@ -340,7 +340,7 @@ export class FolderService {
       }
     }
 
-    // Get all folders for this perkara
+    // Get all folders for this perkara with document statistics
     const folders = await this.prisma.folderDokumen.findMany({
       where: { perkara_id: perkaraId },
       include: {
@@ -350,6 +350,17 @@ export class FolderService {
             dokumen: true,
           },
         },
+        dokumen: {
+          select: {
+            ukuran_file: true,
+            tanggal_upload: true,
+            tipe_file: true,
+            kategori: true,
+          },
+          orderBy: {
+            tanggal_upload: 'desc',
+          },
+        },
       },
       orderBy: [
         { urutan: 'asc' },
@@ -357,9 +368,47 @@ export class FolderService {
       ],
     });
 
+    // Calculate statistics for each folder
+    const foldersWithStats = folders.map(folder => {
+      const dokumen = folder.dokumen;
+
+      // Calculate total size
+      const totalSize = dokumen.reduce((sum, doc) => sum + (doc.ukuran_file || 0), 0);
+
+      // Get last upload date
+      const lastUpload = dokumen.length > 0 ? dokumen[0].tanggal_upload : null;
+
+      // Count file types
+      const fileTypes: Record<string, number> = {};
+      dokumen.forEach(doc => {
+        const type = doc.tipe_file || 'unknown';
+        fileTypes[type] = (fileTypes[type] || 0) + 1;
+      });
+
+      // Count categories
+      const categories: Record<string, number> = {};
+      dokumen.forEach(doc => {
+        const category = doc.kategori || 'unknown';
+        categories[category] = (categories[category] || 0) + 1;
+      });
+
+      // Remove dokumen from response (we don't need full dokumen data in tree)
+      const { dokumen: _, ...folderWithoutDokumen } = folder;
+
+      return {
+        ...folderWithoutDokumen,
+        statistics: {
+          totalSize,
+          lastUpload,
+          fileTypes,
+          categories,
+        },
+      };
+    });
+
     // Build tree structure
     const buildTree = (parentId: string | null): any[] => {
-      return folders
+      return foldersWithStats
         .filter(f => f.parent_id === parentId)
         .map(f => ({
           ...f,

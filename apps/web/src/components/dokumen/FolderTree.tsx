@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { folderApi, type Folder } from '@/lib/api/folder.api';
-import { Folder as FolderIcon, FolderOpen, ChevronRight, ChevronDown, Plus, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Folder as FolderIcon, FolderOpen, ChevronRight, ChevronDown, Plus, MoreVertical, Edit, Trash2, Clock, HardDrive } from 'lucide-react';
 import { RenameFolderModal } from './RenameFolderModal';
 import { ConfirmDialog } from '@/components/modals/confirm-dialog';
 import {
@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { formatFileSize } from '@/lib/utils/format';
+import { formatDistanceToNow } from 'date-fns';
 
 interface FolderTreeProps {
   perkaraId: string;
@@ -79,81 +81,131 @@ export function FolderTree({ perkaraId, currentFolderId, onFolderClick, onCreate
     const isActive = currentFolderId === folder.id;
     const hasChildren = folder.children && folder.children.length > 0;
 
+    // Extract statistics
+    const stats = folder.statistics;
+    const hasStats = stats && folder._count && folder._count.dokumen > 0;
+
+    // Get top 3 file types
+    const topFileTypes = stats?.fileTypes
+      ? Object.entries(stats.fileTypes)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+      : [];
+
     return (
       <div key={folder.id} className="select-none">
         <div
-          className={`flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition group ${
+          className={`flex flex-col gap-1 px-2 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition group ${
             isActive ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900' : ''
           }`}
           style={{ paddingLeft: `${level * 12 + 8}px` }}
         >
-          {hasChildren && (
+          {/* Main Row: Folder Name */}
+          <div className="flex items-center gap-1">
+            {hasChildren && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFolder(folder.id);
+                }}
+                className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-3 w-3" />
+                ) : (
+                  <ChevronRight className="h-3 w-3" />
+                )}
+              </button>
+            )}
+            {!hasChildren && <div className="w-4" />}
+
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFolder(folder.id);
-              }}
-              className="p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded"
+              onClick={() => onFolderClick(folder.id)}
+              className="flex items-center gap-2 flex-1 min-w-0"
             >
-              {isExpanded ? (
-                <ChevronDown className="h-3 w-3" />
+              {isExpanded || isActive ? (
+                <FolderOpen className="h-4 w-4 flex-shrink-0" style={{ color: folder.warna || undefined }} />
               ) : (
-                <ChevronRight className="h-3 w-3" />
+                <FolderIcon className="h-4 w-4 flex-shrink-0" style={{ color: folder.warna || undefined }} />
+              )}
+              <span className="text-sm truncate">{folder.nama_folder}</span>
+              {folder._count && (
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  ({folder._count.dokumen})
+                </span>
               )}
             </button>
+
+            {/* Dropdown Menu for Rename/Delete */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRenameFolder({ id: folder.id, name: folder.nama_folder, color: folder.warna });
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Rename
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteFolder({ id: folder.id, name: folder.nama_folder });
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Statistics Row: Size, Last Upload, File Types */}
+          {hasStats && (
+            <div className="flex items-center gap-2 ml-5 text-xs text-slate-500 dark:text-slate-400">
+              {/* Total Size */}
+              {stats.totalSize > 0 && (
+                <div className="flex items-center gap-1" title="Total size">
+                  <HardDrive className="h-3 w-3" />
+                  <span>{formatFileSize(stats.totalSize)}</span>
+                </div>
+              )}
+
+              {/* Last Upload */}
+              {stats.lastUpload && (
+                <div className="flex items-center gap-1" title="Last upload">
+                  <Clock className="h-3 w-3" />
+                  <span>{formatDistanceToNow(new Date(stats.lastUpload), { addSuffix: true })}</span>
+                </div>
+              )}
+
+              {/* Top File Types */}
+              {topFileTypes.length > 0 && (
+                <div className="flex items-center gap-1">
+                  {topFileTypes.map(([type, count]) => (
+                    <span
+                      key={type}
+                      className="px-1.5 py-0.5 bg-slate-200 dark:bg-slate-700 rounded text-xs"
+                      title={`${type}: ${count} files`}
+                    >
+                      {type.toUpperCase()} {count > 1 && `×${count}`}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
-          {!hasChildren && <div className="w-4" />}
-
-          <button
-            onClick={() => onFolderClick(folder.id)}
-            className="flex items-center gap-2 flex-1 min-w-0"
-          >
-            {isExpanded || isActive ? (
-              <FolderOpen className="h-4 w-4 flex-shrink-0" style={{ color: folder.warna || undefined }} />
-            ) : (
-              <FolderIcon className="h-4 w-4 flex-shrink-0" style={{ color: folder.warna || undefined }} />
-            )}
-            <span className="text-sm truncate">{folder.nama_folder}</span>
-            {folder._count && (
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                ({folder._count.dokumen})
-              </span>
-            )}
-          </button>
-
-          {/* Dropdown Menu for Rename/Delete */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="p-1 opacity-0 group-hover:opacity-100 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="h-3.5 w-3.5" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setRenameFolder({ id: folder.id, name: folder.nama_folder, color: folder.warna });
-                }}
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-600"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteFolder({ id: folder.id, name: folder.nama_folder });
-                }}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         {hasChildren && isExpanded && (

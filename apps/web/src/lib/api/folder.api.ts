@@ -15,6 +15,12 @@ export interface Folder {
     children: number;
     dokumen: number;
   };
+  statistics?: {
+    totalSize: number;
+    lastUpload: string | null;
+    fileTypes: Record<string, number>;
+    categories: Record<string, number>;
+  };
   children?: Folder[];
 }
 
