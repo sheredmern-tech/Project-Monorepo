@@ -15,6 +15,7 @@ import { CreateFolderModal } from "@/components/dokumen/CreateFolderModal";
 import { BulkActionBar } from "@/components/dokumen/BulkActionBar";
 import { CommandPalette } from "@/components/dokumen/CommandPalette";
 import { KeyboardShortcutsHelp } from "@/components/dokumen/KeyboardShortcutsHelp";
+import { FilterPresetsBar } from "@/components/dokumen/FilterPresetsBar";
 import { useDokumen } from "@/lib/hooks/use-dokumen";
 import { useDokumenStore } from "@/lib/stores/dokumen.store";
 import { usePermission } from "@/lib/hooks/use-permission";
@@ -169,6 +170,23 @@ export default function DokumenPage() {
 
   const handleFolderCreated = () => {
     fetchDokumen();
+  };
+
+  // ✨ Apply Filter Preset
+  const handleApplyPreset = (filters: {
+    search?: string;
+    kategori?: string;
+    uploaderFilter?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    folderId?: string | null;
+  }) => {
+    if (filters.search !== undefined) setSearch(filters.search);
+    if (filters.kategori) setKategori(filters.kategori);
+    if (filters.uploaderFilter) setUploaderFilter(filters.uploaderFilter);
+    if (filters.sortBy) setSortBy(filters.sortBy);
+    if (filters.sortOrder) setSortOrder(filters.sortOrder);
+    if (filters.folderId !== undefined) setFolderId(filters.folderId);
   };
 
   // ✅ Sort options
@@ -347,6 +365,19 @@ export default function DokumenPage() {
                 </Button>
               </div>
             </div>
+
+            {/* Row 3: Filter Presets */}
+            <FilterPresetsBar
+              currentFilters={{
+                search,
+                kategori,
+                uploaderFilter,
+                sortBy,
+                sortOrder,
+                folderId,
+              }}
+              onApplyPreset={handleApplyPreset}
+            />
           </div>
 
           {/* Context Info - Show current folder & search status */}
