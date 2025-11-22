@@ -28,7 +28,7 @@ export const folderApi = {
     urutan?: number;
   }) => {
     const response = await apiClient.post('/folders', data);
-    return response.data;
+    return response; // ✅ Interceptor already unwrapped
   },
 
   getAll: async (params?: {
@@ -36,17 +36,17 @@ export const folderApi = {
     parent_id?: string | 'null';
   }) => {
     const response = await apiClient.get('/folders', { params });
-    return response.data.data || [];
+    return Array.isArray(response) ? response : (response?.data || []); // ✅ Handle both cases
   },
 
   getTree: async (perkaraId: string): Promise<Folder[]> => {
     const response = await apiClient.get(`/folders/tree/${perkaraId}`);
-    return response.data.data || [];
+    return Array.isArray(response) ? response : (response?.data || []); // ✅ Handle both cases
   },
 
   getById: async (id: string) => {
     const response = await apiClient.get(`/folders/${id}`);
-    return response.data.data;
+    return response; // ✅ Interceptor already unwrapped
   },
 
   update: async (id: string, data: Partial<{
@@ -57,7 +57,7 @@ export const folderApi = {
     urutan: number;
   }>) => {
     const response = await apiClient.patch(`/folders/${id}`, data);
-    return response.data;
+    return response; // ✅ Interceptor already unwrapped
   },
 
   delete: async (id: string) => {
