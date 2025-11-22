@@ -8,24 +8,30 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface MoveFolderModalProps {
-  dokumenId: string;
-  dokumenName: string;
-  perkaraId: string;
+  dokumenId?: string;
+  dokumentIds?: string[];
+  isBulk?: boolean;
+  dokumenName?: string;
+  perkaraId?: string;
   currentFolderId?: string | null;
-  mode: 'move' | 'copy';
+  mode?: 'move' | 'copy';
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export function MoveFolderModal({
   dokumenId,
+  dokumentIds,
+  isBulk = false,
   dokumenName,
   perkaraId,
   currentFolderId,
-  mode,
+  mode = 'move',
   onClose,
   onSuccess,
 }: MoveFolderModalProps) {
+  // Use bulk IDs if provided, otherwise single ID
+  const targetIds = isBulk ? (dokumentIds || []) : (dokumenId ? [dokumenId] : []);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
@@ -33,12 +39,20 @@ export function MoveFolderModal({
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    loadFolders();
+    if (perkaraId) {
+      loadFolders();
+    }
   }, [perkaraId]);
 
   const loadFolders = async () => {
     try {
       setLoading(true);
+      if (!perkaraId) {
+        // For bulk operations without specific perkara, load all folders
+        // This is a simplified version - you might want to fetch from first document
+        setFolders([]);
+        return;
+      }
       const data = await folderApi.getTree(perkaraId);
       setFolders(data);
 
@@ -87,12 +101,24 @@ export function MoveFolderModal({
     try {
       setSubmitting(true);
 
-      if (mode === 'move') {
-        await dokumenApi.move(dokumenId, selectedFolder);
-        toast.success(`Dokumen berhasil dipindahkan ke ${selectedFolder ? 'folder' : 'root'}`);
+      if (isBulk) {
+        // Bulk operation
+        if (mode === 'move') {
+          await Promise.all(targetIds.map(id => dokumenApi.move(id, selectedFolder)));
+          toast.success(`${targetIds.length} dokumen berhasil dipindahkan`);
+        } else {
+          await Promise.all(targetIds.map(id => dokumenApi.copy(id, { folder_id: selectedFolder })));
+          toast.success(`${targetIds.length} dokumen berhasil disalin`);
+        }
       } else {
-        await dokumenApi.copy(dokumenId, { folder_id: selectedFolder });
-        toast.success(`Dokumen berhasil disalin ke ${selectedFolder ? 'folder' : 'root'}`);
+        // Single operation
+        if (mode === 'move') {
+          await dokumenApi.move(targetIds[0], selectedFolder);
+          toast.success(`Dokumen berhasil dipindahkan ke ${selectedFolder ? 'folder' : 'root'}`);
+        } else {
+          await dokumenApi.copy(targetIds[0], { folder_id: selectedFolder });
+          toast.success(`Dokumen berhasil disalin ke ${selectedFolder ? 'folder' : 'root'}`);
+        }
       }
 
       onSuccess();
@@ -176,11 +202,13 @@ export function MoveFolderModal({
             )}
             <div>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                {mode === 'move' ? 'Move' : 'Copy'} Document
+                {mode === 'move' ? 'Move' : 'Copy'} {isBulk ? `${targetIds.length} Documents` : 'Document'}
               </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                {dokumenName}
-              </p>
+              {!isBulk && dokumenName && (
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                  {dokumenName}
+                </p>
+              )}
             </div>
           </div>
           <button

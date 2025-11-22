@@ -26,6 +26,10 @@ interface DokumenState {
   sortBy: string;
   sortOrder: 'asc' | 'desc';
 
+  // Bulk Selection
+  selectedIds: Set<string>;
+  isSelectionMode: boolean;
+
   // Actions
   setDokumen: (dokumen: DokumenWithRelations[]) => void;
   setSelectedDokumen: (dokumen: DokumenWithRelations | null) => void;
@@ -41,10 +45,14 @@ interface DokumenState {
   setFolderId: (folderId: string | null) => void;
   setSortBy: (sortBy: string) => void;
   setSortOrder: (sortOrder: 'asc' | 'desc') => void;
+  toggleSelection: (id: string) => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+  setSelectionMode: (mode: boolean) => void;
   reset: () => void;
 }
 
-export const useDokumenStore = create<DokumenState>((set) => ({
+export const useDokumenStore = create<DokumenState>((set, get) => ({
   dokumen: [],
   selectedDokumen: null,
   isLoading: true, // ✅ Start with loading state to show skeleton on mount
@@ -59,6 +67,8 @@ export const useDokumenStore = create<DokumenState>((set) => ({
   folderId: null,
   sortBy: "tanggal_upload", // ✅ Default: newest first
   sortOrder: "desc", // ✅ Default: descending
+  selectedIds: new Set<string>(), // ✅ Bulk selection
+  isSelectionMode: false, // ✅ Selection mode toggle
 
   setDokumen: (dokumen) => set({ dokumen }),
   setSelectedDokumen: (dokumen) => set({ selectedDokumen: dokumen }),
@@ -74,6 +84,29 @@ export const useDokumenStore = create<DokumenState>((set) => ({
   setFolderId: (folderId) => set({ folderId, page: 1 }),
   setSortBy: (sortBy) => set({ sortBy, page: 1 }), // ✅ Reset to page 1 when sorting
   setSortOrder: (sortOrder) => set({ sortOrder, page: 1 }), // ✅ Reset to page 1 when sorting
+
+  // ✅ Bulk selection actions
+  toggleSelection: (id: string) => set((state) => {
+    const newSelected = new Set(state.selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    return { selectedIds: newSelected };
+  }),
+
+  selectAll: () => set((state) => ({
+    selectedIds: new Set(state.dokumen.map(d => d.id)),
+  })),
+
+  clearSelection: () => set({ selectedIds: new Set<string>(), isSelectionMode: false }),
+
+  setSelectionMode: (mode: boolean) => set({
+    isSelectionMode: mode,
+    selectedIds: mode ? get().selectedIds : new Set<string>()
+  }),
+
   reset: () =>
     set({
       dokumen: [],
@@ -88,5 +121,7 @@ export const useDokumenStore = create<DokumenState>((set) => ({
       folderId: null,
       sortBy: "tanggal_upload",
       sortOrder: "desc",
+      selectedIds: new Set<string>(),
+      isSelectionMode: false,
     }),
 }));
