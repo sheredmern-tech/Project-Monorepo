@@ -45,7 +45,8 @@ export class DokumenStatusService {
     dto: SubmitDokumenDto,
   ) {
     // Check permission
-    if (![UserRole.advokat, UserRole.staff, UserRole.paralegal].includes(userRole)) {
+    const allowedRoles: UserRole[] = [UserRole.advokat, UserRole.staff, UserRole.paralegal];
+    if (!allowedRoles.includes(userRole)) {
       throw new ForbiddenException(
         'Only advokat, paralegal, or staff can submit documents',
       );
@@ -159,7 +160,8 @@ export class DokumenStatusService {
     dto: ReviewDokumenDto,
   ) {
     // Check permission
-    if (![UserRole.admin, UserRole.partner].includes(userRole)) {
+    const allowedRoles: UserRole[] = [UserRole.admin, UserRole.partner];
+    if (!allowedRoles.includes(userRole)) {
       throw new ForbiddenException('Only admin or partner can review documents');
     }
 
@@ -232,7 +234,8 @@ export class DokumenStatusService {
     userRole: UserRole,
     dto: ApproveDokumenDto,
   ) {
-    if (![UserRole.admin, UserRole.partner].includes(userRole)) {
+    const allowedRoles: UserRole[] = [UserRole.admin, UserRole.partner];
+    if (!allowedRoles.includes(userRole)) {
       throw new ForbiddenException('Only admin or partner can approve documents');
     }
 
@@ -330,7 +333,8 @@ export class DokumenStatusService {
     userRole: UserRole,
     dto: RejectDokumenDto,
   ) {
-    if (![UserRole.admin, UserRole.partner].includes(userRole)) {
+    const allowedRoles: UserRole[] = [UserRole.admin, UserRole.partner];
+    if (!allowedRoles.includes(userRole)) {
       throw new ForbiddenException('Only admin or partner can reject documents');
     }
 
@@ -432,7 +436,8 @@ export class DokumenStatusService {
     userRole: UserRole,
     dto: ArchiveDokumenDto,
   ) {
-    if (![UserRole.admin, UserRole.partner].includes(userRole)) {
+    const allowedRoles: UserRole[] = [UserRole.admin, UserRole.partner];
+    if (!allowedRoles.includes(userRole)) {
       throw new ForbiddenException('Only admin or partner can archive documents');
     }
 

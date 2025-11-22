@@ -51,7 +51,7 @@ export function BulkActionBar({
       setLoadingPerkara(true);
 
       // Fetch perkara_id from the first selected document
-      const firstDoc = await dokumenApi.getById(selectedIds[0]);
+      const firstDoc = (await dokumenApi.getById(selectedIds[0])) as any;
       const fetchedPerkaraId = firstDoc?.perkara_id;
 
       if (!fetchedPerkaraId) {

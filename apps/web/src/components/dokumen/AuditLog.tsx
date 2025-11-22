@@ -40,7 +40,8 @@ export function AuditLog({ dokumenId }: AuditLogProps) {
     try {
       setLoading(true);
       const data = await dokumenApi.getDocumentHistory(dokumenId);
-      setHistory(data);
+      // API client auto-unwraps response.data, so data is already the array
+      setHistory(data as unknown as AuditEntry[]);
     } catch (error) {
       console.error('Failed to load history:', error);
     } finally {
