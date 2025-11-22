@@ -46,6 +46,11 @@ model User {
   tim_perkara         TimPerkara[]
   tugas_dibuat        Tugas[]              @relation("TugasDibuat")
   tugas_ditugaskan    Tugas[]              @relation("TugasDitugaskan")
+  status_submitted    DokumenStatus[]      @relation("StatusSubmittedBy")
+  status_reviewed     DokumenStatus[]      @relation("StatusReviewedBy")
+  status_approved     DokumenStatus[]      @relation("StatusApprovedBy")
+  status_rejected     DokumenStatus[]      @relation("StatusRejectedBy")
+  audit_logs          DokumenAuditLog[]    @relation("AuditLogChangedBy")
 
   @@map("users")
 }
@@ -191,9 +196,11 @@ model DokumenHukum {
   tanggal_dokumen   DateTime?
   tanggal_upload    DateTime        @default(now())
   catatan           String?
-  pengunggah        User?           @relation("DokumenDiunggah", fields: [diunggah_oleh], references: [id])
-  perkara           Perkara         @relation(fields: [perkara_id], references: [id], onDelete: Cascade)
-  folder            FolderDokumen?  @relation(fields: [folder_id], references: [id], onDelete: SetNull)
+  pengunggah        User?            @relation("DokumenDiunggah", fields: [diunggah_oleh], references: [id])
+  perkara           Perkara          @relation(fields: [perkara_id], references: [id], onDelete: Cascade)
+  folder            FolderDokumen?   @relation(fields: [folder_id], references: [id], onDelete: SetNull)
+  status            DokumenStatus?   // Workflow status
+  audit_logs        DokumenAuditLog[] // Status change history
 
   @@map("dokumen_hukum")
 }
@@ -297,6 +304,62 @@ model FolderDokumen {
   @@map("folder_dokumen")
 }
 
+// ============================================================================
+// MODEL: DOKUMEN STATUS (Workflow Status Tracking)
+// ============================================================================
+model DokumenStatus {
+  id              String         @id @default(uuid())
+  dokumen_id      String         @unique
+  current_status  WorkflowStatus @default(DRAFT)
+  submitted_at    DateTime?      // When moved from DRAFT to SUBMITTED
+  reviewed_at     DateTime?      // When IN_REVIEW started
+  approved_at     DateTime?      // When APPROVED
+  rejected_at     DateTime?      // When REJECTED
+  archived_at     DateTime?      // When ARCHIVED
+  submitted_by    String?        // User who submitted
+  reviewed_by     String?        // User who reviewed
+  approved_by     String?        // User who approved
+  rejected_by     String?        // User who rejected
+  rejection_reason String?       // Reason for rejection
+  notes           String?        // General notes
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  // Relations
+  dokumen         DokumenHukum   @relation(fields: [dokumen_id], references: [id], onDelete: Cascade)
+  submitter       User?          @relation("StatusSubmittedBy", fields: [submitted_by], references: [id])
+  reviewer        User?          @relation("StatusReviewedBy", fields: [reviewed_by], references: [id])
+  approver        User?          @relation("StatusApprovedBy", fields: [approved_by], references: [id])
+  rejector        User?          @relation("StatusRejectedBy", fields: [rejected_by], references: [id])
+
+  @@index([current_status])
+  @@index([dokumen_id])
+  @@map("dokumen_status")
+}
+
+// ============================================================================
+// MODEL: DOKUMEN AUDIT LOG (Status Change History)
+// ============================================================================
+model DokumenAuditLog {
+  id              String         @id @default(uuid())
+  dokumen_id      String
+  from_status     WorkflowStatus?
+  to_status       WorkflowStatus
+  changed_by      String?
+  reason          String?        // Reason for status change
+  notes           String?        // Additional notes
+  metadata        Json?          // Additional metadata (e.g., IP address, user agent)
+  created_at      DateTime       @default(now())
+
+  // Relations
+  dokumen         DokumenHukum   @relation(fields: [dokumen_id], references: [id], onDelete: Cascade)
+  user            User?          @relation("AuditLogChangedBy", fields: [changed_by], references: [id])
+
+  @@index([dokumen_id])
+  @@index([created_at])
+  @@map("dokumen_audit_log")
+}
+
 enum UserRole {
   admin
   partner
@@ -372,4 +435,13 @@ enum JenisSidang {
   sidang_pk
   eksekusi
   lainnya
+}
+
+enum WorkflowStatus {
+  DRAFT        // Document uploaded but not submitted
+  SUBMITTED    // Submitted for review by staff/advokat
+  IN_REVIEW    // Being reviewed by admin/partner
+  APPROVED     // Approved and visible to client
+  REJECTED     // Rejected and needs revision
+  ARCHIVED     // Soft deleted / archived
 }

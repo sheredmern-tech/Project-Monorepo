@@ -27,9 +27,16 @@ import {
   ApiConsumes,
 } from '@nestjs/swagger';
 import { DokumenService } from './dokumen.service';
+import { DokumenStatusService } from './dokumen-status.service';
 import { CreateDokumenDto } from './dto/create-dokumen.dto';
 import { UpdateDokumenDto } from './dto/update-dokumen.dto';
 import { QueryDokumenDto } from './dto/query-dokumen.dto';
+import { SubmitDokumenDto, BulkSubmitDokumenDto } from './dto/submit-dokumen.dto';
+import { ReviewDokumenDto } from './dto/review-dokumen.dto';
+import { ApproveDokumenDto, BulkApproveDokumenDto } from './dto/approve-dokumen.dto';
+import { RejectDokumenDto, BulkRejectDokumenDto } from './dto/reject-dokumen.dto';
+import { ArchiveDokumenDto } from './dto/archive-dokumen.dto';
+import { QueryWorkflowDto } from './dto/query-workflow.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -43,6 +50,7 @@ import { GoogleDriveService } from '../google-drive/google-drive.service';
 export class DokumenController {
   constructor(
     private readonly dokumenService: DokumenService,
+    private readonly dokumenStatusService: DokumenStatusService,
     private readonly googleDriveService: GoogleDriveService,
   ) {}
 
@@ -186,6 +194,139 @@ export class DokumenController {
   ) {
     return this.dokumenService.copyDocument(id, body.folder_id, body.nama_dokumen, userId, userRole);
   }
+
+  // ============================================================================
+  // WORKFLOW ENDPOINTS
+  // ============================================================================
+
+  @Post(':id/submit')
+  @Roles(UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @ApiOperation({ summary: 'Submit document for review (DRAFT -> SUBMITTED)' })
+  @ApiResponse({ status: 200, description: 'Document submitted for review' })
+  submitDocument(
+    @Param('id') id: string,
+    @Body() dto: SubmitDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.submitDocument(id, userId, userRole, dto);
+  }
+
+  @Post('workflow/bulk-submit')
+  @Roles(UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @ApiOperation({ summary: 'Bulk submit documents for review' })
+  @ApiResponse({ status: 200, description: 'Bulk submission completed' })
+  bulkSubmitDocuments(
+    @Body() dto: BulkSubmitDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.bulkSubmitDocuments(userId, userRole, dto);
+  }
+
+  @Post(':id/review')
+  @Roles(UserRole.admin, UserRole.partner)
+  @ApiOperation({ summary: 'Start reviewing document (SUBMITTED -> IN_REVIEW)' })
+  @ApiResponse({ status: 200, description: 'Document review started' })
+  reviewDocument(
+    @Param('id') id: string,
+    @Body() dto: ReviewDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.reviewDocument(id, userId, userRole, dto);
+  }
+
+  @Post(':id/approve')
+  @Roles(UserRole.admin, UserRole.partner)
+  @ApiOperation({ summary: 'Approve document (IN_REVIEW -> APPROVED)' })
+  @ApiResponse({ status: 200, description: 'Document approved' })
+  approveDocument(
+    @Param('id') id: string,
+    @Body() dto: ApproveDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.approveDocument(id, userId, userRole, dto);
+  }
+
+  @Post('workflow/bulk-approve')
+  @Roles(UserRole.admin, UserRole.partner)
+  @ApiOperation({ summary: 'Bulk approve documents' })
+  @ApiResponse({ status: 200, description: 'Bulk approval completed' })
+  bulkApproveDocuments(
+    @Body() dto: BulkApproveDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.bulkApproveDocuments(userId, userRole, dto);
+  }
+
+  @Post(':id/reject')
+  @Roles(UserRole.admin, UserRole.partner)
+  @ApiOperation({ summary: 'Reject document (IN_REVIEW -> REJECTED)' })
+  @ApiResponse({ status: 200, description: 'Document rejected' })
+  rejectDocument(
+    @Param('id') id: string,
+    @Body() dto: RejectDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.rejectDocument(id, userId, userRole, dto);
+  }
+
+  @Post('workflow/bulk-reject')
+  @Roles(UserRole.admin, UserRole.partner)
+  @ApiOperation({ summary: 'Bulk reject documents' })
+  @ApiResponse({ status: 200, description: 'Bulk rejection completed' })
+  bulkRejectDocuments(
+    @Body() dto: BulkRejectDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.bulkRejectDocuments(userId, userRole, dto);
+  }
+
+  @Post(':id/archive')
+  @Roles(UserRole.admin, UserRole.partner)
+  @ApiOperation({ summary: 'Archive document (ANY -> ARCHIVED)' })
+  @ApiResponse({ status: 200, description: 'Document archived' })
+  archiveDocument(
+    @Param('id') id: string,
+    @Body() dto: ArchiveDokumenDto,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('role') userRole: UserRole,
+  ) {
+    return this.dokumenStatusService.archiveDocument(id, userId, userRole, dto);
+  }
+
+  @Get(':id/history')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @ApiOperation({ summary: 'Get document status change history' })
+  @ApiResponse({ status: 200, description: 'Document history retrieved' })
+  getDocumentHistory(@Param('id') id: string) {
+    return this.dokumenStatusService.getDocumentHistory(id);
+  }
+
+  @Get('workflow/queue')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @ApiOperation({ summary: 'Get documents by workflow status (review queue)' })
+  @ApiResponse({ status: 200, description: 'Documents retrieved' })
+  getWorkflowQueue(@Query() query: QueryWorkflowDto) {
+    return this.dokumenStatusService.getDocumentsByStatus(query);
+  }
+
+  @Get('workflow/stats')
+  @Roles(UserRole.admin, UserRole.partner, UserRole.advokat, UserRole.paralegal, UserRole.staff)
+  @ApiOperation({ summary: 'Get workflow statistics' })
+  @ApiResponse({ status: 200, description: 'Workflow statistics retrieved' })
+  getWorkflowStats(@Query('perkara_id') perkaraId?: string) {
+    return this.dokumenStatusService.getWorkflowStats(perkaraId);
+  }
+
+  // ============================================================================
+  // TEST ENDPOINTS
+  // ============================================================================
 
   @Get('test/google-drive-connection')
   @Roles(UserRole.admin)
