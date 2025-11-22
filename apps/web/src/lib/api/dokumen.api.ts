@@ -64,4 +64,64 @@ export const dokumenApi = {
       },
     });
   },
+
+  // ============================================================================
+  // WORKFLOW API FUNCTIONS
+  // ============================================================================
+
+  submitDocument: async (id: string, notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post(`/dokumen/${id}/submit`, { notes });
+  },
+
+  bulkSubmit: async (dokumenIds: string[], notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post("/dokumen/workflow/bulk-submit", {
+      dokumen_ids: dokumenIds,
+      notes,
+    });
+  },
+
+  reviewDocument: async (id: string, notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post(`/dokumen/${id}/review`, { notes });
+  },
+
+  approveDocument: async (id: string, notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post(`/dokumen/${id}/approve`, { notes });
+  },
+
+  bulkApprove: async (dokumenIds: string[], notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post("/dokumen/workflow/bulk-approve", {
+      dokumen_ids: dokumenIds,
+      notes,
+    });
+  },
+
+  rejectDocument: async (id: string, reason: string, notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post(`/dokumen/${id}/reject`, { reason, notes });
+  },
+
+  bulkReject: async (dokumenIds: string[], reason: string, notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post("/dokumen/workflow/bulk-reject", {
+      dokumen_ids: dokumenIds,
+      reason,
+      notes,
+    });
+  },
+
+  archiveDocument: async (id: string, reason?: string, notes?: string): Promise<ApiResponse<any>> => {
+    return apiClient.post(`/dokumen/${id}/archive`, { reason, notes });
+  },
+
+  getDocumentHistory: async (id: string): Promise<ApiResponse<any>> => {
+    return apiClient.get(`/dokumen/${id}/history`);
+  },
+
+  getWorkflowQueue: async (params?: any): Promise<PaginatedResponse<any>> => {
+    return apiClient.get("/dokumen/workflow/queue", { params });
+  },
+
+  getWorkflowStats: async (perkaraId?: string): Promise<ApiResponse<any>> => {
+    return apiClient.get("/dokumen/workflow/stats", {
+      params: perkaraId ? { perkara_id: perkaraId } : undefined,
+    });
+  },
 };

@@ -99,3 +99,15 @@ export enum JenisSidang {
   EKSEKUSI = 'eksekusi',
   LAINNYA = 'lainnya',
 }
+
+/**
+ * Workflow Status Enum
+ */
+export enum WorkflowStatus {
+  DRAFT = 'DRAFT',
+  SUBMITTED = 'SUBMITTED',
+  IN_REVIEW = 'IN_REVIEW',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  ARCHIVED = 'ARCHIVED',
+}
